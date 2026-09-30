@@ -1,0 +1,20 @@
+[project]
+name = "polyglot-backend"
+version = "0.1.0"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.23.0",
+    "pydantic>=2.0",
+    "cryptography>=41.0.0",
+]
+
+[project.optional-dependencies]
+monitoring = ["sentry-sdk>=1.40.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+polyglot-backend = "app.cli:main"

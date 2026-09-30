@@ -1,0 +1,158 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+      - name: Run pytest
+        run: |
+          cd backend
+          python -m pytest tests/test_api.py -q
+      - name: Validate migrations
+        run: |
+          cd backend
+          rm -f data/spendingsaver.db
+          python -c "from app.database import init_db; init_db()"
+          python -m alembic upgrade head
+          python -m alembic downgrade base
+          python -m alembic upgrade head
+
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+      - name: Run Go tests
+        run: |
+          cd go-service
+          go test -count=1 ./...
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install bandit
+        run: pip install bandit
+      - name: Run security scan
+        run: bandit -r backend/app -f json -o bandit-report.json || true
+      - name: Check for high-severity issues
+        run: |
+          python -c "
+          import json
+          with open('bandit-report.json') as f:
+              data = json.load(f)
+          high = [r for r in data.get('results', []) if r.get('issue_severity') == 'HIGH']
+          if high:
+              print(f'Found {len(high)} high-severity issues')
+              for h in high[:5]:
+                  print(f'  - {h[\"filename\"]}:{h[\"line_number\"]}: {h[\"issue_text\"]}')
+          "
+
+  frontend:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: polyglot-app/tauri-app/package-lock.json
+      - name: Install dependencies
+        run: |
+          cd polyglot-app/tauri-app
+          npm ci
+      - name: Run frontend tests
+        run: |
+          cd polyglot-app/tauri-app
+          npm run test
+      - name: Build frontend
+        run: |
+          cd polyglot-app/tauri-app
+          npm run build
+      - name: Validate PWA manifest
+        run: |
+          cd polyglot-app/tauri-app
+          node -e "
+          const fs = require('fs');
+          const manifest = JSON.parse(fs.readFileSync('public/manifest.json'));
+          console.log('Name:', manifest.name);
+          console.log('Icons:', manifest.icons?.length || 0);
+          console.log('Valid:', !!(manifest.name && manifest.start_url && manifest.icons));
+          "
+      - name: Validate service worker
+        run: |
+          cd polyglot-app/tauri-app
+          node -e "
+          const fs = require('fs');
+          const sw = fs.readFileSync('public/sw.js', 'utf8');
+          console.log('Has install handler:', sw.includes('install'));
+          console.log('Has fetch handler:', sw.includes('fetch'));
+          console.log('Has cache:', sw.includes('caches'));
+          "
+      - name: Upload frontend dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: tauri-app-dist
+          path: polyglot-app/tauri-app/dist
+          retention-days: 7
+
+  tauri:
+    needs: [backend, go, frontend]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: polyglot-app/tauri-app/package-lock.json
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache Rust
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            polyglot-app/tauri-app/src-tauri/target
+          key: rust-${{ hashFiles('polyglot-app/tauri-app/src-tauri/Cargo.lock') }}
+          restore-keys: rust-
+      - name: Install dependencies
+        run: |
+          cd polyglot-app/tauri-app
+          npm ci
+      - name: Build Tauri release
+        run: |
+          cd polyglot-app/tauri-app
+          npx tauri build --bundles app
+      - name: Upload Tauri artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tauri-release
+          path: |
+            polyglot-app/tauri-app/src-tauri/target/release/*.exe
+            polyglot-app/tauri-app/src-tauri/target/release/*.msi
+            polyglot-app/tauri-app/src-tauri/target/release/*.nsis.exe
+          retention-days: 14

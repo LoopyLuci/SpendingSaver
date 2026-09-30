@@ -1,0 +1,46 @@
+# written by abp_modkit (`python -m abp_modkit adopt` refreshes this file; delete this line to keep it as it is)
+# How AgenticBotPlatform (ABP) builds, runs and drives this project as a module. Operations: abp-ops.toml.
+
+[module]
+id = "spending-saver"
+name = "SpendingSaver"
+repo = "https://github.com/LoopyLuci/SpendingSaver.git"
+branch = "main"
+api = 1
+area = "data"
+description = "Light, fast cross-platform desktop app shell with:"
+
+[checkout]
+marker = ["abp-module.toml", "abp-ops.toml"]
+
+[toolchain]
+require = [{ tool = "python", min = "3.10", url = "https://www.python.org/downloads/" }, { tool = "go", min = "1.21", url = "https://go.dev/dl/" }, { tool = "node", min = "20", url = "https://nodejs.org" }, { tool = "cargo", min = "1.75", url = "https://rustup.rs" }, { tool = "java", min = "17", url = "https://adoptium.net" }]
+
+[build]
+steps = [
+  ["python", "-m", "venv", ".venv"],
+  ["{venv_python}", "-m", "pip", "install", "-q", "-e", "polyglot-app/backend"],
+  ["go", "-C", "polyglot-app/go-service", "build", "./..."],
+  ["npm", "ci", "--prefix", "polyglot-app/tauri-app"],
+  ["npm", "run", "build", "--prefix", "polyglot-app/tauri-app"],
+  ["{venv_python}", "-m", "pip", "install", "-q", "-e", "spendingsaver-mcp"],
+  ["npm", "ci", "--prefix", "spendingsaver-web"],
+  ["npm", "run", "build", "--prefix", "spendingsaver-web"],
+]
+
+[hub]
+# abp_modkit's hub: the operations in abp-ops.toml (routes, commands, the project's server)
+start = ["{abp_python}", "-m", "abp_modkit", "serve", "--spec", "{repo}/abp-ops.toml", "--project", "{repo}", "--home", "{data}", "--var", "target={target}"]
+control_file = "{data}/control.json"
+start_timeout_s = 30
+
+[mcp]
+stdio = ["{venv_python}", "-m", "spendingsaver_mcp.server"]  # the project's own MCP server
+
+[ui]
+gui = ["{target}/release/spendingsaver{exe}"]
+panel = "operations"
+
+[host]
+os = ["windows", "linux", "macos"]
+needs = ["android-sdk"]

@@ -1,0 +1,1 @@
+"""SpendingSaver MCP Server."""

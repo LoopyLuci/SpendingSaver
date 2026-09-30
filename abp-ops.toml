@@ -1,0 +1,937 @@
+# What this project can do, as ABP operations (abp_modkit). Edit freely: adopting it again
+# (`python -m abp_modkit adopt .`) keeps edited summaries, settings and ops you added, and picks up new
+# routes and commands.
+
+[service]
+id = "spending-saver"
+name = "SpendingSaver"
+description = "Light, fast cross-platform desktop app shell with:"
+base_url = "http://127.0.0.1:27215"
+health = "/health"
+start = ["{python}", "-m", "uvicorn", "app.api:app", "--host", "127.0.0.1", "--port", "27215"]
+cwd = "polyglot-app/backend"
+ready_timeout_s = 90
+
+[[op]]
+id = "polyglot_backend.run"
+kind = "cmd"
+summary = "Run `polyglot-backend` with the given arguments"
+argv = ["{venv_bin}/polyglot-backend{exe}"]
+timeout_s = 900
+extra_args = true
+
+[[op]]
+id = "script.standalone_server"
+kind = "cmd"
+summary = "Standalone entry point for the SpendingSaver backend."
+argv = ["{python}", "polyglot-app/backend/standalone_server.py"]
+timeout_s = 900
+extra_args = true
+
+[[op]]
+id = "spendingsaver.dev"
+kind = "cmd"
+summary = "`npm run dev`: vite"
+argv = ["npm", "run", "dev"]
+cwd = "polyglot-app/tauri-app"
+timeout_s = 86400
+background = true
+extra_args = true
+
+[[op]]
+id = "spendingsaver.build"
+kind = "cmd"
+summary = "`npm run build`: tsc && vite build"
+argv = ["npm", "run", "build"]
+cwd = "polyglot-app/tauri-app"
+timeout_s = 3600
+background = true
+extra_args = true
+
+[[op]]
+id = "spendingsaver.preview"
+kind = "cmd"
+summary = "`npm run preview`: vite preview"
+argv = ["npm", "run", "preview"]
+cwd = "polyglot-app/tauri-app"
+timeout_s = 86400
+background = true
+extra_args = true
+
+[[op]]
+id = "spendingsaver.tauri"
+kind = "cmd"
+summary = "`npm run tauri`: tauri"
+argv = ["npm", "run", "tauri"]
+cwd = "polyglot-app/tauri-app"
+timeout_s = 3600
+extra_args = true
+
+[[op]]
+id = "spendingsaver.test"
+kind = "cmd"
+summary = "`npm run test`: vitest run"
+argv = ["npm", "run", "test"]
+cwd = "polyglot-app/tauri-app"
+timeout_s = 3600
+background = true
+extra_args = true
+
+[[op]]
+id = "app.dev"
+kind = "cmd"
+summary = "Run the SpendingSaver desktop app in development mode"
+argv = ["npm", "run", "tauri", "dev"]
+cwd = "polyglot-app/tauri-app"
+timeout_s = 86400
+background = true
+
+[[op]]
+id = "app.build"
+kind = "cmd"
+summary = "Build the SpendingSaver desktop app (installer)"
+argv = ["npm", "run", "tauri", "build"]
+cwd = "polyglot-app/tauri-app"
+timeout_s = 7200
+background = true
+
+[[op]]
+id = "spendingsaver_mcp.run"
+kind = "cmd"
+summary = "Run `spendingsaver-mcp` with the given arguments"
+argv = ["{venv_bin}/spendingsaver-mcp{exe}"]
+timeout_s = 900
+extra_args = true
+
+[[op]]
+id = "spendingsaver_web.dev"
+kind = "cmd"
+summary = "`npm run dev`: vite"
+argv = ["npm", "run", "dev"]
+cwd = "spendingsaver-web"
+timeout_s = 86400
+background = true
+extra_args = true
+
+[[op]]
+id = "spendingsaver_web.build"
+kind = "cmd"
+summary = "`npm run build`: tsc && vite build"
+argv = ["npm", "run", "build"]
+cwd = "spendingsaver-web"
+timeout_s = 3600
+background = true
+extra_args = true
+
+[[op]]
+id = "spendingsaver_web.preview"
+kind = "cmd"
+summary = "`npm run preview`: vite preview"
+argv = ["npm", "run", "preview"]
+cwd = "spendingsaver-web"
+timeout_s = 86400
+background = true
+extra_args = true
+
+[[op]]
+id = "gradle_spendingsaverandroid.assembledebug"
+kind = "cmd"
+summary = "Gradle assembleDebug (Android)"
+argv = ["{project}/SpendingSaverAndroid/gradlew{bat}", "assembleDebug"]
+cwd = "SpendingSaverAndroid"
+timeout_s = 7200
+background = true
+extra_args = true
+
+[[op]]
+id = "gradle_spendingsaverandroid.test"
+kind = "cmd"
+summary = "Gradle test (Android)"
+argv = ["{project}/SpendingSaverAndroid/gradlew{bat}", "test"]
+cwd = "SpendingSaverAndroid"
+timeout_s = 7200
+background = true
+extra_args = true
+
+[[op]]
+id = "gradle_spendingsaverandroid.lint"
+kind = "cmd"
+summary = "Gradle lint (Android)"
+argv = ["{project}/SpendingSaverAndroid/gradlew{bat}", "lint"]
+cwd = "SpendingSaverAndroid"
+timeout_s = 7200
+background = true
+extra_args = true
+
+[[op]]
+id = "gradle_spendingsaverandroid.installdebug"
+kind = "cmd"
+summary = "Gradle installDebug (Android)"
+argv = ["{project}/SpendingSaverAndroid/gradlew{bat}", "installDebug"]
+cwd = "SpendingSaverAndroid"
+timeout_s = 7200
+background = true
+extra_args = true
+
+[[op]]
+id = "accounts.delete_by_account_id"
+kind = "http"
+summary = "DELETE /api/accounts/{account_id}"
+method = "DELETE"
+path = "/api/accounts/{account_id}"
+
+[[op]]
+id = "budgets.delete_by_budget_id"
+kind = "http"
+summary = "DELETE /api/budgets/{budget_id}"
+method = "DELETE"
+path = "/api/budgets/{budget_id}"
+
+[[op]]
+id = "categories.delete_by_category_id"
+kind = "http"
+summary = "DELETE /api/categories/{category_id}"
+method = "DELETE"
+path = "/api/categories/{category_id}"
+
+[[op]]
+id = "recurring_templates.delete_by_template_id"
+kind = "http"
+summary = "DELETE /api/recurring-templates/{template_id}"
+method = "DELETE"
+path = "/api/recurring-templates/{template_id}"
+
+[[op]]
+id = "recurring_transactions.delete_by_rec_id"
+kind = "http"
+summary = "DELETE /api/recurring-transactions/{rec_id}"
+method = "DELETE"
+path = "/api/recurring-transactions/{rec_id}"
+
+[[op]]
+id = "savings_goals.delete_by_goal_id"
+kind = "http"
+summary = "DELETE /api/savings-goals/{goal_id}"
+method = "DELETE"
+path = "/api/savings-goals/{goal_id}"
+
+[[op]]
+id = "transactions.delete_duplicates_keep_by_keep_id"
+kind = "http"
+summary = "DELETE /api/transactions/duplicates/keep/{keep_id}"
+method = "DELETE"
+path = "/api/transactions/duplicates/keep/{keep_id}"
+
+[[op]]
+id = "transactions.delete_by_transaction_id"
+kind = "http"
+summary = "DELETE /api/transactions/{transaction_id}"
+method = "DELETE"
+path = "/api/transactions/{transaction_id}"
+
+[[op]]
+id = "accounts.get"
+kind = "http"
+summary = "GET /api/accounts"
+method = "GET"
+path = "/api/accounts"
+
+[[op]]
+id = "audit.get"
+kind = "http"
+summary = "GET /api/audit"
+method = "GET"
+path = "/api/audit"
+
+[[op]]
+id = "auth.get_me"
+kind = "http"
+summary = "GET /api/auth/me"
+method = "GET"
+path = "/api/auth/me"
+
+[[op]]
+id = "backup.get"
+kind = "http"
+summary = "GET /api/backup"
+method = "GET"
+path = "/api/backup"
+
+[[op]]
+id = "backups.get"
+kind = "http"
+summary = "GET /api/backups"
+method = "GET"
+path = "/api/backups"
+
+[[op]]
+id = "bill_reminders.get"
+kind = "http"
+summary = "GET /api/bill-reminders"
+method = "GET"
+path = "/api/bill-reminders"
+
+[[op]]
+id = "bill_splits.get"
+kind = "http"
+summary = "GET /api/bill-splits"
+method = "GET"
+path = "/api/bill-splits"
+
+[[op]]
+id = "budgets.get"
+kind = "http"
+summary = "GET /api/budgets"
+method = "GET"
+path = "/api/budgets"
+
+[[op]]
+id = "budgets.get_alerts"
+kind = "http"
+summary = "GET /api/budgets/alerts"
+method = "GET"
+path = "/api/budgets/alerts"
+
+[[op]]
+id = "budgets.get_comparison"
+kind = "http"
+summary = "GET /api/budgets/comparison"
+method = "GET"
+path = "/api/budgets/comparison"
+
+[[op]]
+id = "categories.get"
+kind = "http"
+summary = "GET /api/categories"
+method = "GET"
+path = "/api/categories"
+
+[[op]]
+id = "categories.get_hierarchy"
+kind = "http"
+summary = "GET /api/categories/hierarchy"
+method = "GET"
+path = "/api/categories/hierarchy"
+
+[[op]]
+id = "connectors.get"
+kind = "http"
+summary = "GET /api/connectors"
+method = "GET"
+path = "/api/connectors"
+
+[[op]]
+id = "credit_scores.get"
+kind = "http"
+summary = "GET /api/credit-scores"
+method = "GET"
+path = "/api/credit-scores"
+
+[[op]]
+id = "debts.get"
+kind = "http"
+summary = "GET /api/debts"
+method = "GET"
+path = "/api/debts"
+
+[[op]]
+id = "debts.get_strategy"
+kind = "http"
+summary = "GET /api/debts/strategy"
+method = "GET"
+path = "/api/debts/strategy"
+
+[[op]]
+id = "debts.get_by_debt_id_payments"
+kind = "http"
+summary = "GET /api/debts/{debt_id}/payments"
+method = "GET"
+path = "/api/debts/{debt_id}/payments"
+
+[[op]]
+id = "exchange_rates.get"
+kind = "http"
+summary = "GET /api/exchange-rates"
+method = "GET"
+path = "/api/exchange-rates"
+
+[[op]]
+id = "export.get_csv"
+kind = "http"
+summary = "GET /api/export/csv"
+method = "GET"
+path = "/api/export/csv"
+
+[[op]]
+id = "export.get_quickbooks"
+kind = "http"
+summary = "GET /api/export/quickbooks"
+method = "GET"
+path = "/api/export/quickbooks"
+
+[[op]]
+id = "export.get_summary"
+kind = "http"
+summary = "GET /api/export/summary"
+method = "GET"
+path = "/api/export/summary"
+
+[[op]]
+id = "forecast.get_spending"
+kind = "http"
+summary = "GET /api/forecast/spending"
+method = "GET"
+path = "/api/forecast/spending"
+
+[[op]]
+id = "goals.get_by_goal_id_milestones"
+kind = "http"
+summary = "GET /api/goals/{goal_id}/milestones"
+method = "GET"
+path = "/api/goals/{goal_id}/milestones"
+
+[[op]]
+id = "host.get_info"
+kind = "http"
+summary = "GET /api/host/info"
+method = "GET"
+path = "/api/host/info"
+
+[[op]]
+id = "host.get_peers"
+kind = "http"
+summary = "GET /api/host/peers"
+method = "GET"
+path = "/api/host/peers"
+
+[[op]]
+id = "income_streams.get"
+kind = "http"
+summary = "GET /api/income-streams"
+method = "GET"
+path = "/api/income-streams"
+
+[[op]]
+id = "insights.get_spending"
+kind = "http"
+summary = "GET /api/insights/spending"
+method = "GET"
+path = "/api/insights/spending"
+
+[[op]]
+id = "investments.get"
+kind = "http"
+summary = "GET /api/investments"
+method = "GET"
+path = "/api/investments"
+
+[[op]]
+id = "investments.get_performance"
+kind = "http"
+summary = "GET /api/investments/performance"
+method = "GET"
+path = "/api/investments/performance"
+
+[[op]]
+id = "net_worth.get"
+kind = "http"
+summary = "GET /api/net-worth"
+method = "GET"
+path = "/api/net-worth"
+
+[[op]]
+id = "net_worth.get_history"
+kind = "http"
+summary = "GET /api/net-worth/history"
+method = "GET"
+path = "/api/net-worth/history"
+
+[[op]]
+id = "portable_backup.get"
+kind = "http"
+summary = "GET /api/portable-backup"
+method = "GET"
+path = "/api/portable-backup"
+
+[[op]]
+id = "recurring_templates.get"
+kind = "http"
+summary = "GET /api/recurring-templates"
+method = "GET"
+path = "/api/recurring-templates"
+
+[[op]]
+id = "recurring_transactions.get"
+kind = "http"
+summary = "GET /api/recurring-transactions"
+method = "GET"
+path = "/api/recurring-transactions"
+
+[[op]]
+id = "recurring_transactions.get_due"
+kind = "http"
+summary = "GET /api/recurring-transactions/due"
+method = "GET"
+path = "/api/recurring-transactions/due"
+
+[[op]]
+id = "reports.get_net_income"
+kind = "http"
+summary = "GET /api/reports/net-income"
+method = "GET"
+path = "/api/reports/net-income"
+
+[[op]]
+id = "reports.get_summary"
+kind = "http"
+summary = "GET /api/reports/summary"
+method = "GET"
+path = "/api/reports/summary"
+
+[[op]]
+id = "savings_goals.get"
+kind = "http"
+summary = "GET /api/savings-goals"
+method = "GET"
+path = "/api/savings-goals"
+
+[[op]]
+id = "search.get"
+kind = "http"
+summary = "GET /api/search"
+method = "GET"
+path = "/api/search"
+
+[[op]]
+id = "spending_by_category.get"
+kind = "http"
+summary = "GET /api/spending-by-category"
+method = "GET"
+path = "/api/spending-by-category"
+
+[[op]]
+id = "spending_limits.get"
+kind = "http"
+summary = "GET /api/spending-limits"
+method = "GET"
+path = "/api/spending-limits"
+
+[[op]]
+id = "sync.get_changes"
+kind = "http"
+summary = "GET /api/sync/changes"
+method = "GET"
+path = "/api/sync/changes"
+
+[[op]]
+id = "tax_tags.get"
+kind = "http"
+summary = "GET /api/tax-tags"
+method = "GET"
+path = "/api/tax-tags"
+
+[[op]]
+id = "transactions.get"
+kind = "http"
+summary = "GET /api/transactions"
+method = "GET"
+path = "/api/transactions"
+
+[[op]]
+id = "transactions.get_category_suggestions"
+kind = "http"
+summary = "GET /api/transactions/category-suggestions"
+method = "GET"
+path = "/api/transactions/category-suggestions"
+
+[[op]]
+id = "transactions.get_deleted"
+kind = "http"
+summary = "GET /api/transactions/deleted"
+method = "GET"
+path = "/api/transactions/deleted"
+
+[[op]]
+id = "transactions.get_duplicates"
+kind = "http"
+summary = "GET /api/transactions/duplicates"
+method = "GET"
+path = "/api/transactions/duplicates"
+
+[[op]]
+id = "transactions.get_search"
+kind = "http"
+summary = "GET /api/transactions/search"
+method = "GET"
+path = "/api/transactions/search"
+
+[[op]]
+id = "transactions.get_tags_by_tag"
+kind = "http"
+summary = "GET /api/transactions/tags/{tag}"
+method = "GET"
+path = "/api/transactions/tags/{tag}"
+
+[[op]]
+id = "transactions.get_by_transaction_id_splits"
+kind = "http"
+summary = "GET /api/transactions/{transaction_id}/splits"
+method = "GET"
+path = "/api/transactions/{transaction_id}/splits"
+
+[[op]]
+id = "transactions.get_by_transaction_id_tags"
+kind = "http"
+summary = "GET /api/transactions/{transaction_id}/tags"
+method = "GET"
+path = "/api/transactions/{transaction_id}/tags"
+
+[[op]]
+id = "widget_layouts.get"
+kind = "http"
+summary = "GET /api/widget-layouts"
+method = "GET"
+path = "/api/widget-layouts"
+
+[[op]]
+id = "diagnostics.get"
+kind = "http"
+summary = "GET /diagnostics"
+method = "GET"
+path = "/diagnostics"
+
+[[op]]
+id = "health.get"
+kind = "http"
+summary = "GET /health"
+method = "GET"
+path = "/health"
+
+[[op]]
+id = "accounts.post"
+kind = "http"
+summary = "POST /api/accounts"
+method = "POST"
+path = "/api/accounts"
+
+[[op]]
+id = "audit.post"
+kind = "http"
+summary = "POST /api/audit"
+method = "POST"
+path = "/api/audit"
+
+[[op]]
+id = "auth.post_2fa_setup"
+kind = "http"
+summary = "POST /api/auth/2fa/setup"
+method = "POST"
+path = "/api/auth/2fa/setup"
+
+[[op]]
+id = "auth.post_2fa_verify"
+kind = "http"
+summary = "POST /api/auth/2fa/verify"
+method = "POST"
+path = "/api/auth/2fa/verify"
+
+[[op]]
+id = "auth.post_login"
+kind = "http"
+summary = "POST /api/auth/login"
+method = "POST"
+path = "/api/auth/login"
+
+[[op]]
+id = "auth.post_logout"
+kind = "http"
+summary = "POST /api/auth/logout"
+method = "POST"
+path = "/api/auth/logout"
+
+[[op]]
+id = "auth.post_refresh"
+kind = "http"
+summary = "POST /api/auth/refresh"
+method = "POST"
+path = "/api/auth/refresh"
+
+[[op]]
+id = "auth.post_register"
+kind = "http"
+summary = "POST /api/auth/register"
+method = "POST"
+path = "/api/auth/register"
+
+[[op]]
+id = "bill_reminders.post"
+kind = "http"
+summary = "POST /api/bill-reminders"
+method = "POST"
+path = "/api/bill-reminders"
+
+[[op]]
+id = "bill_splits.post"
+kind = "http"
+summary = "POST /api/bill-splits"
+method = "POST"
+path = "/api/bill-splits"
+
+[[op]]
+id = "budgets.post"
+kind = "http"
+summary = "POST /api/budgets"
+method = "POST"
+path = "/api/budgets"
+
+[[op]]
+id = "categories.post"
+kind = "http"
+summary = "POST /api/categories"
+method = "POST"
+path = "/api/categories"
+
+[[op]]
+id = "connectors.post_by_name_connect"
+kind = "http"
+summary = "POST /api/connectors/{name}/connect"
+method = "POST"
+path = "/api/connectors/{name}/connect"
+
+[[op]]
+id = "connectors.post_by_name_fetch"
+kind = "http"
+summary = "POST /api/connectors/{name}/fetch"
+method = "POST"
+path = "/api/connectors/{name}/fetch"
+
+[[op]]
+id = "credit_scores.post"
+kind = "http"
+summary = "POST /api/credit-scores"
+method = "POST"
+path = "/api/credit-scores"
+
+[[op]]
+id = "debts.post"
+kind = "http"
+summary = "POST /api/debts"
+method = "POST"
+path = "/api/debts"
+
+[[op]]
+id = "debts.post_by_debt_id_payments"
+kind = "http"
+summary = "POST /api/debts/{debt_id}/payments"
+method = "POST"
+path = "/api/debts/{debt_id}/payments"
+
+[[op]]
+id = "goals.post_by_goal_id_milestones"
+kind = "http"
+summary = "POST /api/goals/{goal_id}/milestones"
+method = "POST"
+path = "/api/goals/{goal_id}/milestones"
+
+[[op]]
+id = "host.post_pair"
+kind = "http"
+summary = "POST /api/host/pair"
+method = "POST"
+path = "/api/host/pair"
+
+[[op]]
+id = "host.post_rotate_key"
+kind = "http"
+summary = "POST /api/host/rotate-key"
+method = "POST"
+path = "/api/host/rotate-key"
+
+[[op]]
+id = "host.post_share_key"
+kind = "http"
+summary = "POST /api/host/share-key"
+method = "POST"
+path = "/api/host/share-key"
+
+[[op]]
+id = "income_streams.post"
+kind = "http"
+summary = "POST /api/income-streams"
+method = "POST"
+path = "/api/income-streams"
+
+[[op]]
+id = "investments.post"
+kind = "http"
+summary = "POST /api/investments"
+method = "POST"
+path = "/api/investments"
+
+[[op]]
+id = "portable_restore.post"
+kind = "http"
+summary = "POST /api/portable-restore"
+method = "POST"
+path = "/api/portable-restore"
+
+[[op]]
+id = "receipts.post_ocr"
+kind = "http"
+summary = "POST /api/receipts/ocr"
+method = "POST"
+path = "/api/receipts/ocr"
+
+[[op]]
+id = "recurring_templates.post"
+kind = "http"
+summary = "POST /api/recurring-templates"
+method = "POST"
+path = "/api/recurring-templates"
+
+[[op]]
+id = "recurring_transactions.post"
+kind = "http"
+summary = "POST /api/recurring-transactions"
+method = "POST"
+path = "/api/recurring-transactions"
+
+[[op]]
+id = "recurring_transactions.post_run_scheduler"
+kind = "http"
+summary = "POST /api/recurring-transactions/run-scheduler"
+method = "POST"
+path = "/api/recurring-transactions/run-scheduler"
+
+[[op]]
+id = "reports.post_send_email"
+kind = "http"
+summary = "POST /api/reports/send-email"
+method = "POST"
+path = "/api/reports/send-email"
+
+[[op]]
+id = "savings_goals.post"
+kind = "http"
+summary = "POST /api/savings-goals"
+method = "POST"
+path = "/api/savings-goals"
+
+[[op]]
+id = "spending_limits.post"
+kind = "http"
+summary = "POST /api/spending-limits"
+method = "POST"
+path = "/api/spending-limits"
+
+[[op]]
+id = "sync.post_upsert"
+kind = "http"
+summary = "POST /api/sync/upsert"
+method = "POST"
+path = "/api/sync/upsert"
+
+[[op]]
+id = "tax_tags.post"
+kind = "http"
+summary = "POST /api/tax-tags"
+method = "POST"
+path = "/api/tax-tags"
+
+[[op]]
+id = "transactions.post"
+kind = "http"
+summary = "POST /api/transactions"
+method = "POST"
+path = "/api/transactions"
+
+[[op]]
+id = "transactions.post_import"
+kind = "http"
+summary = "POST /api/transactions/import"
+method = "POST"
+path = "/api/transactions/import"
+
+[[op]]
+id = "transactions.post_import_bank"
+kind = "http"
+summary = "POST /api/transactions/import-bank"
+method = "POST"
+path = "/api/transactions/import-bank"
+
+[[op]]
+id = "transactions.post_by_transaction_id_attachment"
+kind = "http"
+summary = "POST /api/transactions/{transaction_id}/attachment"
+method = "POST"
+path = "/api/transactions/{transaction_id}/attachment"
+
+[[op]]
+id = "transactions.post_by_transaction_id_split"
+kind = "http"
+summary = "POST /api/transactions/{transaction_id}/split"
+method = "POST"
+path = "/api/transactions/{transaction_id}/split"
+
+[[op]]
+id = "transactions.post_by_transaction_id_tags"
+kind = "http"
+summary = "POST /api/transactions/{transaction_id}/tags"
+method = "POST"
+path = "/api/transactions/{transaction_id}/tags"
+
+[[op]]
+id = "transactions.post_by_transaction_id_undo"
+kind = "http"
+summary = "POST /api/transactions/{transaction_id}/undo"
+method = "POST"
+path = "/api/transactions/{transaction_id}/undo"
+
+[[op]]
+id = "widget_layouts.post"
+kind = "http"
+summary = "POST /api/widget-layouts"
+method = "POST"
+path = "/api/widget-layouts"
+
+[[op]]
+id = "accounts.put_by_account_id"
+kind = "http"
+summary = "PUT /api/accounts/{account_id}"
+method = "PUT"
+path = "/api/accounts/{account_id}"
+
+[[op]]
+id = "budgets.put_by_budget_id"
+kind = "http"
+summary = "PUT /api/budgets/{budget_id}"
+method = "PUT"
+path = "/api/budgets/{budget_id}"
+
+[[op]]
+id = "categories.put_by_category_id"
+kind = "http"
+summary = "PUT /api/categories/{category_id}"
+method = "PUT"
+path = "/api/categories/{category_id}"
+
+[[op]]
+id = "recurring_transactions.put_by_rec_id"
+kind = "http"
+summary = "PUT /api/recurring-transactions/{rec_id}"
+method = "PUT"
+path = "/api/recurring-transactions/{rec_id}"
+
+[[op]]
+id = "savings_goals.put_by_goal_id"
+kind = "http"
+summary = "PUT /api/savings-goals/{goal_id}"
+method = "PUT"
+path = "/api/savings-goals/{goal_id}"
+
+[[op]]
+id = "transactions.put_by_transaction_id"
+kind = "http"
+summary = "PUT /api/transactions/{transaction_id}"
+method = "PUT"
+path = "/api/transactions/{transaction_id}"
