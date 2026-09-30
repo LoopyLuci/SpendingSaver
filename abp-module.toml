@@ -8,7 +8,7 @@ repo = "https://github.com/LoopyLuci/SpendingSaver.git"
 branch = "main"
 api = 1
 area = "data"
-description = "Light, fast cross-platform desktop app shell with:"
+description = "A budgeting app for web, desktop and Android: accounts, transactions, rules, budgets, net worth, CSV import/export, with an MCP server."
 
 [checkout]
 marker = ["abp-module.toml", "abp-ops.toml"]

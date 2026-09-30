@@ -5,7 +5,7 @@
 [service]
 id = "spending-saver"
 name = "SpendingSaver"
-description = "Light, fast cross-platform desktop app shell with:"
+description = "A budgeting app for web, desktop and Android: accounts, transactions, rules, budgets, net worth, CSV import/export, with an MCP server."
 base_url = "http://127.0.0.1:27215"
 health = "/health"
 start = ["{python}", "-m", "uvicorn", "app.api:app", "--host", "127.0.0.1", "--port", "27215"]
