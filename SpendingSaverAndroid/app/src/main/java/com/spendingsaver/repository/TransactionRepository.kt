@@ -9,27 +9,20 @@ import javax.inject.Singleton
 @Singleton
 class TransactionRepository @Inject constructor(
     private val transactionDao: TransactionDao,
-    private val syncQueue: SyncQueue
 ) {
     val transactions: Flow<List<Transaction>> = transactionDao.getAll()
 
     suspend fun addTransaction(transaction: Transaction): Transaction {
-        val dirty = transaction.copy(dirty = true, updatedAt = System.currentTimeMillis())
-        transactionDao.insert(dirty)
-        syncQueue.enqueue("transaction", "insert", dirty)
-        return dirty
+        transactionDao.insert(transaction.copy(updatedAt = System.currentTimeMillis()))
+        return transaction
     }
 
     suspend fun updateTransaction(transaction: Transaction) {
-        val dirty = transaction.copy(dirty = true, updatedAt = System.currentTimeMillis())
-        transactionDao.update(dirty)
-        syncQueue.enqueue("transaction", "update", dirty)
+        transactionDao.update(transaction.copy(updatedAt = System.currentTimeMillis()))
     }
 
-    /** Soft delete so the removal is captured and synced. */
+    /** Soft delete: mark the row deleted; it is never physically removed. */
     suspend fun deleteTransaction(transaction: Transaction) {
-        val soft = transaction.copy(deleted = true, dirty = true, updatedAt = System.currentTimeMillis())
-        transactionDao.update(soft)
-        syncQueue.enqueue("transaction", "delete", soft)
+        transactionDao.update(transaction.copy(deleted = true, updatedAt = System.currentTimeMillis()))
     }
 }

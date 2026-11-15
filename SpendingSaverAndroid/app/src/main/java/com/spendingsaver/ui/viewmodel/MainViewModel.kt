@@ -5,12 +5,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.spendingsaver.data.*
 import com.spendingsaver.repository.BudgetRepository
+import com.spendingsaver.repository.DataBackupRepository
 import com.spendingsaver.repository.SettingsRepository
-import com.spendingsaver.sync.SyncScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,6 +21,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val repo: BudgetRepository,
     private val settingsRepo: SettingsRepository,
+    private val backupRepo: DataBackupRepository,
     @ApplicationContext private val appContext: Context
 ) : ViewModel() {
     val accounts = repo.accounts.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
@@ -89,8 +92,35 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    /** On-demand sync triggered from the UI / app entry point. */
-    fun syncNow() {
-        SyncScheduler.syncNow(appContext)
+    // Self-contained local backup & restore — no companion desktop server.
+    private val _backupStatus = MutableStateFlow<String?>(null)
+    val backupStatus: StateFlow<String?> = _backupStatus.asStateFlow()
+
+    fun exportBackup(uri: android.net.Uri) {
+        viewModelScope.launch {
+            try {
+                val json = backupRepo.export()
+                appContext.contentResolver.openOutputStream(uri)?.use { out ->
+                    out.write(json.toByteArray(Charsets.UTF_8))
+                }
+                _backupStatus.value = "Backup exported"
+            } catch (e: Exception) {
+                _backupStatus.value = "Export failed: ${e.message}"
+            }
+        }
+    }
+
+    fun restoreBackup(uri: android.net.Uri) {
+        viewModelScope.launch {
+            try {
+                val json = appContext.contentResolver.openInputStream(uri)
+                    ?.bufferedReader()?.use { it.readText() }
+                    ?: run { _backupStatus.value = "Unable to read backup file"; return@launch }
+                backupRepo.restore(json)
+                _backupStatus.value = "Backup restored"
+            } catch (e: Exception) {
+                _backupStatus.value = "Restore failed: ${e.message}"
+            }
+        }
     }
 }

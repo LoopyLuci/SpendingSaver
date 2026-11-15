@@ -26,6 +26,6 @@ interface AccountDao {
     @Delete
     suspend fun delete(account: Account)
 
-    @Query("UPDATE accounts SET deleted = :deleted, dirty = :dirty, updatedAt = :updatedAt WHERE id = :id")
-    suspend fun setSyncFlags(id: String, deleted: Boolean, dirty: Boolean, updatedAt: Long)
+    @Query("DELETE FROM accounts")
+    suspend fun deleteAll()
 }

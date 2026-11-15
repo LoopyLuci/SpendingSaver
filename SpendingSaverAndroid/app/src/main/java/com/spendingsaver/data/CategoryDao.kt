@@ -26,6 +26,6 @@ interface CategoryDao {
     @Delete
     suspend fun delete(category: Category)
 
-    @Query("UPDATE categories SET deleted = :deleted, dirty = :dirty, updatedAt = :updatedAt WHERE id = :id")
-    suspend fun setSyncFlags(id: String, deleted: Boolean, dirty: Boolean, updatedAt: Long)
+    @Query("DELETE FROM categories")
+    suspend fun deleteAll()
 }

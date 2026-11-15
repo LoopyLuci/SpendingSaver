@@ -6,7 +6,7 @@ import java.util.UUID
 
 @Entity(tableName = "transactions")
 data class Transaction(
-    @PrimaryKey override val id: String = UUID.randomUUID().toString(),
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
     val accountId: String,
     val amount: Double,          // positive income, negative expense
     val description: String,
@@ -14,8 +14,7 @@ data class Transaction(
     val date: String,            // YYYY-MM-DD
     val notes: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
-    override val updatedAt: Long = System.currentTimeMillis(),
-    override val deleted: Boolean = false,
-    override val dirty: Boolean = false,
-    override val remoteId: String? = null
-) : SyncEntity
+    /** Soft-delete flag so the user can undo; rows are never physically removed. */
+    val deleted: Boolean = false,
+    val updatedAt: Long = System.currentTimeMillis()
+)

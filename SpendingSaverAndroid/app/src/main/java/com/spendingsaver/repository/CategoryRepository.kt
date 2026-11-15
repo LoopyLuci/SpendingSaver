@@ -9,27 +9,20 @@ import javax.inject.Singleton
 @Singleton
 class CategoryRepository @Inject constructor(
     private val categoryDao: CategoryDao,
-    private val syncQueue: SyncQueue
 ) {
     val categories: Flow<List<Category>> = categoryDao.getAll()
 
     suspend fun addCategory(category: Category): Category {
-        val dirty = category.copy(dirty = true, updatedAt = System.currentTimeMillis())
-        categoryDao.insert(dirty)
-        syncQueue.enqueue("category", "insert", dirty)
-        return dirty
+        categoryDao.insert(category.copy(updatedAt = System.currentTimeMillis()))
+        return category
     }
 
     suspend fun updateCategory(category: Category) {
-        val dirty = category.copy(dirty = true, updatedAt = System.currentTimeMillis())
-        categoryDao.update(dirty)
-        syncQueue.enqueue("category", "update", dirty)
+        categoryDao.update(category.copy(updatedAt = System.currentTimeMillis()))
     }
 
-    /** Soft delete so the removal is captured and synced. */
+    /** Soft delete: mark the row deleted; it is never physically removed. */
     suspend fun deleteCategory(category: Category) {
-        val soft = category.copy(deleted = true, dirty = true, updatedAt = System.currentTimeMillis())
-        categoryDao.update(soft)
-        syncQueue.enqueue("category", "delete", soft)
+        categoryDao.update(category.copy(deleted = true, updatedAt = System.currentTimeMillis()))
     }
 }

@@ -23,6 +23,8 @@ interface BudgetDao {
     @Delete
     suspend fun delete(budget: Budget)
 
-    @Query("UPDATE budgets SET deleted = :deleted, dirty = :dirty, updatedAt = :updatedAt WHERE id = :id")
-    suspend fun setSyncFlags(id: String, deleted: Boolean, dirty: Boolean, updatedAt: Long)
+    @Query("DELETE FROM budgets")
+    suspend fun deleteAll()
+    @Query("SELECT * FROM budgets WHERE deleted = 0")
+    suspend fun getAllOnce(): List<Budget>
 }

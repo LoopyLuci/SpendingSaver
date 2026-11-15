@@ -6,12 +6,11 @@ import java.util.UUID
 
 @Entity(tableName = "categories")
 data class Category(
-    @PrimaryKey override val id: String = UUID.randomUUID().toString(),
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
     val name: String,
     val parentId: String? = null,
     val color: String? = null,
-    override val updatedAt: Long = System.currentTimeMillis(),
-    override val deleted: Boolean = false,
-    override val dirty: Boolean = false,
-    override val remoteId: String? = null
-) : SyncEntity
+    /** Soft-delete flag so the user can undo; rows are never physically removed. */
+    val deleted: Boolean = false,
+    val updatedAt: Long = System.currentTimeMillis()
+)

@@ -29,6 +29,6 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE categoryId = :categoryId AND amount < 0 AND deleted = 0")
     suspend fun getExpensesByCategory(categoryId: String): List<Transaction>
 
-    @Query("UPDATE transactions SET deleted = :deleted, dirty = :dirty, updatedAt = :updatedAt WHERE id = :id")
-    suspend fun setSyncFlags(id: String, deleted: Boolean, dirty: Boolean, updatedAt: Long)
+    @Query("DELETE FROM transactions")
+    suspend fun deleteAll()
 }

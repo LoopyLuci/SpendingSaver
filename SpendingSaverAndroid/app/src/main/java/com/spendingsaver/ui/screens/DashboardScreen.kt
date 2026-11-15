@@ -245,7 +245,6 @@ private fun QuickActionRow(navController: NavHostController) {
         Triple("Add", Icons.Default.Add, "transactions"),
         Triple("Budgets", Icons.Default.Savings, "budgets"),
         Triple("Accounts", Icons.Default.AccountBalance, "accounts"),
-        Triple("Connect", Icons.Default.Cast, "connect"),
     )
     Row(
         Modifier.fillMaxWidth(),

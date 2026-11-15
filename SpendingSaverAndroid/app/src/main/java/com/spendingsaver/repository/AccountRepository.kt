@@ -9,28 +9,20 @@ import javax.inject.Singleton
 @Singleton
 class AccountRepository @Inject constructor(
     private val accountDao: AccountDao,
-    private val syncQueue: SyncQueue
 ) {
     val accounts: Flow<List<Account>> = accountDao.getAll()
 
-    /** Insert a new account, mark it dirty and queue it for upload. */
     suspend fun addAccount(account: Account): Account {
-        val dirty = account.copy(dirty = true, updatedAt = System.currentTimeMillis())
-        accountDao.insert(dirty)
-        syncQueue.enqueue("account", "insert", dirty)
-        return dirty
+        accountDao.insert(account.copy(updatedAt = System.currentTimeMillis()))
+        return account
     }
 
     suspend fun updateAccount(account: Account) {
-        val dirty = account.copy(dirty = true, updatedAt = System.currentTimeMillis())
-        accountDao.update(dirty)
-        syncQueue.enqueue("account", "update", dirty)
+        accountDao.update(account.copy(updatedAt = System.currentTimeMillis()))
     }
 
-    /** Soft delete: mark the row deleted + dirty so it syncs, never remove it. */
+    /** Soft delete: mark the row deleted; it is never physically removed. */
     suspend fun deleteAccount(account: Account) {
-        val soft = account.copy(deleted = true, dirty = true, updatedAt = System.currentTimeMillis())
-        accountDao.update(soft)
-        syncQueue.enqueue("account", "delete", soft)
+        accountDao.update(account.copy(deleted = true, updatedAt = System.currentTimeMillis()))
     }
 }

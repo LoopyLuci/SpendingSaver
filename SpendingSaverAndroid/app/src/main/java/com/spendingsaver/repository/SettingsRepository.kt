@@ -31,10 +31,6 @@ class SettingsRepository @Inject constructor(@ApplicationContext context: Contex
         compactMode = prefs.getBoolean(KEY_COMPACT, false),
         defaultCurrency = prefs.getString(KEY_CURRENCY, "USD") ?: "USD",
         dateFormat = prefs.getString(KEY_DATE_FORMAT, "yyyy-MM-dd") ?: "yyyy-MM-dd",
-        syncEnabled = prefs.getBoolean(KEY_SYNC, true),
-        syncIntervalMinutes = prefs.getInt(KEY_SYNC_INTERVAL, 15),
-        syncHost = prefs.getString(KEY_SYNC_HOST, "") ?: "",
-        pairingKey = prefs.getString(KEY_PAIRING_KEY, "") ?: "",
     )
 
     private fun update(mutator: (AppSettings) -> AppSettings) {
@@ -48,10 +44,6 @@ class SettingsRepository @Inject constructor(@ApplicationContext context: Contex
             .putBoolean(KEY_COMPACT, updated.compactMode)
             .putString(KEY_CURRENCY, updated.defaultCurrency)
             .putString(KEY_DATE_FORMAT, updated.dateFormat)
-            .putBoolean(KEY_SYNC, updated.syncEnabled)
-            .putInt(KEY_SYNC_INTERVAL, updated.syncIntervalMinutes)
-            .putString(KEY_SYNC_HOST, updated.syncHost)
-            .putString(KEY_PAIRING_KEY, updated.pairingKey)
             .apply()
     }
 
@@ -62,10 +54,6 @@ class SettingsRepository @Inject constructor(@ApplicationContext context: Contex
     fun setCompact(compact: Boolean) = update { it.copy(compactMode = compact) }
     fun setCurrency(c: String) = update { it.copy(defaultCurrency = c) }
     fun setDateFormat(f: String) = update { it.copy(dateFormat = f) }
-    fun setSyncEnabled(enabled: Boolean) = update { it.copy(syncEnabled = enabled) }
-    fun setSyncInterval(minutes: Int) = update { it.copy(syncIntervalMinutes = minutes) }
-    fun setSyncHost(host: String) = update { it.copy(syncHost = host) }
-    fun setPairingKey(key: String) = update { it.copy(pairingKey = key) }
 
     fun reset() {
         update { AppSettings() }
@@ -79,9 +67,5 @@ class SettingsRepository @Inject constructor(@ApplicationContext context: Contex
         private const val KEY_COMPACT = "compact_mode"
         private const val KEY_CURRENCY = "default_currency"
         private const val KEY_DATE_FORMAT = "date_format"
-        private const val KEY_SYNC = "sync_enabled"
-        private const val KEY_SYNC_INTERVAL = "sync_interval"
-        private const val KEY_SYNC_HOST = "sync_host"
-        private const val KEY_PAIRING_KEY = "pairing_key"
     }
 }

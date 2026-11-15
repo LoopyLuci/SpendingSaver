@@ -8,8 +8,8 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [Account::class, Category::class, Transaction::class, Budget::class, PendingSync::class],
-    version = 2,
+    entities = [Account::class, Category::class, Transaction::class, Budget::class],
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -17,7 +17,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun categoryDao(): CategoryDao
     abstract fun transactionDao(): TransactionDao
     abstract fun budgetDao(): BudgetDao
-    abstract fun pendingSyncDao(): PendingSyncDao
 
     companion object {
         @Volatile
@@ -105,6 +104,74 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v2 -> v3: make the schema fully self-contained by dropping the server
+         * upload outbox (pending_sync) and the sync-metadata columns (dirty/remoteId)
+         * so the on-disk tables match the no-server entity definitions.
+         */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS pending_sync")
+
+                // accounts
+                db.execSQL(
+                    "CREATE TABLE accounts_new (" +
+                        "id TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL, type TEXT NOT NULL, " +
+                        "balance REAL NOT NULL, currency TEXT NOT NULL, updatedAt INTEGER NOT NULL, " +
+                        "deleted INTEGER NOT NULL)"
+                )
+                db.execSQL(
+                    "INSERT INTO accounts_new (id,name,type,balance,currency,updatedAt,deleted) " +
+                        "SELECT id,name,type,balance,currency,updatedAt,deleted FROM accounts"
+                )
+                db.execSQL("DROP TABLE accounts")
+                db.execSQL("ALTER TABLE accounts_new RENAME TO accounts")
+
+                // categories
+                db.execSQL(
+                    "CREATE TABLE categories_new (" +
+                        "id TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL, parentId TEXT, color TEXT, " +
+                        "updatedAt INTEGER NOT NULL, deleted INTEGER NOT NULL)"
+                )
+                db.execSQL(
+                    "INSERT INTO categories_new (id,name,parentId,color,updatedAt,deleted) " +
+                        "SELECT id,name,parentId,color,updatedAt,deleted FROM categories"
+                )
+                db.execSQL("DROP TABLE categories")
+                db.execSQL("ALTER TABLE categories_new RENAME TO categories")
+
+                // transactions
+                db.execSQL(
+                    "CREATE TABLE transactions_new (" +
+                        "id TEXT NOT NULL PRIMARY KEY, accountId TEXT NOT NULL, amount REAL NOT NULL, " +
+                        "description TEXT NOT NULL, categoryId TEXT, date TEXT NOT NULL, notes TEXT, " +
+                        "createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, deleted INTEGER NOT NULL)"
+                )
+                db.execSQL(
+                    "INSERT INTO transactions_new " +
+                        "(id,accountId,amount,description,categoryId,date,notes,createdAt,updatedAt,deleted) " +
+                        "SELECT id,accountId,amount,description,categoryId,date,notes,createdAt,updatedAt,deleted " +
+                        "FROM transactions"
+                )
+                db.execSQL("DROP TABLE transactions")
+                db.execSQL("ALTER TABLE transactions_new RENAME TO transactions")
+
+                // budgets
+                db.execSQL(
+                    "CREATE TABLE budgets_new (" +
+                        "id TEXT NOT NULL PRIMARY KEY, categoryId TEXT NOT NULL, amount REAL NOT NULL, " +
+                        "period TEXT NOT NULL, startDate TEXT NOT NULL, updatedAt INTEGER NOT NULL, " +
+                        "deleted INTEGER NOT NULL)"
+                )
+                db.execSQL(
+                    "INSERT INTO budgets_new (id,categoryId,amount,period,startDate,updatedAt,deleted) " +
+                        "SELECT id,categoryId,amount,period,startDate,updatedAt,deleted FROM budgets"
+                )
+                db.execSQL("DROP TABLE budgets")
+                db.execSQL("ALTER TABLE budgets_new RENAME TO budgets")
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase =
             INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -112,7 +179,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "spendingsaver.db"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build().also { INSTANCE = it }
             }
     }

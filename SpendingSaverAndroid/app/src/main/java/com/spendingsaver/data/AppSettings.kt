@@ -11,8 +11,4 @@ data class AppSettings(
     val compactMode: Boolean = false,       // denser list rows
     val defaultCurrency: String = "USD",
     val dateFormat: String = "yyyy-MM-dd",  // "yyyy-MM-dd" | "MM/dd/yyyy" | "dd/MM/yyyy"
-    val syncEnabled: Boolean = true,
-    val syncIntervalMinutes: Int = 15,
-    val syncHost: String = "",             // paired self-hosted server URL, e.g. http://192.168.1.5:8125
-    val pairingKey: String = "",           // connection key to share with other devices
 )

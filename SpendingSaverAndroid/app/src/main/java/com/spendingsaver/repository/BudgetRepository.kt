@@ -12,7 +12,6 @@ class BudgetRepository @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val transactionRepository: TransactionRepository,
     private val budgetDao: BudgetDao,
-    private val syncQueue: SyncQueue
 ) {
     val accounts: Flow<List<Account>> = accountRepository.accounts
     val categories: Flow<List<Category>> = categoryRepository.categories
@@ -28,22 +27,16 @@ class BudgetRepository @Inject constructor(
     suspend fun deleteCategory(category: Category) = categoryRepository.deleteCategory(category)
 
     suspend fun addBudget(budget: Budget): Budget {
-        val dirty = budget.copy(dirty = true, updatedAt = System.currentTimeMillis())
-        budgetDao.insert(dirty)
-        syncQueue.enqueue("budget", "insert", dirty)
-        return dirty
+        budgetDao.insert(budget.copy(updatedAt = System.currentTimeMillis()))
+        return budget
     }
 
     suspend fun updateBudget(budget: Budget) {
-        val dirty = budget.copy(dirty = true, updatedAt = System.currentTimeMillis())
-        budgetDao.update(dirty)
-        syncQueue.enqueue("budget", "update", dirty)
+        budgetDao.update(budget.copy(updatedAt = System.currentTimeMillis()))
     }
 
     suspend fun deleteBudget(budget: Budget) {
-        val soft = budget.copy(deleted = true, dirty = true, updatedAt = System.currentTimeMillis())
-        budgetDao.update(soft)
-        syncQueue.enqueue("budget", "delete", soft)
+        budgetDao.update(budget.copy(deleted = true, updatedAt = System.currentTimeMillis()))
     }
 
     suspend fun autoCategorize(transaction: Transaction): Transaction {

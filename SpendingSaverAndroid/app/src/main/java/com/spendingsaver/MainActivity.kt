@@ -19,7 +19,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.spendingsaver.repository.SettingsRepository
-import com.spendingsaver.sync.SyncScheduler
 import com.spendingsaver.ui.screens.*
 import com.spendingsaver.ui.theme.SpendingSaverTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,19 +32,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Wire periodic offline sync (every 15 min) + initial on-demand run.
-        SyncScheduler.schedulePeriodic(applicationContext)
-        SyncScheduler.syncNow(applicationContext)
-
-        // If the paired server host/key were pushed via adb (launch_pair), store them.
-        val launchPair = intent?.getBooleanExtra("launch_pair", false) ?: false
-        val pairHost = intent?.getStringExtra("pair_host")
-        val pairKey = intent?.getStringExtra("pair_key")
-        if (launchPair && !pairHost.isNullOrBlank()) {
-            settingsRepo.setSyncHost("http://$pairHost")
-            if (!pairKey.isNullOrBlank()) settingsRepo.setPairingKey(pairKey)
-        }
-
         setContent {
             AppRoot(settingsRepo)
         }
@@ -74,7 +60,6 @@ val NAV_ITEMS = listOf(
     NavItem("categories", "Categories", Icons.Default.Category),
     NavItem("networth", "Net Worth", Icons.Default.TrendingUp),
     NavItem("import", "Import / Export", Icons.Default.FileUpload),
-    NavItem("connect", "Connect", Icons.Default.Cast),
     NavItem("settings", "Settings", Icons.Default.Settings),
 )
 
@@ -152,7 +137,6 @@ fun AppNavHost(settingsRepo: SettingsRepository) {
                     composable("categories") { CategoriesScreen(navController) }
                     composable("networth") { NetWorthScreen(navController) }
                     composable("import") { ImportExportScreen(navController) }
-                    composable("connect") { ConnectScreen(settingsRepo) }
                     composable("settings") { SettingsScreen(navController, settingsRepo) }
                 }
             }

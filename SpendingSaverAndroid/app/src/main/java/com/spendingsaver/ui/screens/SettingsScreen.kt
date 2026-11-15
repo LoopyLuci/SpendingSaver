@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -114,6 +116,15 @@ fun SettingsScreen(
     viewModel: com.spendingsaver.ui.viewmodel.MainViewModel = hiltViewModel(),
 ) {
     val settings by settingsRepo.settings.collectAsState()
+    val backupStatus by viewModel.backupStatus.collectAsState()
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri -> if (uri != null) viewModel.exportBackup(uri) }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri -> if (uri != null) viewModel.restoreBackup(uri) }
 
     val colorScheme = MaterialTheme.colorScheme
     val backgroundGradient = Brush.verticalGradient(
@@ -185,41 +196,40 @@ fun SettingsScreen(
             }
         }
 
-        SettingsSection("Pair with server") {
+        SettingsSection("Data & backups") {
             Text(
-                if (settings.syncHost.isBlank())
-                    "No server connected. Pair this phone with a SpendingSaver server to sync over your local network."
-                else
-                    "Connected to ${settings.syncHost.trim('/').removePrefix("http://").removePrefix("https://")}",
+                "Export a personal JSON backup of all your accounts, transactions, categories and budgets, or restore a previous backup. Everything stays on this device — no server needed.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(12.dp))
-            Button(onClick = { navController.navigate("connect") }, modifier = Modifier.fillMaxWidth()) {
-                Icon(Icons.Default.Cast, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text(if (settings.syncHost.isBlank()) "Pair with server" else "Manage connection")
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Button(
+                    onClick = { exportLauncher.launch("spendingsaver-backup.json") },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(Icons.Default.FileUpload, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Export backup")
+                }
+                Button(
+                    onClick = { importLauncher.launch(arrayOf("application/json")) },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(Icons.Default.FileDownload, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Restore backup")
+                }
             }
-        }
-
-        SettingsSection("Sync & data") {
-            SwitchRow("Automatic sync", "Sync with connected services", settings.syncEnabled) { settingsRepo.setSyncEnabled(it) }
-            if (settings.syncEnabled) {
-                Spacer(Modifier.height(12.dp))
-                SettingsLabel("Sync interval (minutes)")
-                Slider(
-                    value = settings.syncIntervalMinutes.toFloat(),
-                    onValueChange = { settingsRepo.setSyncInterval(it.toInt()) },
-                    valueRange = 5f..60f,
-                    steps = 4,
+            backupStatus?.let { status ->
+                Text(
+                    status,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (status.startsWith("Backup")) colorScheme.primary else colorScheme.error,
                 )
-                Text("Every ${settings.syncIntervalMinutes} min", style = MaterialTheme.typography.bodySmall)
-            }
-            Spacer(Modifier.height(12.dp))
-            Button(onClick = { viewModel.syncNow() }, modifier = Modifier.fillMaxWidth()) {
-                Icon(Icons.Default.Sync, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Sync now")
             }
         }
 

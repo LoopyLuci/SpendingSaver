@@ -32,9 +32,6 @@ object AppModule {
     fun provideBudgetDao(db: AppDatabase): BudgetDao = db.budgetDao()
 
     @Provides
-    fun providePendingSyncDao(db: AppDatabase): PendingSyncDao = db.pendingSyncDao()
-
-    @Provides
     @Singleton
     fun provideGson(): Gson = Gson()
 }
