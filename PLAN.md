@@ -3,6 +3,9 @@
 This is a maintenance plan for the repository as it exists, not a feature
 promise or a claim that the separate apps share data.
 
+Product requirements and unresolved decisions are recorded in the
+[SpendingSaver specification](spec/SPEC.md).
+
 ## Project map
 
 - **Android:** standalone local-first app; see

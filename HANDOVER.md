@@ -16,9 +16,11 @@ for repository history.
 
 1. [`README.md`](README.md) — project index and data boundaries.
 2. [`AGENTS.md`](AGENTS.md) — contribution and data-safety guidance.
-3. [`PLAN.md`](PLAN.md) and [`TODO.md`](TODO.md) — maintenance sequence and
+3. [`spec/SPEC.md`](spec/SPEC.md) — product requirements, implementation
+   status, and unresolved cross-project decisions.
+4. [`PLAN.md`](PLAN.md) and [`TODO.md`](TODO.md) — maintenance sequence and
    confirmed follow-ups.
-4. The README and runbook for the project being changed.
+5. The README and runbook for the project being changed.
 
 ## Verification context
 

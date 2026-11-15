@@ -15,6 +15,8 @@ with the desktop backend.
 | MCP integration | [`spendingsaver-mcp/`](spendingsaver-mcp/README.md) | Model Context Protocol tools that call the desktop backend's HTTP API. |
 
 Screenshots are in [`SpendingSaverScreenshots/`](SpendingSaverScreenshots/).
+The product requirements and implementation status are in the
+[SpendingSaver specification](spec/SPEC.md).
 The Android feature roadmap is in
 [`SpendingSaverAndroid/.hermes/plans/2026-10-22_100200-spendingsaver-roadmap.md`](SpendingSaverAndroid/.hermes/plans/2026-10-22_100200-spendingsaver-roadmap.md).
 
