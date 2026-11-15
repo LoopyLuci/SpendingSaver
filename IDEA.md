@@ -1,3 +1,8 @@
+> **Historical concept draft:** This document captures an early product
+> description and may not match the implemented apps. For current project
+> boundaries and setup, use the repository [README](README.md) and the
+> project-specific guides.
+
 SpendingSaver
 We'll now provide the complete codebase for **SpendingSaver**, a full-featured budgeting app for web (React + TypeScript + Dexie) and Android (Kotlin + Compose + Room). The app includes unlimited accounts/transactions/categories, automatic categorization via rules, batch editing, budget tracking, net worth, CSV import/export, dashboards with charts, dark mode, and absolutely no ads or data selling.
 
