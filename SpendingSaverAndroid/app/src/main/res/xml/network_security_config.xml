@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 9+ blocks plain HTTP unless allowed here. The desktop sync hub and the
+  AI service usually run on the local network over HTTP, and Android cannot
+  allow "private addresses only" in this file. The app therefore enforces it in
+  code: HubUrl only accepts http:// for local-network hosts and requires
+  https:// otherwise. Nothing contacts a server until the user configures one.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

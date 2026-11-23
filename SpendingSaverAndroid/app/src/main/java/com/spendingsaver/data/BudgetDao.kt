@@ -24,4 +24,16 @@ interface BudgetDao {
     suspend fun deleteAll()
     @Query("SELECT * FROM budgets WHERE deleted = 0")
     suspend fun getAllOnce(): List<Budget>
+
+    /** Insert-or-replace by primary key (used by sync and restore). */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(item: Budget)
+
+    /** Every row, including soft-deleted tombstones, changed at or after [sinceMs]. */
+    @Query("SELECT * FROM budgets WHERE updatedAt >= :sinceMs ORDER BY updatedAt")
+    suspend fun getModifiedSince(sinceMs: Long): List<Budget>
+
+    /** Every row including tombstones; used to plan a restore. */
+    @Query("SELECT * FROM budgets")
+    suspend fun getAllIncludingDeleted(): List<Budget>
 }

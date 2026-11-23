@@ -28,4 +28,16 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions")
     suspend fun deleteAll()
+
+    /** Insert-or-replace by primary key (used by sync and restore). */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(item: Transaction)
+
+    /** Every row, including soft-deleted tombstones, changed at or after [sinceMs]. */
+    @Query("SELECT * FROM transactions WHERE updatedAt >= :sinceMs ORDER BY updatedAt")
+    suspend fun getModifiedSince(sinceMs: Long): List<Transaction>
+
+    /** Every row including tombstones; used to plan a restore. */
+    @Query("SELECT * FROM transactions")
+    suspend fun getAllIncludingDeleted(): List<Transaction>
 }

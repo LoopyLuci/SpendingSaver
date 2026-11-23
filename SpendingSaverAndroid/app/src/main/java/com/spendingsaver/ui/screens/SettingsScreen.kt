@@ -285,6 +285,8 @@ fun SettingsScreen(
             }
         }
 
+        SyncSection()
+
         Spacer(Modifier.height(8.dp))
         OutlinedButton(
             onClick = { settingsRepo.reset() },

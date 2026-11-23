@@ -26,13 +26,18 @@ android {
     val keystoreProps = Properties().apply {
         if (keystorePropsFile.exists()) keystorePropsFile.inputStream().use { load(it) }
     }
-    val hasReleaseSigning = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+    val keystoreComplete = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
         .all { !keystoreProps.getProperty(it).isNullOrBlank() }
+    val keystoreFile = keystoreProps.getProperty("storeFile")?.takeIf { it.isNotBlank() }?.let { rootProject.file(it) }
+    val hasReleaseSigning = keystoreComplete && keystoreFile?.exists() == true
+    if (keystorePropsFile.exists() && !hasReleaseSigning) {
+        logger.warn("keystore.properties is incomplete or its storeFile does not exist; the release build will be unsigned.")
+    }
 
     signingConfigs {
         if (hasReleaseSigning) {
             create("release") {
-                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                storeFile = keystoreFile
                 storePassword = keystoreProps.getProperty("storePassword")
                 keyAlias = keystoreProps.getProperty("keyAlias")
                 keyPassword = keystoreProps.getProperty("keyPassword")
@@ -48,6 +53,9 @@ android {
             if (hasReleaseSigning) signingConfig = signingConfigs.getByName("release")
         }
         debug {
+            // Opt-in side-by-side install, e.g. -PdebugAppIdSuffix=.debug, so a debug build
+            // never has to replace (or uninstall) an app signed with a different key.
+            (findProperty("debugAppIdSuffix") as String?)?.let { applicationIdSuffix = it }
             buildConfigField("boolean", "DEBUG_OVERLAYS", "true")
         }
     }

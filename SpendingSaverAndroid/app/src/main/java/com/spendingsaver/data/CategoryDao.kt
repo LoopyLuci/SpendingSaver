@@ -25,4 +25,16 @@ interface CategoryDao {
 
     @Query("DELETE FROM categories")
     suspend fun deleteAll()
+
+    /** Insert-or-replace by primary key (used by sync and restore). */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(item: Category)
+
+    /** Every row, including soft-deleted tombstones, changed at or after [sinceMs]. */
+    @Query("SELECT * FROM categories WHERE updatedAt >= :sinceMs ORDER BY updatedAt")
+    suspend fun getModifiedSince(sinceMs: Long): List<Category>
+
+    /** Every row including tombstones; used to plan a restore. */
+    @Query("SELECT * FROM categories")
+    suspend fun getAllIncludingDeleted(): List<Category>
 }

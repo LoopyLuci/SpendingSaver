@@ -2,8 +2,10 @@
 <data-extraction-rules>
     <cloud-backup>
         <include domain="sharedpref" path="."/>
+        <exclude domain="sharedpref" path="spendingsaver_sync.xml"/>
     </cloud-backup>
     <device-transfer>
         <include domain="sharedpref" path="."/>
+        <exclude domain="sharedpref" path="spendingsaver_sync.xml"/>
     </device-transfer>
 </data-extraction-rules>
