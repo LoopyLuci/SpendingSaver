@@ -75,7 +75,7 @@ fun DashboardScreen(navController: NavHostController, viewModel: MainViewModel =
             subtitle = if (showBalance) {
                 "Income ${Format.money(income, currency)} · Saved ${Format.money(savings, currency)}"
             } else {
-                "Tap to reveal balances"
+                "Balances hidden · change in Settings"
             },
             accent = colorScheme.primary,
             onAccent = colorScheme.onPrimary,
@@ -248,17 +248,15 @@ private fun QuickActionRow(navController: NavHostController) {
         Triple("Budgets", Icons.Default.Savings, "budgets"),
         Triple("Accounts", Icons.Default.AccountBalance, "accounts"),
     )
-    Row(
-        Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-    ) {
+    Row(Modifier.fillMaxWidth()) {
         actions.forEach { (label, icon, route) ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
+                    .weight(1f)
                     .clip(RoundedCornerShape(20.dp))
-                    .clickable { navController.navigate(route) }
-                    .padding(vertical = 8.dp, horizontal = 12.dp),
+                    .clickable(role = androidx.compose.ui.semantics.Role.Button) { navController.navigate(route) }
+                    .padding(vertical = 8.dp),
             ) {
                 Box(
                     Modifier
@@ -280,6 +278,8 @@ private fun QuickActionRow(navController: NavHostController) {
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    softWrap = false,
                 )
             }
         }

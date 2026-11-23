@@ -164,7 +164,7 @@ fun AccountRow(account: Account, showBalance: Boolean, currency: String, onDelet
             subtitle = account.type.replaceFirstChar { it.uppercase() },
             trailing = if (showBalance) Format.money(account.balance, currency) else "••••",
             trailingColor = if (account.balance < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-            onClick = onDelete,
+            onDelete = onDelete,
             leadingIcon = {
                 Icon(
                     Icons.Default.AccountBalance,

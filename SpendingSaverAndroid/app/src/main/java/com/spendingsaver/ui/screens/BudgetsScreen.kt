@@ -160,7 +160,7 @@ fun BudgetsScreen(navController: NavHostController, viewModel: MainViewModel = h
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
                 items(budgets) { budget ->
-                    BudgetRow(budget, categories, transactions, settings)
+                    BudgetRow(budget, categories, transactions, settings, onDelete = { viewModel.deleteBudget(budget) })
                 }
             }
         }
@@ -168,10 +168,11 @@ fun BudgetsScreen(navController: NavHostController, viewModel: MainViewModel = h
 }
 
 @Composable
-private fun BudgetRow(budget: com.spendingsaver.data.Budget, categories: List<com.spendingsaver.data.Category>, transactions: List<com.spendingsaver.data.Transaction>, settings: com.spendingsaver.data.AppSettings) {
+private fun BudgetRow(budget: com.spendingsaver.data.Budget, categories: List<com.spendingsaver.data.Category>, transactions: List<com.spendingsaver.data.Transaction>, settings: com.spendingsaver.data.AppSettings, onDelete: () -> Unit) {
     val category = categories.find { it.id == budget.categoryId }
     val spent = transactions.filter { it.categoryId == budget.categoryId && it.amount < 0 }.sumOf { Math.abs(it.amount) }
-    val fraction = (spent / budget.amount).toFloat().coerceIn(0f, 1f)
+    // A zero budget would give NaN/Infinity and break the progress bar.
+    val fraction = if (budget.amount > 0) (spent / budget.amount).toFloat().coerceIn(0f, 1f) else 0f
     val isOver = spent > budget.amount
 
     AppCard(Modifier.fillMaxWidth(), elevation = 1.dp) {
@@ -180,6 +181,7 @@ private fun BudgetRow(budget: com.spendingsaver.data.Budget, categories: List<co
             subtitle = "${budget.period.replaceFirstChar { it.uppercase() }} · ${if (settings.showBalance) Format.money(spent, settings.defaultCurrency) else "••••"} of ${Format.money(budget.amount, settings.defaultCurrency)}",
             trailing = if (settings.showBalance) Format.money(budget.amount - spent, settings.defaultCurrency) else "••••",
             trailingColor = if (isOver) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+            onDelete = onDelete,
             leadingIcon = {
                 Icon(
                     Icons.Default.Savings,

@@ -8,6 +8,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
@@ -156,8 +157,27 @@ private val AppTypography = Typography(
 
 // --- Accent-tinted scheme builder -------------------------------------------
 
-private fun tintScheme(baseScheme: ColorScheme, accent: AccentPalette): ColorScheme {
-    val containerAlpha = 0.18f
+/**
+ * The accent palettes are tuned for light surfaces (dark primary, pale
+ * container). On a dark surface that gives low-contrast text and glaring
+ * containers, so dark mode uses the inverse tones: a lightened primary and a
+ * deepened container.
+ */
+private fun forDarkSurface(accent: AccentPalette): AccentPalette {
+    // Material 3 dark primaries sit at roughly the light scheme's container tone;
+    // pulling slightly toward the accent keeps it from looking neon.
+    val primary = lerp(accent.container, accent.primary, 0.3f)
+    return AccentPalette(
+        primary = primary,
+        onPrimary = lerp(accent.primary, Color.Black, 0.7f),
+        container = lerp(accent.primary, Color.Black, 0.45f),
+        onContainer = accent.container,
+    )
+}
+
+private fun tintScheme(baseScheme: ColorScheme, lightAccent: AccentPalette, darkTheme: Boolean): ColorScheme {
+    val accent = if (darkTheme) forDarkSurface(lightAccent) else lightAccent
+    val containerAlpha = if (darkTheme) 0.45f else 0.18f
     return baseScheme.copy(
         primary = accent.primary,
         onPrimary = accent.onPrimary,
@@ -190,23 +210,27 @@ fun SpendingSaverTheme(
 ) {
     val accent = ACCENTS[accentColor] ?: DefaultAccent
     val baseScheme = if (darkTheme) BaseDarkScheme else BaseLightScheme
-    val colorScheme = tintScheme(baseScheme, accent)
+    val colorScheme = tintScheme(baseScheme, accent, darkTheme)
 
-    val baseTypography = MaterialTheme.typography
-    val typography = baseTypography.copy(
-        bodyLarge = baseTypography.bodyLarge.copy(fontSize = baseTypography.bodyLarge.fontSize * textScale),
-        bodyMedium = baseTypography.bodyMedium.copy(fontSize = baseTypography.bodyMedium.fontSize * textScale),
-        bodySmall = baseTypography.bodySmall.copy(fontSize = baseTypography.bodySmall.fontSize * textScale),
-        titleLarge = baseTypography.titleLarge.copy(fontSize = baseTypography.titleLarge.fontSize * textScale),
-        titleMedium = baseTypography.titleMedium.copy(fontSize = baseTypography.titleMedium.fontSize * textScale),
-    )
+    // Scale every style (size and line height together, so larger text is not clipped).
+    fun TextStyle.scaled() = copy(fontSize = fontSize * textScale, lineHeight = lineHeight * textScale)
+    val typography = AppTypography.run {
+        copy(
+            displayLarge = displayLarge.scaled(), displayMedium = displayMedium.scaled(), displaySmall = displaySmall.scaled(),
+            headlineLarge = headlineLarge.scaled(), headlineMedium = headlineMedium.scaled(), headlineSmall = headlineSmall.scaled(),
+            titleLarge = titleLarge.scaled(), titleMedium = titleMedium.scaled(), titleSmall = titleSmall.scaled(),
+            bodyLarge = bodyLarge.scaled(), bodyMedium = bodyMedium.scaled(), bodySmall = bodySmall.scaled(),
+            labelLarge = labelLarge.scaled(), labelMedium = labelMedium.scaled(), labelSmall = labelSmall.scaled(),
+        )
+    }
 
     CompositionLocalProvider(LocalAccent provides accent) {
         val view = LocalView.current
         if (!view.isInEditMode) {
             SideEffect {
                 val window = (view.context as androidx.activity.ComponentActivity).window
-                window.statusBarColor = colorScheme.primary.toArgb()
+                // Match the top app bar so the status bar blends in instead of showing a coloured strip.
+                window.statusBarColor = colorScheme.surfaceVariant.toArgb()
                 WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
             }
         }

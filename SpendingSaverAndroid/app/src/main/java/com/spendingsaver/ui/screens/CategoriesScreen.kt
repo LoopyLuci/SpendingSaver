@@ -75,14 +75,7 @@ fun CategoriesScreen(navController: NavHostController, viewModel: MainViewModel 
             EmptyState(
                 emoji = "🏷️",
                 title = "No categories yet",
-                message = "Add categories to organize your spending.",
-                action = {
-                    PrimaryButton(
-                        "Add category",
-                        onClick = { },
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                    )
-                },
+                message = "Use the form above to add your first category.",
             )
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
@@ -96,32 +89,16 @@ fun CategoriesScreen(navController: NavHostController, viewModel: MainViewModel 
 
 @Composable
 fun CategoryRow(name: String, color: String?, onDelete: () -> Unit) {
+    val swatch = try {
+        if (color.isNullOrBlank()) null else androidx.compose.ui.graphics.Color(android.graphics.Color.parseColor(color))
+    } catch (_: IllegalArgumentException) {
+        null
+    } ?: MaterialTheme.colorScheme.primaryContainer
     AppCard(Modifier.fillMaxWidth(), elevation = 1.dp) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (!color.isNullOrBlank()) {
-                Box(
-                    Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(
-                            try {
-                                val c = android.graphics.Color.parseColor(color)
-                                androidx.compose.ui.graphics.Color(c)
-                            } catch (_: Exception) {
-                                MaterialTheme.colorScheme.primaryContainer
-                            }
-                        ),
-                )
-                Spacer(Modifier.width(12.dp))
-            }
-            Column(Modifier.weight(1f)) {
-                Text(name, style = MaterialTheme.typography.bodyLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium)
-            }
-        }
+        ListItem(
+            title = name,
+            onDelete = onDelete,
+            leadingIcon = { Box(Modifier.size(24.dp).clip(CircleShape).background(swatch)) },
+        )
     }
 }

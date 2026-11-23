@@ -4,8 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -52,14 +58,15 @@ fun HeroCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        colors = CardDefaults.cardColors(containerColor = accent),
     ) {
         Box(
             Modifier
+                .fillMaxWidth()
                 .background(Brush.linearGradient(listOf(accent, accent.copy(alpha = 0.8f))))
                 .padding(22.dp),
         ) {
-            Column {
+            Column(Modifier.fillMaxWidth()) {
                 Text(title.uppercase(), style = MaterialTheme.typography.labelMedium, color = onAccent.copy(alpha = 0.85f), letterSpacing = 1.2.sp)
                 Spacer(Modifier.height(8.dp))
                 Text(value, style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold, color = onAccent)
@@ -156,13 +163,20 @@ fun ListItem(
     subtitle: String? = null,
     trailing: String? = null,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    val clickMod = Modifier
+    var confirming by remember { mutableStateOf(false) }
+    if (confirming && onDelete != null) {
+        ConfirmDeleteDialog(
+            what = title,
+            onConfirm = { confirming = false; onDelete() },
+            onDismiss = { confirming = false },
+        )
+    }
     Row(
-        modifier = clickMod.padding(vertical = 6.dp),
+        modifier = modifier.padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (leadingIcon != null) {
@@ -177,7 +191,26 @@ fun ListItem(
             Spacer(Modifier.width(8.dp))
             Text(trailing, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = trailingColor)
         }
+        if (onDelete != null) {
+            IconButton(onClick = { confirming = true }) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete $title", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
     }
+}
+
+/** Destructive actions always ask first; nothing in the app deletes on a single tap. */
+@Composable
+fun ConfirmDeleteDialog(what: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Delete \"$what\"?") },
+        text = { Text("This can't be undone.") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text("Delete", color = MaterialTheme.colorScheme.error) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
 }
 
 /** Compact category chip for filters. */

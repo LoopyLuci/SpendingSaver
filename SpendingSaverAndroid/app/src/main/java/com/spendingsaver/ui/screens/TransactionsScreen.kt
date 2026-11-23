@@ -38,6 +38,7 @@ fun TransactionsScreen(navController: NavHostController, viewModel: MainViewMode
     var date by remember { mutableStateOf(SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())) }
     var dateError by remember { mutableStateOf(false) }
     var notes by remember { mutableStateOf("") }
+    var isExpense by remember { mutableStateOf(true) }
     var showForm by remember { mutableStateOf(false) }
     var accExpanded by remember { mutableStateOf(false) }
     var catExpanded by remember { mutableStateOf(false) }
@@ -116,6 +117,21 @@ fun TransactionsScreen(navController: NavHostController, viewModel: MainViewMode
                     )
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = isExpense,
+                            onClick = { isExpense = true },
+                            label = { Text("Expense") },
+                            leadingIcon = { Icon(Icons.Default.ArrowDownward, null, Modifier.size(18.dp)) },
+                        )
+                        FilterChip(
+                            selected = !isExpense,
+                            onClick = { isExpense = false },
+                            label = { Text("Income") },
+                            leadingIcon = { Icon(Icons.Default.ArrowUpward, null, Modifier.size(18.dp)) },
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = amount,
                             onValueChange = { amount = it; amountError = false },
@@ -146,9 +162,11 @@ fun TransactionsScreen(navController: NavHostController, viewModel: MainViewMode
                             readOnly = true,
                             label = { Text("Account") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = accExpanded) },
-                            modifier = Modifier.weight(1f).menuAnchor(),
+                            modifier = Modifier.fillMaxWidth().menuAnchor(),
                             isError = accountError,
-                            supportingText = { if (accountError) Text("Required") else null },
+                            supportingText = {
+                                if (accountError) Text(if (accounts.isEmpty()) "Add an account first" else "Required")
+                            },
                         )
                         ExposedDropdownMenu(expanded = accExpanded, onDismissRequest = { accExpanded = false }) {
                             accounts.forEach { account ->
@@ -158,7 +176,10 @@ fun TransactionsScreen(navController: NavHostController, viewModel: MainViewMode
                                 )
                             }
                             if (accounts.isEmpty()) {
-                                DropdownMenuItem(text = { Text("No accounts — add one first") }, onClick = { accExpanded = false })
+                                DropdownMenuItem(
+                                    text = { Text("No accounts yet — tap to create one") },
+                                    onClick = { accExpanded = false; navController.navigate("accounts") },
+                                )
                             }
                         }
                     }
@@ -201,10 +222,13 @@ fun TransactionsScreen(navController: NavHostController, viewModel: MainViewMode
                             accountError = selectedAccountId.isBlank()
                             dateError = date.isBlank()
                             if (descriptionError || amountError || accountError || dateError) return@PrimaryButton
-                            val amt = amount.toDoubleOrNull() ?: 0.0
+                            // Expenses are stored negative; the chip decides the sign, not the typing.
+                            val magnitude = kotlin.math.abs(amount.toDoubleOrNull() ?: 0.0)
+                            val amt = if (isExpense) -magnitude else magnitude
                             viewModel.addTransaction(accountId = selectedAccountId, amount = amt, description = description, date = date, categoryId = selectedCategoryId, notes = notes)
                             description = ""
                             amount = ""
+                            isExpense = true
                             selectedAccountId = ""
                             selectedCategoryId = null
                             notes = ""
@@ -218,11 +242,6 @@ fun TransactionsScreen(navController: NavHostController, viewModel: MainViewMode
 
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 SectionHeader("Transactions", modifier = Modifier.weight(1f))
-                if (transactions.isNotEmpty()) {
-                    TextButton(onClick = { /* could add filter */ }) {
-                        Text("Filter", fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
-                    }
-                }
             }
             Spacer(Modifier.height(4.dp))
 
@@ -273,7 +292,7 @@ private fun TransactionRow(
             subtitle = "${category ?: "Uncategorized"} • ${Format.date(tx.date, dateFormat)}",
             trailing = if (showBalance) Format.money(tx.amount, currency) else "••••",
             trailingColor = if (tx.amount < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-            onClick = onDelete,
+            onDelete = onDelete,
             leadingIcon = {
                 Icon(
                     if (tx.amount < 0) Icons.Default.ShoppingCart else Icons.Default.AttachMoney,

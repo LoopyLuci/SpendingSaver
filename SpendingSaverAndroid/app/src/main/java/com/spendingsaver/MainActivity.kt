@@ -96,7 +96,7 @@ fun AppNavHost(
                 NAV_ITEMS.forEach { item ->
                     NavigationDrawerItem(
                         label = { Text(item.title) },
-                        icon = { Icon(item.icon, contentDescription = item.title) },
+                        icon = { Icon(item.icon, contentDescription = null) },
                         selected = currentRoute == item.route,
                         onClick = {
                             navController.navigate(item.route) {
