@@ -16,6 +16,7 @@ const BillSplits = lazy(() => import('./pages/BillSplits'))
 const CreditScore = lazy(() => import('./pages/CreditScore'))
 const Insights = lazy(() => import('./pages/Insights'))
 const AndroidDevices = lazy(() => import('./pages/AndroidDevices'))
+const SyncHub = lazy(() => import('./pages/SyncHub'))
 const ConnectAccounts = lazy(() => import('./pages/ConnectAccounts'))
 const Diagnostics = lazy(() => import('./pages/Diagnostics'))
 
@@ -33,6 +34,7 @@ const ICONS: Record<string, string> = {
   '/credit': '🏅',
   '/insights': '🔍',
   '/devices': '📱',
+  '/sync': '🔁',
   '/connect': '🔗',
   '/diagnostics': '🩺',
   '/import-export': '📤',
@@ -53,6 +55,7 @@ const LABELS: Record<string, string> = {
   '/credit': 'Credit',
   '/insights': 'Insights',
   '/devices': 'Devices',
+  '/sync': 'Phone Sync',
   '/connect': 'Connect & Import',
   '/diagnostics': 'Diagnostics',
   '/import-export': 'Import / Export',
@@ -157,6 +160,7 @@ function AppLayout() {
               <Route path="/credit" element={<CreditScore />} />
               <Route path="/insights" element={<Insights />} />
               <Route path="/devices" element={<AndroidDevices />} />
+              <Route path="/sync" element={<SyncHub />} />
               <Route path="/connect" element={<ConnectAccounts />} />
               <Route path="/diagnostics" element={<Diagnostics />} />
               <Route path="/import-export" element={<ImportExport />} />

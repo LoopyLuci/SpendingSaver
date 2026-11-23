@@ -38,13 +38,25 @@ internal class SyncMapperTest {
     }
 
     @Test
-    fun `remote category update keeps the android only parent`() {
+    fun `remote category without a parent key keeps the local parent`() {
+        // A hub that predates hierarchy sync omits "parent_id" entirely.
         val local = Category("c1", "Food", parentId = "root", color = null, updatedAt = 1_000)
-        val remote = SyncMapper.toRecord(Category("c1", "Groceries", null, "#fff", updatedAt = 2_000))
-        val merged = SyncMapper.categoryFromRecord(remote, local)!!
+        val full = SyncMapper.toRecord(Category("c1", "Groceries", null, "#fff", updatedAt = 2_000))
+        val legacy = full.copy(data = full.data - "parent_id")
+        val merged = SyncMapper.categoryFromRecord(legacy, local)!!
         assertEquals("Groceries", merged.name)
         assertEquals("root", merged.parentId)
         assertEquals("#fff", merged.color)
+    }
+
+    @Test
+    fun `category parent round trips and a remote parent wins`() {
+        val child = Category("c2", "Snacks", parentId = "c1", color = null, updatedAt = 1_000)
+        assertEquals(child, SyncMapper.categoryFromRecord(SyncMapper.toRecord(child), null))
+
+        val local = Category("c2", "Snacks", parentId = "old", color = null, updatedAt = 500)
+        val moved = SyncMapper.categoryFromRecord(SyncMapper.toRecord(child), local)!!
+        assertEquals("c1", moved.parentId)
     }
 
     @Test

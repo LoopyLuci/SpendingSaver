@@ -73,11 +73,11 @@ def main():
     check("3. accounts endpoint", isinstance(api("GET", "/api/accounts"), list))
     check("4. categories endpoint", isinstance(api("GET", "/api/categories"), list))
 
-    # 4. Sync endpoints (if present)
+    # 4. Hub info (used by the optional sync pairing flow)
     try:
-        check("5. sync/changes endpoint", isinstance(api("GET", "/api/sync/changes?since=0"), dict))
+        check("5. host/info endpoint", isinstance(api("GET", "/api/host/info"), dict))
     except Exception:
-        check("5. sync/changes endpoint", False)
+        check("5. host/info endpoint", False)
 
     # 5. Connectors endpoint (if present)
     try:

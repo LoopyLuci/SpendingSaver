@@ -602,3 +602,23 @@ export async function getHostInfo() {
 export async function getBudgetComparison() {
   return withRetry(() => fetch(`${API_BASE}/api/budgets/comparison`, { headers: authHeaders() }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() }))
 }
+
+// ---- Optional phone sync hub (docs/sync.md). Hub-machine only: the pairing key and device list
+// are never returned to remote callers, so these work from this desktop app and nowhere else.
+export interface HubInfo { name: string; lan_ip: string; port: number; key: string | null }
+export interface SyncDevice { id: string; name: string; created_at?: string; last_seen?: string | null; revoked?: boolean }
+
+async function hubJson(path: string, init?: RequestInit) {
+  const res = await fetch(`${API_BASE}${path}`, init)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+export const getHubInfo = (): Promise<HubInfo> => hubJson('/api/host/info')
+export const rotateHubKey = (): Promise<{ key: string }> => hubJson('/api/host/rotate-key', { method: 'POST' })
+export const listSyncDevices = async (): Promise<SyncDevice[]> => {
+  const data = await hubJson('/api/sync/v1/devices')
+  return Array.isArray(data) ? data : (data.devices ?? [])
+}
+export const revokeSyncDevice = (id: string) =>
+  hubJson(`/api/sync/v1/devices/${encodeURIComponent(id)}`, { method: 'DELETE' })

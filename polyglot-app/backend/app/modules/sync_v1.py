@@ -150,9 +150,10 @@ ENTITIES: dict[str, dict[str, Any]] = {
         "fields": {
             "name": _req_text("name"),
             "color": _opt_text("color", 20),
+            "parent_id": _opt_text("parent_id", 64),
         },
         "refs": {},
-        "optional": {"color"},
+        "optional": {"color", "parent_id"},
     },
     "transaction": {
         "model": TransactionModel,
@@ -255,11 +256,21 @@ def ensure_sync_schema() -> None:
     get one log entry each so the first client pull receives them.
     """
     Base.metadata.create_all(engine, tables=[SyncLogModel.__table__, SyncDeviceModel.__table__])
+    ensure_category_parent_column()
     db = SessionLocal()
     try:
         backfill_sync_log(db)
     finally:
         db.close()
+
+
+def ensure_category_parent_column() -> None:
+    """Add ``categories.parent_id`` to a database created before category hierarchy synced."""
+    from sqlalchemy import inspect
+
+    if "parent_id" not in {c["name"] for c in inspect(engine).get_columns("categories")}:
+        with engine.begin() as conn:
+            conn.exec_driver_sql("ALTER TABLE categories ADD COLUMN parent_id VARCHAR")
 
 
 def backfill_sync_log(db: Session) -> int:

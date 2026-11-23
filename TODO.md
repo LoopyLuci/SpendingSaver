@@ -16,11 +16,12 @@ before starting work.
   backend) cover tool-to-API mapping, argument handling, error reporting and
   auth; run with `python -m pytest` there. Not yet in CI.
 - [ ] **Desktop packaging is unverified.** `tauri dev` now runs Vite (config
-  fixed) and `scripts/start.py` works with the Go service, but neither
-  `tauri dev`/`tauri build` was run. The bundle expects
-  `backend/dist-offline/backend-service` (no build script exists) and the
-  Windows signing config is a placeholder. No CI covers Rust tests or
-  packaging.
+  fixed) and `scripts/start.py` works with the Go service. The Rust tests
+  (`cargo test` in `tauri-app/src-tauri`, 3 pass) run once `go-service/go-service.exe`
+  is built (`go build -o go-service.exe .`) and a placeholder
+  `backend/dist-offline/backend-service` exists; no build script produces the real
+  one. `tauri dev`/`tauri build` were not run, and the Windows signing config is
+  a placeholder.
 - [x] **Unify MCP HTTP client/auth behavior.** Done: `server.py` now calls the
   backend through `client.py`, which sends `SS_MCP_TOKEN` as a bearer token
   when set (also fixes GET arguments, previously sent as a JSON body instead
@@ -35,15 +36,15 @@ before starting work.
   `npm test`, `spendingsaver-mcp` `python -m pytest`.
 - [x] **Secure the legacy backend routes.** Done as a network guard
   (`app/security.py`, `docs/sync.md`): callers from other machines need a user
-  JWT or `SS_SYNC_TOKEN`; loopback callers are unchanged. Remaining: routes
-  are still not per-user authenticated for local callers, and the legacy
-  `/api/sync/upsert`/`changes` routes still exist (nothing in this repo uses them
-  except `scripts/verify_offline.py`); remove them once older clients are gone.
-- [ ] **Sync follow-ups.** Not synced: category hierarchy (`parentId`), budget
-  carry-over, recurring items and other desktop-only data. No background/
-  automatic sync, no per-field merge, no TLS in the backend, no desktop UI for
-  the pairing key or device list (use the loopback API), device token is not
-  hardware-backed on Android, and the backend treats data as a single owner's.
+  JWT or `SS_SYNC_TOKEN`; loopback callers are unchanged. The legacy
+  `/api/sync/upsert`/`changes` routes were removed. Remaining: routes are still not
+  per-user authenticated for callers on the hub machine itself.
+- [ ] **Sync follow-ups.** Category hierarchy, the desktop "Phone Sync" page and an
+  opt-in hourly Android background sync now exist. The background worker has only
+  been compiled and unit-tested around, not observed running on a device. Not
+  synced: budget carry-over, recurring items and other desktop-only data. No
+  per-field merge, no TLS in the backend, device token is not hardware-backed on
+  Android, and the backend treats data as a single owner's.
 - [ ] **Git history contains private data.** The initial commit tracked
   `polyglot-app/backend/data/` (a live SQLite database, WAL files, a backup and
   a pairing key). They are untracked now and the pairing key was rotated, but

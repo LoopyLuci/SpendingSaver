@@ -19,12 +19,20 @@ Accounts, categories, transactions and budgets, limited to the fields both apps
 store:
 
 - account: name, type, balance, currency
-- category: name, color (Android's `parentId` is Android-only and is kept locally)
+- category: name, color, parent category (the desktop UI shows categories flat; it stores and
+  forwards the parent so the Android hierarchy survives. A child may arrive before its parent)
 - transaction: account, amount, description, category, date, notes, created time
 - budget: category, amount, period, start date
 
 Everything else (recurring items, goals, debts, attachments, budget carry-over,
 app settings, the Android AI and tax data) stays where it was created.
+
+## Pairing screen and automatic sync
+
+- **Desktop:** the **Phone Sync** page shows the hub address and pairing key (hidden until
+  you click Show), rotates the key and revokes paired phones. It talks only to the local backend.
+- **Android:** after pairing, **Sync automatically** (off by default) schedules a background
+  sync about hourly while online. Unpairing turns it off. Nothing runs unless you switch it on.
 
 ## Pairing
 
@@ -67,8 +75,9 @@ Wrong keys are rate-limited per client address.
   Set `SS_ALLOW_OPEN_LAN=1` to restore the old open-LAN behaviour (not
   recommended). The guard trusts the connecting address, so behind a reverse
   proxy on the same machine every request looks local; protect the proxy itself.
-- Do not expose the backend to the internet. The legacy `/api/sync/upsert` and
-  `/api/sync/changes` routes still exist for older clients (now behind the guard).
+- Do not expose the backend to the internet. The old unauthenticated
+  `/api/sync/upsert` and `/api/sync/changes` routes have been removed; the only
+  sync API is `/api/sync/v1`.
 
 ## How merging works
 
@@ -100,7 +109,8 @@ the restore propagates to the hub on the next sync instead of being undone.
 ## Upgrading an existing desktop database
 
 Back up `backend/data/spendingsaver.db` first. The backend creates the two new
-tables, `sync_log` and `sync_devices`, at startup, and seeds the log from your
+tables, `sync_log` and `sync_devices`, and adds a nullable `categories.parent_id` column (Alembic
+revision `b7d2f4a91c33`, also applied idempotently at startup), and seeds the log from your
 existing rows once. The equivalent Alembic revision `a1c3e5f70b21` is idempotent;
 run it from `polyglot-app/backend` with `alembic upgrade head`. It only adds
 tables and log rows. Downgrading drops the two tables (devices must pair again);

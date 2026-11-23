@@ -17,7 +17,7 @@ Key concepts
 - POST /api/host/rotate-key     -> mint a fresh pairing key (owner action)
 - POST /api/host/share-key      -> return the current key for quick sharing
 
-Devices sync through the existing /api/sync/upsert + /api/sync/changes
+Devices sync through /api/sync/v1 (see docs/sync.md)
 endpoints. This module only manages identity + trusted peer state.
 """
 import os

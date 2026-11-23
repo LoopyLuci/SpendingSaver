@@ -98,6 +98,9 @@ class CategoryModel(Base):
     user_id = Column(String, ForeignKey("users.id"), nullable=True)
     name = Column(String, nullable=False)
     color = Column(String, nullable=True)
+    # Category hierarchy (set by synced Android clients; the desktop UI treats categories as flat).
+    # A soft reference: it is not a foreign key so a child may arrive before its parent.
+    parent_id = Column(String, nullable=True)
     updated_at = Column(String, nullable=True)
     deleted_at = Column(String, nullable=True)
 

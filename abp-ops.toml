@@ -517,13 +517,6 @@ method = "GET"
 path = "/api/spending-limits"
 
 [[op]]
-id = "sync.get_changes"
-kind = "http"
-summary = "GET /api/sync/changes"
-method = "GET"
-path = "/api/sync/changes"
-
-[[op]]
 id = "tax_tags.get"
 kind = "http"
 summary = "GET /api/tax-tags"
@@ -823,13 +816,6 @@ kind = "http"
 summary = "POST /api/spending-limits"
 method = "POST"
 path = "/api/spending-limits"
-
-[[op]]
-id = "sync.post_upsert"
-kind = "http"
-summary = "POST /api/sync/upsert"
-method = "POST"
-path = "/api/sync/upsert"
 
 [[op]]
 id = "tax_tags.post"

@@ -288,3 +288,57 @@ def test_backfill_seeds_log_for_preexisting_rows():
 @pytest.mark.parametrize("value", ["2026-11-22T10:00:00Z", "2026-11-22T10:00:00.123+00:00", "2026-11-22T10:00:00"])
 def test_parse_ts_accepts_common_iso_forms(value):
     assert sync_v1.parse_ts(value).year == 2026
+
+
+def category_rec(cat_id, name, parent_id=..., updated_at=None):
+    data = {"name": name, "color": None}
+    if parent_id is not ...:
+        data["parent_id"] = parent_id
+    return {"entity": "category", "id": cat_id, "updated_at": updated_at or ts(), "deleted": False, "data": data}
+
+
+def test_category_hierarchy_syncs_and_child_may_arrive_before_parent():
+    _, a = pair_device("hier-a")
+    _, b = pair_device("hier-b")
+    parent, child = new_id(), new_id()
+    start = exchange(a)["cursor"]
+    # child first: parent_id is a soft reference, so this must not be rejected
+    resp = exchange(a, cursor=start, changes=[
+        category_rec(child, f"Snacks-{child[:6]}", parent_id=parent),
+        category_rec(parent, f"Food-{parent[:6]}"),
+    ])
+    assert resp["applied"] == 2 and resp["rejected"] == []
+    pulled = by_id(exchange(b, cursor=0))
+    assert pulled[child]["data"]["parent_id"] == parent
+    assert pulled[parent]["data"]["parent_id"] is None
+
+
+def test_older_client_without_parent_key_does_not_erase_the_hierarchy():
+    _, a = pair_device("hier-c")
+    cat, parent = new_id(), new_id()
+    start = exchange(a)["cursor"]
+    exchange(a, cursor=start, changes=[category_rec(cat, f"Kid-{cat[:6]}", parent_id=parent, updated_at=ts(-20))])
+    # same category edited by a client that does not know about parent_id
+    exchange(a, cursor=start, changes=[category_rec(cat, f"Kid2-{cat[:6]}", updated_at=ts(-10))])
+    _, b = pair_device("hier-d")
+    got = by_id(exchange(b, cursor=0))[cat]
+    assert got["data"]["name"].startswith("Kid2-")
+    assert got["data"]["parent_id"] == parent
+
+
+def test_parent_id_column_is_added_to_a_legacy_database(tmp_path):
+    from sqlalchemy import create_engine, inspect, text
+    legacy = create_engine(f"sqlite:///{tmp_path / 'legacy.db'}")
+    with legacy.begin() as c:
+        c.execute(text("CREATE TABLE categories (id VARCHAR PRIMARY KEY, name VARCHAR NOT NULL)"))
+        c.execute(text("INSERT INTO categories VALUES ('x', 'Old')"))
+    original = sync_v1.engine
+    sync_v1.engine = legacy
+    try:
+        sync_v1.ensure_category_parent_column()
+        sync_v1.ensure_category_parent_column()  # idempotent
+    finally:
+        sync_v1.engine = original
+    assert "parent_id" in {col["name"] for col in inspect(legacy).get_columns("categories")}
+    with legacy.begin() as c:
+        assert c.execute(text("SELECT name, parent_id FROM categories")).one() == ("Old", None)

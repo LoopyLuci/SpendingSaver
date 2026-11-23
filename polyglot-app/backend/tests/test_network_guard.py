@@ -47,3 +47,8 @@ def test_sync_v1_and_health_keep_their_own_auth():
 def test_open_lan_escape_hatch(monkeypatch):
     monkeypatch.setenv("SS_ALLOW_OPEN_LAN", "1")
     assert remote.get("/api/accounts").status_code == 200
+
+
+def test_legacy_sync_routes_are_gone():
+    assert local.post("/api/sync/upsert", json={"records": []}).status_code in (404, 405)
+    assert local.get("/api/sync/changes?since=0").status_code in (404, 405)

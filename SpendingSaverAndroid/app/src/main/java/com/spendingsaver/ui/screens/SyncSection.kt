@@ -41,6 +41,18 @@ fun SyncSection(viewModel: SyncViewModel = hiltViewModel()) {
                 color = colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.weight(1f)) {
+                    Text("Sync automatically", style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        "About once an hour when online. Off by default.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(checked = state.autoSync, onCheckedChange = viewModel::setAutoSync, enabled = !state.busy)
+            }
+            Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                 Button(onClick = viewModel::syncNow, enabled = !state.busy, modifier = Modifier.weight(1f)) {
                     Text(if (state.busy) "Syncing…" else "Sync now")

@@ -3,9 +3,9 @@
   Runs the project's local test suites (GitHub Actions is not available for this repo).
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File scripts/check.ps1                # everything
-  powershell -ExecutionPolicy Bypass -File scripts/check.ps1 -Only backend  # backend | mcp | web | android
+  powershell -ExecutionPolicy Bypass -File scripts/check.ps1 -Only backend  # backend | mcp | web | desktop | android
 #>
-param([ValidateSet('all', 'backend', 'mcp', 'web', 'android')][string]$Only = 'all')
+param([ValidateSet('all', 'backend', 'mcp', 'web', 'desktop', 'android')][string]$Only = 'all')
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
@@ -45,6 +45,13 @@ Step 'mcp' {
 }
 Step 'web' {
     Push-Location "$root\spendingsaver-web"
+    try {
+        if (-not (Test-Path node_modules)) { npm ci --silent }
+        npm test --silent; $script:code = $LASTEXITCODE
+    } finally { Pop-Location }
+}
+Step 'desktop' {
+    Push-Location "$root/polyglot-app/tauri-app"
     try {
         if (-not (Test-Path node_modules)) { npm ci --silent }
         npm test --silent; $script:code = $LASTEXITCODE

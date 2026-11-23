@@ -1,6 +1,6 @@
 """Module registry package.
 
-Drop a new module file (e.g. app/modules/insights.py, app/modules/sync.py) into
+Drop a new module file (e.g. app/modules/insights.py, app/modules/sync_v1.py) into
 this directory. Each module exposes an `APIRouter` named `router` (and
 optionally a `name` / `enabled`). The ModuleRegistry in app/registry.py
 auto-discovers every module here and attaches its routes to the FastAPI app, so
@@ -11,6 +11,5 @@ new modules never touch app/api.py.
 # exclude it; keep it out of the list to disable a module.
 MODULES = [
     "insights",
-    "sync",
     "sync_v1",
 ]

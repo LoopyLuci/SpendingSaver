@@ -1,11 +1,9 @@
-use std::sync::Arc;
+use spendingsaver::BackendHandle;
 
 #[test]
 fn smoke_sidecar_handle_initial_state() {
-    let handle = tauri_app::BackendHandle::new();
-    let python = handle.python_pid.lock().unwrap();
-    assert!(*python == None);
-
-    let go = handle.go_pid.lock().unwrap();
-    assert!(*go == None);
+    let handle = BackendHandle::new();
+    assert_eq!(*handle.python_pid.lock().unwrap(), None);
+    assert_eq!(*handle.go_pid.lock().unwrap(), None);
+    assert_eq!(*handle.mcp_pid.lock().unwrap(), None);
 }

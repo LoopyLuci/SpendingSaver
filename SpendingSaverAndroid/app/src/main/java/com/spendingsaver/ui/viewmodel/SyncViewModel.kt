@@ -16,5 +16,6 @@ class SyncViewModel @Inject constructor(
 
     fun pair(hubUrl: String, key: String) { viewModelScope.launch { repo.pair(hubUrl, key) } }
     fun syncNow() { viewModelScope.launch { repo.syncNow() } }
+    fun setAutoSync(enabled: Boolean) = repo.setAutoSync(enabled)
     fun unpair() = repo.unpair()
 }

@@ -115,3 +115,7 @@ keystore.properties
 # Backend runtime data: live database, WAL files, backups, pairing key (credential)
 polyglot-app/backend/data/
 .venv-check/
+
+# local machine tooling and stray artifacts
+/ci/
+SpendingSaverAndroid/gradle/wrapper/test_jar.jar

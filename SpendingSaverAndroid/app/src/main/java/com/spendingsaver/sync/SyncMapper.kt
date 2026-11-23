@@ -41,7 +41,7 @@ object SyncMapper {
 
     fun toRecord(c: Category) = SyncRecord(
         SyncEntity.CATEGORY, c.id, toIso(c.updatedAt), c.deleted,
-        mapOf("name" to c.name, "color" to c.color),
+        mapOf("name" to c.name, "color" to c.color, "parent_id" to c.parentId),
     )
 
     fun toRecord(t: Transaction) = SyncRecord(
@@ -84,7 +84,8 @@ object SyncMapper {
         return Category(
             id = r.id,
             name = r.data.str("name") ?: return null,
-            parentId = existing?.parentId,
+            // Hubs that predate hierarchy sync omit the key; keep the local parent then.
+            parentId = if (r.data.containsKey("parent_id")) r.data.str("parent_id") else existing?.parentId,
             color = r.data.str("color"),
             deleted = r.deleted,
             updatedAt = ms,
