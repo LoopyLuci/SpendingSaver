@@ -37,7 +37,9 @@ Latest verification (Windows, JDK 17, Gradle 8.2 wrapper, Python 3.11 clean venv
   phone), and opened and worked with the hub stopped. Not tested: Wi-Fi/LAN
   pairing, multiple phones, HTTPS, conflicting edits on a device, the release
   build, and the browser, MCP and Go/Tauri projects.
-- GitHub Actions (`.github/workflows/ci.yml`) has not been run.
+- GitHub Actions cannot run for this repository (account billing), so
+  `.github/workflows/ci.yml` documents the checks but is not a gate; run them
+  locally (see `TODO.md`).
 
 ## Important caveats
 

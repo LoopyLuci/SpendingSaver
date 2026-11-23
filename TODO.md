@@ -27,8 +27,11 @@ before starting work.
   the next items.
 - [ ] **Extend CI.** The root `.github/workflows/ci.yml` runs the Android
   debug build and unit tests and the backend tests. It also runs backend migrations, Go tests and the desktop frontend. It does not cover the
-  browser app, MCP adapter, Rust shell or packaging; it has not yet
-  been run on GitHub.
+  browser app, MCP adapter, Rust shell or packaging. GitHub Actions cannot
+  run for this repository (the account's billing is not going to be fixed), so
+  the workflow documents the checks and they are run locally: Android
+  `./gradlew :app:testDebugUnitTest`, backend `pytest`, `spendingsaver-web`
+  `npm test`, `spendingsaver-mcp` `python -m pytest`.
 - [ ] **Secure the legacy backend routes.** `/api/sync/upsert`,
   `/api/sync/changes`, `/api/host/pair` and nearly all CRUD/financial routes are
   unauthenticated, and the legacy sync routes can write 21 tables. Sync v1 is
