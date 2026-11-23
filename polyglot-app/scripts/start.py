@@ -6,7 +6,7 @@ import time
 import requests
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent  # polyglot-app/
 PYTHON_PORT = 8125
 GO_PORT = 8126
 
@@ -49,10 +49,10 @@ def main() -> int:
         procs = [p for p in [start_backend(), start_go()] if p is not None]
         if procs:
             time.sleep(1.5)
-        print(f"Python: {'http://127.0.0.1:{PYTHON_PORT}' if is_listening(PYTHON_PORT) else 'offline'}")
-        print(f"Go: {'http://127.0.0.1:{GO_PORT}' if is_listening(GO_PORT) else 'offline'}")
+        print(f"Python: {f'http://127.0.0.1:{PYTHON_PORT}' if is_listening(PYTHON_PORT) else 'offline'}")
+        print(f"Go: {f'http://127.0.0.1:{GO_PORT}' if is_listening(GO_PORT) else 'offline'}")
         print("Open http://localhost:5173 for the web frontend")
-        print("Or run: cd tauri-app && npm run tauri dev")
+        print("Frontend (separate terminal): cd tauri-app && npm run dev   (or npm run tauri dev)")
         try:
             while True:
                 time.sleep(1)

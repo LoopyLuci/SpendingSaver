@@ -12,26 +12,19 @@ before starting work.
   files. Start with tests for local persistence and CSV import/export behavior.
 - [ ] **Add MCP adapter tests.** `spendingsaver-mcp` has no test suite. Cover
   tool-to-API mapping, argument handling, and backend error reporting.
-- [ ] **Verify and align Tauri development startup.** The Tauri config declares
-  a Vite `devUrl` but its `beforeDevCommand` runs a production build; verify
-  whether `tauri dev` starts the expected Vite server and align the command
-  and documentation if not.
-- [ ] **Verify the desktop service startup helper end to end.** `scripts/start.py`
-  now launches `app.api:app` and `requests` is declared, but the helper has not
-  been run together with the Go service and frontend. Run it from a clean
-  checkout and document the result.
-- [ ] **Finish backend setup reproducibility.** `pip install -e ".[dev]"` from
-  `polyglot-app/backend` works in a clean venv and the backend tests pass, but
-  the nested `polyglot-app/.github/workflows/*.yml` still reference a
-  non-existent `backend/requirements.txt`. Remove or fix them (the root
-  `.github/workflows/ci.yml` now covers Android and backend).
+- [ ] **Desktop packaging is unverified.** `tauri dev` now runs Vite (config
+  fixed) and `scripts/start.py` works with the Go service, but neither
+  `tauri dev`/`tauri build` was run. The bundle expects
+  `backend/dist-offline/backend-service` (no build script exists) and the
+  Windows signing config is a placeholder. No CI covers Rust tests or
+  packaging.
 - [ ] **Unify MCP HTTP client/auth behavior.** The active MCP server requests
   the backend directly in `server.py`; the separate `client.py` helper adds a
   bearer token from `SS_MCP_TOKEN`. Decide which path is intended, then test
   the authentication behavior and document it.
 - [ ] **Extend CI.** The root `.github/workflows/ci.yml` runs the Android
-  debug build and unit tests and the backend tests. It does not cover the
-  browser app, MCP adapter, Go service, Tauri shell or packaging; it has not yet
+  debug build and unit tests and the backend tests. It also runs backend migrations, Go tests and the desktop frontend. It does not cover the
+  browser app, MCP adapter, Rust shell or packaging; it has not yet
   been run on GitHub.
 - [ ] **Secure the legacy backend routes.** `/api/sync/upsert`,
   `/api/sync/changes`, `/api/host/pair` and nearly all CRUD/financial routes are

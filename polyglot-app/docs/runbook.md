@@ -11,12 +11,16 @@ the Tauri prerequisites for your operating system.
 
 ## Start local services
 
-The backend dependency metadata is incomplete for clean-environment setup; see
-the root [`TODO.md`](../../TODO.md). Once the required Python packages are
-available, start the API from the repository root:
+Install the backend once (a virtual environment is recommended):
 
 ```powershell
-Set-Location polyglot-app\backend
+Set-Location polyglot-appackend
+python -m pip install -e ".[dev]"
+```
+
+Then start the API:
+
+```powershell
 python -m uvicorn app.api:app --host 127.0.0.1 --port 8125
 ```
 
@@ -43,10 +47,23 @@ Use the URL printed by Vite (port 5173 by default). Health checks:
 - `http://127.0.0.1:8125/health`
 - `http://127.0.0.1:8126/health`
 
-The `scripts/start.py` helper currently launches Uvicorn with an invalid
-application module (`app:app`). Use the direct command above until the helper
-is fixed. The Go service binds beyond loopback; do not expose a development
-server to an untrusted network.
+### One-command helper
+
+`python polyglot-app\scripts\start.py` starts the Python API (using the Python
+that runs the script, so activate the venv with the backend installed first)
+and the Go service (building `go-service.exe` with `go build` if missing), then
+waits until Ctrl+C. It does not start the frontend; run `npm run dev` (above) in
+another terminal. Verified on Windows: both `/health` endpoints answered and
+the Vite dev server served on 5173.
+
+### Tauri development (`tauri dev`)
+
+`npm run tauri dev` (from `polyglot-app	auri-app`) runs `beforeDevCommand`
+(`npm run dev`, the Vite server on the fixed port 5173, `strictPort`) and loads
+`devUrl` in the native window. Stop any other process on 5173 first. It needs
+Rust and the Tauri prerequisites and was not launched in this verification;
+`beforeDevCommand` previously ran a production build, which does not start a
+server on `devUrl`. The services above must be started separately.
 
 ## Test and build
 
@@ -80,10 +97,11 @@ The integration script runs the Python, Go, and frontend tests:
 python polyglot-app\scripts\integration_tests.py
 ```
 
-The nested workflow configuration is not automatically discovered as GitHub
-Actions workflow configuration at this repository's current layout. The
-backend job also refers to a `requirements.txt` that is not present. See the
-root [`TODO.md`](../../TODO.md).
+CI (`.github/workflows/ci.yml` at the repository root) runs the Android
+build/tests, backend tests and migration round trip, Go tests, and the desktop
+frontend tests and build. It does not run Rust tests or packaging; the former
+nested `polyglot-app/.github/workflows/` files were not discovered by GitHub
+Actions and referenced a missing `requirements.txt`, so they were removed.
 
 ## Database and migrations
 
@@ -124,7 +142,7 @@ npm run tauri build
 ```
 
 Inspect `src-tauri/tauri.conf.json` for configured bundle targets and sidecar
-resources. Build/package required sidecar artifacts before bundling. Windows
+resources. Build/package required sidecar artifacts before bundling (`backend/dist-offline/backend-service` has no checked-in build script; packaging and signing were not verified and there is no packaging CI). Windows
 certificate signing guidance is in
 [`scripts/windows-signing.md`](../scripts/windows-signing.md).
 
