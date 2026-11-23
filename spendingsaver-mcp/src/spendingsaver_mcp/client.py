@@ -1,33 +1,65 @@
-"""SpendingSaver MCP Client - HTTP client for backend API."""
+"""HTTP client for the SpendingSaver backend, used by the MCP server.
+
+Every backend call made by the MCP adapter goes through ``request`` so that
+the base URL and bearer token are resolved in exactly one place.
+
+Configuration is read from the environment on every call:
+
+- ``SS_API_URL``: backend base URL (default ``http://127.0.0.1:8125``).
+- ``SS_MCP_TOKEN``: optional bearer token, sent as ``Authorization: Bearer``.
+  It is never logged or included in error messages.
+"""
 import os
-import requests
 from typing import Any
 
-API_BASE = os.environ.get("SS_API_URL", "http://127.0.0.1:8125")
-TOKEN = os.environ.get("SS_MCP_TOKEN", "")
+import requests
+
+DEFAULT_API_URL = "http://127.0.0.1:8125"
+TIMEOUT_SECONDS = 10
+
+
+def api_base() -> str:
+    return os.environ.get("SS_API_URL", DEFAULT_API_URL).rstrip("/")
+
 
 def _headers() -> dict:
-    h = {"Content-Type": "application/json"}
-    if TOKEN:
-        h["Authorization"] = f"Bearer {TOKEN}"
-    return h
+    headers = {"Content-Type": "application/json"}
+    token = os.environ.get("SS_MCP_TOKEN", "").strip()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return headers
+
+
+def request(method: str, path: str, params: dict | None = None, data: Any = None) -> Any:
+    """Call the backend and return the decoded JSON body.
+
+    ``params`` are sent as the query string (what the backend's GET routes
+    read); ``data`` is sent as a JSON body. Raises ``requests`` exceptions on
+    transport errors and non-2xx responses.
+    """
+    r = requests.request(
+        method,
+        f"{api_base()}{path}",
+        headers=_headers(),
+        params=params,
+        json=data,
+        timeout=TIMEOUT_SECONDS,
+    )
+    r.raise_for_status()
+    return r.json()
+
 
 def api_get(path: str, params: dict = None) -> Any:
-    r = requests.get(f"{API_BASE}{path}", headers=_headers(), params=params, timeout=10)
-    r.raise_for_status()
-    return r.json()
+    return request("GET", path, params=params)
+
 
 def api_post(path: str, data: dict = None) -> Any:
-    r = requests.post(f"{API_BASE}{path}", headers=_headers(), json=data, timeout=10)
-    r.raise_for_status()
-    return r.json()
+    return request("POST", path, data=data)
+
 
 def api_put(path: str, data: dict = None) -> Any:
-    r = requests.put(f"{API_BASE}{path}", headers=_headers(), json=data, timeout=10)
-    r.raise_for_status()
-    return r.json()
+    return request("PUT", path, data=data)
+
 
 def api_delete(path: str) -> Any:
-    r = requests.delete(f"{API_BASE}{path}", headers=_headers(), timeout=10)
-    r.raise_for_status()
-    return r.json()
+    return request("DELETE", path)

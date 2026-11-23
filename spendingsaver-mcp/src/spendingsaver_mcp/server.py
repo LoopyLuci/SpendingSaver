@@ -1,13 +1,11 @@
 """SpendingSaver MCP Server - exposes personal finance tools for Hermes Agent."""
 import json
-import os
 
 import requests
 
+from spendingsaver_mcp import client
 from mcp.server.mcpserver import MCPServer
 from mcp.types import TextContent, Tool
-
-API_BASE = os.environ.get("SS_API_URL", "http://127.0.0.1:8125")
 
 ALL_TOOLS = [
     # Accounts
@@ -53,58 +51,75 @@ ALL_TOOLS = [
 ]
 
 
-def _api(method, path, data=None):
-    url = f"{API_BASE}{path}"
+def _error_message(e: Exception) -> str:
+    """Describe a backend failure without leaking the token or full request."""
+    resp = getattr(e, "response", None)
+    if isinstance(e, requests.HTTPError) and resp is not None:
+        detail = ""
+        try:
+            body = resp.json()
+            detail = body.get("detail", "") if isinstance(body, dict) else ""
+        except Exception:
+            pass
+        msg = f"Backend returned HTTP {resp.status_code}"
+        if resp.status_code in (401, 403):
+            msg += " (not authorized; check SS_MCP_TOKEN)"
+        return f"{msg}: {detail}" if detail else msg
+    return f"Backend request failed: {type(e).__name__}: {e}"
+
+
+def _api(method, path, params=None, data=None):
     try:
-        r = requests.request(method, url, json=data, timeout=10)
-        r.raise_for_status()
-        return r.json()
+        return client.request(method, path, params=params, data=data)
     except Exception as e:
-        return {"error": str(e)}
+        return {"error": _error_message(e)}
 
 
 def _handle(name, args):
     try:
         if name == "ss_list_accounts": return _api("GET", "/api/accounts")
-        elif name == "ss_create_account": return _api("POST", "/api/accounts", args)
+        elif name == "ss_create_account": return _api("POST", "/api/accounts", data=args)
         elif name == "ss_update_account":
-            aid = args.pop("account_id")
-            return _api("PUT", f"/api/accounts/{aid}", args)
+            aid = args["account_id"]
+            body = {k: v for k, v in args.items() if k != "account_id"}
+            return _api("PUT", f"/api/accounts/{aid}", data=body)
         elif name == "ss_delete_account": return _api("DELETE", f"/api/accounts/{args['account_id']}")
-        elif name == "ss_get_net_worth": return _api("GET", "/api/net-worth", {"base_currency": args.get("base_currency", "USD")})
+        elif name == "ss_get_net_worth": return _api("GET", "/api/net-worth", params={"base_currency": args.get("base_currency", "USD")})
         elif name == "ss_list_transactions": return _api("GET", "/api/transactions")
-        elif name == "ss_create_transaction": return _api("POST", "/api/transactions", args)
+        elif name == "ss_create_transaction": return _api("POST", "/api/transactions", data=args)
         elif name == "ss_delete_transaction": return _api("DELETE", f"/api/transactions/{args['transaction_id']}")
         elif name == "ss_undo_transaction": return _api("POST", f"/api/transactions/{args['transaction_id']}/undo")
-        elif name == "ss_tag_transaction": return _api("POST", f"/api/transactions/{args['transaction_id']}/tags", {"tags": args["tags"]})
-        elif name == "ss_split_transaction": return _api("POST", f"/api/transactions/{args['transaction_id']}/split", {"splits": args["splits"]})
+        elif name == "ss_tag_transaction": return _api("POST", f"/api/transactions/{args['transaction_id']}/tags", data={"tags": args["tags"]})
+        elif name == "ss_split_transaction": return _api("POST", f"/api/transactions/{args['transaction_id']}/split", data={"splits": args["splits"]})
         elif name == "ss_list_budgets": return _api("GET", "/api/budgets")
-        elif name == "ss_create_budget": return _api("POST", "/api/budgets", args)
+        elif name == "ss_create_budget": return _api("POST", "/api/budgets", data=args)
         elif name == "ss_delete_budget": return _api("DELETE", f"/api/budgets/{args['budget_id']}")
         elif name == "ss_budget_alerts": return _api("GET", "/api/budgets/alerts")
         elif name == "ss_budget_comparison": return _api("GET", "/api/budgets/comparison")
-        elif name == "ss_net_income_report": return _api("GET", "/api/reports/net-income", {"months": args.get("months", 12)})
-        elif name == "ss_spending_insights": return _api("GET", "/api/insights/spending", {"months": args.get("months", 6)})
-        elif name == "ss_spending_forecast": return _api("GET", "/api/forecast/spending", {"months": args.get("months", 3)})
-        elif name == "ss_debt_payoff_strategy": return _api("GET", "/api/debts/strategy", args)
+        elif name == "ss_net_income_report": return _api("GET", "/api/reports/net-income", params={"months": args.get("months", 12)})
+        elif name == "ss_spending_insights": return _api("GET", "/api/insights/spending", params={"months": args.get("months", 6)})
+        elif name == "ss_spending_forecast": return _api("GET", "/api/forecast/spending", params={"months": args.get("months", 3)})
+        elif name == "ss_debt_payoff_strategy": return _api("GET", "/api/debts/strategy", params=args)
         elif name == "ss_investment_performance": return _api("GET", "/api/investments/performance")
-        elif name == "ss_summary_report": return _api("GET", "/api/reports/summary", args)
+        elif name == "ss_summary_report": return _api("GET", "/api/reports/summary", params=args)
         elif name == "ss_export_csv": return _api("GET", "/api/export/csv")
-        elif name == "ss_search": return _api("GET", "/api/search", {"q": args["query"]})
+        elif name == "ss_search": return _api("GET", "/api/search", params={"q": args["query"]})
         elif name == "ss_list_categories": return _api("GET", "/api/categories")
-        elif name == "ss_create_category": return _api("POST", "/api/categories", args)
+        elif name == "ss_create_category": return _api("POST", "/api/categories", data=args)
         elif name == "ss_list_recurring": return _api("GET", "/api/recurring-transactions")
         elif name == "ss_run_scheduler": return _api("POST", "/api/recurring-transactions/run-scheduler")
         elif name == "ss_list_savings_goals": return _api("GET", "/api/savings-goals")
-        elif name == "ss_create_savings_goal": return _api("POST", "/api/savings-goals", args)
+        elif name == "ss_create_savings_goal": return _api("POST", "/api/savings-goals", data=args)
         elif name == "ss_list_debts": return _api("GET", "/api/debts")
-        elif name == "ss_create_debt": return _api("POST", "/api/debts", args)
+        elif name == "ss_create_debt": return _api("POST", "/api/debts", data=args)
         elif name == "ss_list_income_streams": return _api("GET", "/api/income-streams")
-        elif name == "ss_create_income_stream": return _api("POST", "/api/income-streams", args)
+        elif name == "ss_create_income_stream": return _api("POST", "/api/income-streams", data=args)
         elif name == "ss_create_backup": return _api("GET", "/api/backup")
         return {"error": f"Unknown tool: {name}"}
+    except KeyError as e:
+        return {"error": f"Missing required argument: {e.args[0]}"}
     except Exception as e:
-        return {"error": str(e)}
+        return {"error": f"{type(e).__name__}: {e}"}
 
 
 def create_server() -> MCPServer:

@@ -11,8 +11,9 @@ before starting work.
 - [x] **Add browser-app tests.** `spendingsaver-web` now has `npm test` (Vitest +
   fake-indexeddb) covering local persistence and CSV import/export. UI and
   `budget.ts` remain untested.
-- [ ] **Add MCP adapter tests.** `spendingsaver-mcp` has no test suite. Cover
-  tool-to-API mapping, argument handling, and backend error reporting.
+- [x] **Add MCP adapter tests.** Done: `spendingsaver-mcp/tests` (mocked
+  backend) cover tool-to-API mapping, argument handling, error reporting and
+  auth; run with `python -m pytest` there. Not yet in CI.
 - [ ] **Verify and align Tauri development startup.** The Tauri config declares
   a Vite `devUrl` but its `beforeDevCommand` runs a production build; verify
   whether `tauri dev` starts the expected Vite server and align the command
@@ -26,10 +27,11 @@ before starting work.
   the nested `polyglot-app/.github/workflows/*.yml` still reference a
   non-existent `backend/requirements.txt`. Remove or fix them (the root
   `.github/workflows/ci.yml` now covers Android and backend).
-- [ ] **Unify MCP HTTP client/auth behavior.** The active MCP server requests
-  the backend directly in `server.py`; the separate `client.py` helper adds a
-  bearer token from `SS_MCP_TOKEN`. Decide which path is intended, then test
-  the authentication behavior and document it.
+- [x] **Unify MCP HTTP client/auth behavior.** Done: `server.py` now calls the
+  backend through `client.py`, which sends `SS_MCP_TOKEN` as a bearer token
+  when set (also fixes GET arguments, previously sent as a JSON body instead
+  of query parameters). The backend's legacy routes still do not check it; see
+  the next items.
 - [ ] **Extend CI.** The root `.github/workflows/ci.yml` runs the Android
   debug build and unit tests and the backend tests. It does not cover the
   browser app, MCP adapter, Go service, Tauri shell or packaging; it has not yet

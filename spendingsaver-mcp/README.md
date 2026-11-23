@@ -31,15 +31,42 @@ network; do not expose the development backend publicly.
 
 ## Configuration and authentication
 
-- `SS_API_URL` selects the backend base URL; its default is
-  `http://127.0.0.1:8125`.
-- The active stdio server implementation is in `src/spendingsaver_mcp/server.py`
-  and makes direct HTTP requests. It does not currently attach the bearer token
-  configured by `SS_MCP_TOKEN` in `client.py`. Do not assume MCP calls are
-  authenticated by that variable; see the root [`TODO.md`](../TODO.md).
-- Never place credentials or private financial data in committed config files.
+Both settings are read from the environment of the MCP server process each time
+a tool is called:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `SS_API_URL` | `http://127.0.0.1:8125` | Backend base URL. Every tool call, including writes, goes to this URL. |
+| `SS_MCP_TOKEN` | unset | Optional bearer token. When set, it is sent as `Authorization: Bearer <token>` on every request. When unset or blank, no auth header is sent. |
+
+All requests go through `src/spendingsaver_mcp/client.py` (`request`), which
+`server.py` uses, so the URL and token behave identically for every tool. GET
+tool arguments are sent as query parameters; write arguments as a JSON body.
+
+Safety notes:
+
+- The token is never logged or included in tool error text. A 401/403 from the
+  backend is reported as "not authorized; check SS_MCP_TOKEN".
+- Set the token in your MCP host's environment configuration, not in committed
+  files. Do not put credentials in `SS_API_URL`.
+- The token is only useful if the backend checks it. The backend's legacy
+  routes (accounts, transactions, budgets, ...) that these tools call are
+  currently mostly unauthenticated (see the root [`TODO.md`](../TODO.md)), so
+  setting `SS_MCP_TOKEN` does not by itself protect your data. Only point
+  `SS_API_URL` at a backend you trust, on a trusted machine or network.
+- The MCP adapter does not use the backend's opt-in sync hub
+  (`polyglot-app/docs/sync.md`).
+- `src/spendingsaver_mcp/tools/` contains older, unused per-tool modules; the
+  active tool list and routing live in `server.py`.
 
 ## Validation
 
-There is no checked-in MCP test suite or test command yet. Add tests for the
-tool/API mapping and error cases before changing these operations.
+Tests mock the backend HTTP layer (no backend needed). From this directory:
+
+```powershell
+python -m pip install -e ".[test]"
+python -m pytest
+```
+
+They cover the tool-to-API mapping for every tool, argument handling, backend
+error reporting, and bearer-token/base-URL behavior.
