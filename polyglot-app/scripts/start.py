@@ -26,7 +26,7 @@ def start_backend():
         return None
     print("Starting Python backend...")
     return subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "app:app", "--host", "127.0.0.1", "--port", str(PYTHON_PORT)],
+        [sys.executable, "-m", "uvicorn", "app.api:app", "--host", "127.0.0.1", "--port", str(PYTHON_PORT)],
         cwd=backend_dir,
     )
 
