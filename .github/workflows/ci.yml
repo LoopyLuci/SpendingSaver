@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: SpendingSaverAndroid
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Build debug APK and run unit tests
+        run: ./gradlew :app:assembleDebug :app:testDebugUnitTest --console=plain
+
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: polyglot-app/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install backend with test dependencies
+        run: python -m pip install -e ".[dev]"
+      - name: Run backend tests
+        run: python -m pytest tests/test_api.py tests/test_sync_v1.py -q

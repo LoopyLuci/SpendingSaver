@@ -32,9 +32,11 @@ Product requirements and unresolved decisions are recorded in the
    development startup path, MCP API authentication behavior, and packaging
    prerequisites before relying on them. See the actionable entries in
    [`TODO.md`](TODO.md).
-4. **Choose cross-project product direction only when requested.** Before
-   implementing shared accounts, synchronization, or a common release process,
-   explicitly decide how independent local data stores are meant to relate.
+4. **Keep sync optional.** Android and the desktop backend must each remain fully
+   usable alone; their opt-in sync is specified in
+   [`polyglot-app/docs/sync.md`](polyglot-app/docs/sync.md). Extending sync to the
+   browser app or MCP adapter, adding shared accounts, or a common release
+   process still needs an explicit product decision.
 
 ## Completion criteria
 

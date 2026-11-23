@@ -55,7 +55,10 @@ The repository contains four separately built projects:
    desktop/backend HTTP API.
 
 These are not clients of a common account service. The Android and browser
-projects do not automatically sync with each other or the desktop backend.
+projects do not sync with each other. An Android device that the user has
+explicitly paired with a desktop backend can sync accounts, categories,
+transactions and budgets with it (`polyglot-app/docs/sync.md`); both stay fully
+usable unpaired.
 Android JSON backup/restore and browser CSV transaction import/export are
 manual, distinct workflows; their files are not currently a shared portable
 format. The MCP adapter operates on the desktop/backend API only.
@@ -82,7 +85,8 @@ not be described as available in another app without implementation evidence.
 
 ### 4.2 Non-goals unless separately approved
 
-- Automatic synchronization between the four projects.
+- Synchronization of the browser app or MCP adapter, and any sync that is not
+  explicitly paired and user-triggered.
 - Treating the Android JSON backup, browser CSV, and backend backup as
   interchangeable.
 - Providing financial, tax, investment, or credit advice.
@@ -351,8 +355,8 @@ means code/configuration was found; it does not mean every edge case passes.
 | JSON/full backup | Not a full DB backup | Settings export/restore of active core rows | Backend backup/portable-backup routes |
 | Appearance/settings | Light/dark toggle | Theme, accent, text scale, and display preferences | Settings page |
 | Recurring and other advanced finance features | Not in current navigation | Not in current navigation | Multiple API routes and UI pages |
-| Tests | No test script or test files checked in | No `test`/`androidTest` sources checked in | Backend, Go, frontend, and Rust test files/scripts exist; clean setup/CI has gaps |
-| Automatic synchronization with other apps | No | No | Backend has service/API integrations; no verified common sync contract with the other apps |
+| Tests | No test script or test files checked in | JVM unit tests under `app/src/test` (sync, backup, AI, tax); no `androidTest` | Backend, Go, frontend, and Rust test files/scripts exist; clean setup/CI has gaps |
+| Synchronization with other apps | No | Optional, user-triggered pairing with the desktop backend (accounts, categories, transactions, budgets); last-write-wins | Optional sync hub (`/api/sync/v1`) for paired Android devices; other service/API integrations unchanged |
 
 Project-specific details:
 

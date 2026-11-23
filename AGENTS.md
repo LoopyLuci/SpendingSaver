@@ -5,8 +5,11 @@
 - This repository contains separate Android, browser, desktop/backend, and MCP
   projects. Work in the project that owns the requested behavior; do not assume
   they share storage or automatically synchronize.
-- Android is local-first. Its JSON backup is user-initiated and is not a
-  connection to the desktop backend.
+- Android is local-first and must stay fully usable without the desktop
+  backend, and vice versa. Its JSON backup is user-initiated and is not sync.
+  The only cross-app path is the opt-in sync protocol in
+  `polyglot-app/docs/sync.md`; keep it optional and never make a feature depend
+  on it.
 - The MCP adapter calls the `polyglot-app/backend` HTTP API. MCP tools can
   change financial records; treat tool inputs and backend access accordingly.
 

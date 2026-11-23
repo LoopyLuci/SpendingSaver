@@ -2,14 +2,16 @@
 
 SpendingSaver is a collection of personal-finance applications and integrations
 in one repository. The applications are separate projects, not one shared
-runtime: in particular, the Android app stores data locally and does not sync
-with the desktop backend.
+runtime: in particular, the Android app stores data locally and works fully on
+its own. It can optionally pair with the desktop backend to sync (see
+[`polyglot-app/docs/sync.md`](polyglot-app/docs/sync.md)); nothing syncs unless
+you set that up.
 
 ## Projects
 
 | Project | Location | Data and runtime |
 | --- | --- | --- |
-| Android app | [`SpendingSaverAndroid/`](SpendingSaverAndroid/README.md) | Kotlin, Jetpack Compose, Room. Local-first; user-initiated JSON backup and restore. |
+| Android app | [`SpendingSaverAndroid/`](SpendingSaverAndroid/README.md) | Kotlin, Jetpack Compose, Room. Local-first; JSON backup/restore; optional opt-in sync with the desktop backend. |
 | Browser app | [`spendingsaver-web/`](spendingsaver-web/README.md) | React, TypeScript, Vite, Dexie/IndexedDB. Runs in the browser. |
 | Desktop app and backend | [`polyglot-app/`](polyglot-app/README.md) | Tauri desktop shell and React UI, Python FastAPI backend, and Go service. |
 | MCP integration | [`spendingsaver-mcp/`](spendingsaver-mcp/README.md) | Model Context Protocol tools that call the desktop backend's HTTP API. |
@@ -55,6 +57,8 @@ For desktop development, backend/API operations, tests, and packaging, see the
 ## Privacy and data boundaries
 
 The browser app, Android app, and desktop/backend stack are separate data
-stores. Do not assume that data entered into one app is available in another.
+stores. Do not assume that data entered into one app is available in another:
+only an Android device you have explicitly paired with a desktop backend syncs
+accounts, categories, transactions and budgets with it.
 The MCP server can call mutating backend operations; only point it at a backend
 you trust. Do not expose a development backend to an untrusted network.
