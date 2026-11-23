@@ -13,10 +13,15 @@ dependencies = [
     "alembic>=1.13.0",
     "httpx>=0.27.0",
     "requests>=2.31.0",
+    # UploadFile endpoints in app/api.py fail at import without this.
+    "python-multipart>=0.0.9",
+    # app/auth.py falls back to unsigned tokens when PyJWT is missing.
+    "pyjwt>=2.8.0",
 ]
 
 [project.optional-dependencies]
 monitoring = ["sentry-sdk>=1.40.0"]
+dev = ["pytest>=8.0.0"]
 
 [build-system]
 requires = ["hatchling"]

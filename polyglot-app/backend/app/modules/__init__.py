@@ -12,4 +12,5 @@ new modules never touch app/api.py.
 MODULES = [
     "insights",
     "sync",
+    "sync_v1",
 ]

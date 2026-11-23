@@ -102,6 +102,17 @@ python -m alembic current
 `downgrade` is migration-dependent and may lose data; inspect the relevant
 migration and retain a backup before using it.
 
+## Optional Android sync hub
+
+The backend can act as a sync hub for paired Android devices. It is off until a
+device pairs; the desktop app does not need it. Pairing, security, merge rules
+and troubleshooting are in [`sync.md`](sync.md). Back up
+`backend/data/spendingsaver.db` before the first run of a version that includes
+it (new `sync_log` and `sync_devices` tables are added; see the upgrade notes
+there). Test settings: the backend tests use a throwaway database through
+`SS_DB_PATH` and `SS_DATA_DIR` (see `backend/tests/conftest.py`); set the same
+variables to run a scratch hub.
+
 ## Package
 
 From the repository root:

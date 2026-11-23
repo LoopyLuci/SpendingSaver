@@ -61,7 +61,10 @@ class PairedDeviceModel(Base):
     created_at = Column(String, nullable=True)
 
 
-PAIRING_KEY_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "pairing_key.txt")
+PAIRING_KEY_FILE = os.path.join(
+    os.environ.get("SS_DATA_DIR") or os.path.join(os.path.dirname(__file__), "..", "data"),
+    "pairing_key.txt",
+)
 _PAIR_KEY_TTL_HOURS = float(os.environ.get("SS_PAIR_KEY_TTL_HOURS", "8760"))  # 0 = never expires
 
 
@@ -122,9 +125,20 @@ def _lan_ip() -> str:
         return "127.0.0.1"
 
 
+def _is_loopback(request: Request) -> bool:
+    host = request.client.host if request.client else ""
+    return host in ("127.0.0.1", "::1", "localhost")
+
+
+def _require_loopback(request: Request) -> None:
+    """The pairing key is a credential: only the hub machine itself may read or rotate it."""
+    if not _is_loopback(request):
+        raise HTTPException(status_code=403, detail="only available from the hub machine itself")
+
+
 @router.get("/api/host/info")
-def host_info(_: bool = Depends(require_sync_optional)):
-    key = get_or_create_pairing_key()
+def host_info(request: Request, _: bool = Depends(require_sync_optional)):
+    key = get_or_create_pairing_key() if _is_loopback(request) else None
     return {
         "name": os.environ.get("SS_HOST_NAME", socket.gethostname()),
         "lan_ip": _lan_ip(),
@@ -182,8 +196,9 @@ def host_peers(_: bool = Depends(require_sync_access)):
 
 
 @router.post("/api/host/rotate-key")
-def host_rotate_key(_: bool = Depends(require_sync_access)):
+def host_rotate_key(request: Request, _: bool = Depends(require_sync_access)):
     """Owner action: mint a new pairing key (invalidates the old one)."""
+    _require_loopback(request)
     new_key = secrets.token_hex(3).upper()
     os.makedirs(os.path.dirname(PAIRING_KEY_FILE), exist_ok=True)
     with open(PAIRING_KEY_FILE, "w") as f:
@@ -194,8 +209,9 @@ def host_rotate_key(_: bool = Depends(require_sync_access)):
 
 
 @router.post("/api/host/share-key")
-def host_share_key(payload: dict = {}, _: bool = Depends(require_sync_access)):
+def host_share_key(request: Request, payload: dict = {}, _: bool = Depends(require_sync_access)):
     """Return the current pairing key for quick sharing between a user's devices."""
+    _require_loopback(request)
     channel = payload.get("channel", "text")
     key = get_or_create_pairing_key()
     return {"key": key, "channel": channel, "hint": "Enter this key on the device to pair."}

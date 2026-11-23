@@ -37,6 +37,8 @@ async def lifespan(app: FastAPI):
     init_db()
     from app.hosting import ensure_host_table
     ensure_host_table()
+    from app.modules.sync_v1 import ensure_sync_schema
+    ensure_sync_schema()
     setup_sentry()
     db = SessionLocal()
     try:

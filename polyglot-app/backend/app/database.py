@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, String, Float, Integer, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 import os
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "spendingsaver.db")
+DB_PATH = os.environ.get("SS_DB_PATH") or os.path.join(os.path.dirname(__file__), "..", "data", "spendingsaver.db")
 os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 
