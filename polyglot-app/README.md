@@ -43,8 +43,8 @@ go run .
 
 The Python API command binds to loopback at port 8125. The Go service listens
 on all interfaces at port 8126; do not expose either service to an untrusted
-network. The helper script `scripts/start.py` is not currently a reliable
-substitute; see the root [`TODO.md`](../TODO.md).
+network. `scripts/start.py` starts both services together; see the
+[runbook](docs/runbook.md).
 
 In another terminal from the repository root, run the frontend in browser mode:
 
