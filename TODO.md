@@ -8,8 +8,9 @@ before starting work.
   parsing/planning, AI and tax repositories, but nothing exercises Room
   (DAO queries, `RoomSyncStore`, `DataBackupRepository.restore` in a real
   transaction) or the Compose UI. Add `androidTest` (or Robolectric) coverage.
-- [ ] **Add browser-app tests.** `spendingsaver-web` has no test script or test
-  files. Start with tests for local persistence and CSV import/export behavior.
+- [x] **Add browser-app tests.** `spendingsaver-web` now has `npm test` (Vitest +
+  fake-indexeddb) covering local persistence and CSV import/export. UI and
+  `budget.ts` remain untested.
 - [ ] **Add MCP adapter tests.** `spendingsaver-mcp` has no test suite. Cover
   tool-to-API mapping, argument handling, and backend error reporting.
 - [ ] **Verify and align Tauri development startup.** The Tauri config declares
