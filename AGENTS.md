@@ -24,6 +24,10 @@
 
 ## Validation
 
+- GitHub Actions cannot run for this repository (account billing). Run
+  `powershell -ExecutionPolicy Bypass -File scripts/check.ps1` (backend, MCP,
+  browser, Android unit tests) before claiming checks pass.
+
 - Run the narrowest relevant checks documented by the project. The root
   README links to each project guide; desktop commands are also collected in
   `polyglot-app/docs/runbook.md`.

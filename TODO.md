@@ -4,10 +4,12 @@ This list contains repository-level gaps observed in the checked-in projects.
 It is not a complete feature wishlist. Recheck each item against current code
 before starting work.
 
-- [ ] **Add Android instrumented tests.** JVM unit tests now cover sync, backup
-  parsing/planning, AI and tax repositories, but nothing exercises Room
-  (DAO queries, `RoomSyncStore`, `DataBackupRepository.restore` in a real
-  transaction) or the Compose UI. Add `androidTest` (or Robolectric) coverage.
+- [ ] **Run the Android instrumented tests.** `app/src/androidTest/.../RoomSyncAndBackupTest.kt`
+  (in-memory Room: `RoomSyncStore` last-write-wins and tombstones, backup restore,
+  invalid-file rejection, export/restore round trip) compiles but has **not been
+  run** (the build machine ran out of memory). Run with
+  `gradlew.bat :app:connectedDebugAndroidTest -PdebugAppIdSuffix=.debug` and a
+  device attached. The Compose UI still has no tests.
 - [x] **Add browser-app tests.** `spendingsaver-web` now has `npm test` (Vitest +
   fake-indexeddb) covering local persistence and CSV import/export. UI and
   `budget.ts` remain untested.
@@ -32,12 +34,12 @@ before starting work.
   the workflow documents the checks and they are run locally: Android
   `./gradlew :app:testDebugUnitTest`, backend `pytest`, `spendingsaver-web`
   `npm test`, `spendingsaver-mcp` `python -m pytest`.
-- [ ] **Secure the legacy backend routes.** `/api/sync/upsert`,
-  `/api/sync/changes`, `/api/host/pair` and nearly all CRUD/financial routes are
-  unauthenticated, and the legacy sync routes can write 21 tables. Sync v1 is
-  authenticated per device, but anyone who can reach the backend port can still
-  use the rest of the API. Keep the backend on loopback/trusted LAN until
-  these are protected; remove the legacy sync routes if nothing uses them.
+- [x] **Secure the legacy backend routes.** Done as a network guard
+  (`app/security.py`, `docs/sync.md`): callers from other machines need a user
+  JWT or `SS_SYNC_TOKEN`; loopback callers are unchanged. Remaining: routes
+  are still not per-user authenticated for local callers, and the legacy
+  `/api/sync/upsert`/`changes` routes still exist (nothing in this repo uses them
+  except `scripts/verify_offline.py`); remove them once older clients are gone.
 - [ ] **Sync follow-ups.** Not synced: category hierarchy (`parentId`), budget
   carry-over, recurring items and other desktop-only data. No background/
   automatic sync, no per-field merge, no TLS in the backend, no desktop UI for

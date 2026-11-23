@@ -60,10 +60,17 @@ uninstalling it or losing its data), add an application-id suffix:
 gradlew.bat :app:assembleDebug -PdebugAppIdSuffix=.debug
 ```
 
-Unit tests (JUnit 5/MockK, JVM only; there are no instrumented tests):
+Unit tests (JUnit 5/MockK, JVM only):
 
 ```bat
 gradlew.bat :app:testDebugUnitTest
+```
+
+Instrumented Room tests (JUnit 4, need a device or emulator; the suffix keeps
+your existing app installed):
+
+```bat
+gradlew.bat :app:connectedDebugAndroidTest -PdebugAppIdSuffix=.debug
 ```
 
 Release signing reads `keystore.properties` in this directory (`storeFile`,

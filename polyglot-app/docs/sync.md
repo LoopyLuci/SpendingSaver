@@ -57,10 +57,18 @@ Wrong keys are rate-limited per client address.
   (loopback, private ranges, `.local`, single-label hostnames); anything else must
   be `https://`. The backend does not terminate TLS itself; put a reverse proxy in
   front of it to use `https://`.
-- Do not expose the backend to the internet. The older, unauthenticated
-  `/api/sync/upsert` and `/api/sync/changes` routes and the other API routes do
-  not require a device token (see `TODO.md`); keep the backend on loopback or a
-  trusted LAN.
+- **Network guard.** Requests from the hub machine itself (loopback: the desktop
+  app, MCP adapter, scripts) need no login, so the desktop works standalone.
+  Requests from any *other* machine are rejected with 401 unless they carry a
+  valid user JWT (`/api/auth/login`) or the `SS_SYNC_TOKEN` secret. Exempt:
+  `/health`, `/api/auth/*`, `/api/host/info` (key hidden from remote callers),
+  `/api/host/pair` and `/api/sync/v1/*`, which enforce their own pairing-key /
+  device-token auth. A paired phone's device token only opens `/api/sync/v1/*`.
+  Set `SS_ALLOW_OPEN_LAN=1` to restore the old open-LAN behaviour (not
+  recommended). The guard trusts the connecting address, so behind a reverse
+  proxy on the same machine every request looks local; protect the proxy itself.
+- Do not expose the backend to the internet. The legacy `/api/sync/upsert` and
+  `/api/sync/changes` routes still exist for older clients (now behind the guard).
 
 ## How merging works
 

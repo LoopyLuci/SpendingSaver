@@ -9,6 +9,7 @@ import tempfile
 _TMP = tempfile.mkdtemp(prefix="ss-backend-tests-")
 os.environ["SS_DB_PATH"] = os.path.join(_TMP, "spendingsaver.db")
 os.environ["SS_DATA_DIR"] = _TMP
+os.environ["SS_TESTING"] = "1"  # the in-process test client counts as the local machine
 
 # The per-IP rate limiter (100 requests/minute) would otherwise trip on the
 # volume of requests the whole suite makes from the single test client.

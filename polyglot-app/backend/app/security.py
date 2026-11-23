@@ -4,12 +4,15 @@ Security middleware for SpendingSaver backend.
 - CORS hardening
 - Input sanitization
 """
+import hmac
+import os
 import time
 import re
 from collections import defaultdict
 from functools import wraps
 from fastapi import Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 class RateLimiter:
     def __init__(self, max_requests: int = 100, window_seconds: int = 60):
@@ -48,12 +51,64 @@ def setup_cors(app):
         allow_headers=["*"],
     )
 
+# Paths a remote caller may reach without a user/sync credential: they either
+# are the credential exchange itself or enforce their own (device-token / pairing-key) auth.
+_REMOTE_OPEN_PREFIXES = ("/api/auth/", "/api/sync/v1/")
+_REMOTE_OPEN_PATHS = {"/health", "/api/host/info", "/api/host/pair", "/docs", "/openapi.json"}
+
+
+def is_loopback_host(host: str) -> bool:
+    if host.startswith("::ffff:"):
+        host = host[len("::ffff:"):]
+    if host in ("127.0.0.1", "::1", "localhost"):
+        return True
+    # Starlette's TestClient reports "testclient"; only trusted under the test harness.
+    return host == "testclient" and os.environ.get("SS_TESTING") == "1"
+
+
+def remote_credential_ok(authorization: str | None) -> bool:
+    """A remote caller needs a valid user JWT or the configured SS_SYNC_TOKEN."""
+    if not authorization or not authorization.startswith("Bearer "):
+        return False
+    token = authorization[len("Bearer "):].strip()
+    expected = os.environ.get("SS_SYNC_TOKEN", "").strip()
+    if expected and hmac.compare_digest(token, expected):
+        return True
+    from app.auth import decode_token
+    return bool(decode_token(token))
+
+
+def network_guard_blocks(request: Request) -> bool:
+    """True when this request comes from another machine without a credential.
+
+    The desktop app, MCP adapter and CLI run on the hub machine, so loopback
+    callers keep working without a login. Set SS_ALLOW_OPEN_LAN=1 to restore
+    the old behaviour (open to the whole network); not recommended.
+    """
+    if os.environ.get("SS_ALLOW_OPEN_LAN") == "1":
+        return False
+    host = request.client.host if request.client else ""
+    if is_loopback_host(host):
+        return False
+    path = request.url.path
+    if path in _REMOTE_OPEN_PATHS or path.startswith(_REMOTE_OPEN_PREFIXES):
+        return False
+    if request.method == "OPTIONS":
+        return False
+    return not remote_credential_ok(request.headers.get("authorization"))
+
+
 def setup_security(app):
     setup_cors(app)
-    
+
     @app.middleware("http")
     async def security_middleware(request: Request, call_next):
         rate_limit(request)
+        if network_guard_blocks(request):
+            return JSONResponse(
+                {"detail": "authentication required for requests from other machines"},
+                status_code=401,
+            )
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
