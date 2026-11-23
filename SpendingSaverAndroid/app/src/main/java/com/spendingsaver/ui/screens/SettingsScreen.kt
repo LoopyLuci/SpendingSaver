@@ -25,6 +25,7 @@ import androidx.navigation.NavHostController
 import com.spendingsaver.repository.SettingsRepository
 import com.spendingsaver.ui.theme.ACCENTS_PUBLIC
 import com.spendingsaver.ui.viewmodel.MainViewModel
+import com.spendingsaver.ui.components.*
 
 @Composable
 fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
@@ -164,18 +165,69 @@ fun SettingsScreen(
             Spacer(Modifier.height(16.dp))
             SettingsLabel("Text size")
             Slider(
-                value = settings.textScale,
-                onValueChange = { settingsRepo.setTextScale(it) },
-                valueRange = 0.85f..1.3f,
-                steps = 8,
+            value = settings.textScale,
+            onValueChange = { settingsRepo.setTextScale(it) },
+            valueRange = 0.85f..1.3f,
+            steps = 8,
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("A", style = MaterialTheme.typography.bodySmall)
-                Text("A", style = MaterialTheme.typography.headlineMedium)
+            Text("A", style = MaterialTheme.typography.bodySmall)
+            Text("A", style = MaterialTheme.typography.headlineMedium)
             }
-        }
+            }
 
-        SettingsSection("Privacy & display") {
+            SettingsSection("AI toolkit") {
+            SettingsLabel("AI chat")
+            Text(
+            "Ask anything; the local AI engine answers from the device.",
+            style = MaterialTheme.typography.bodySmall,
+            color = colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(8.dp))
+            PrimaryButton(
+            "Open AI chat",
+            onClick = { navController.navigate("ai-chat") },
+            modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(
+            onClick = { navController.navigate("ai-transcribe") },
+            modifier = Modifier.fillMaxWidth(),
+            ) {
+            Icon(Icons.Default.RecordVoiceOver, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Voice input")
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(
+            onClick = { navController.navigate("ai-image-description") },
+            modifier = Modifier.fillMaxWidth(),
+            ) {
+            Icon(Icons.Default.DeveloperBoard, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Describe an image")
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(
+            onClick = { navController.navigate("ai-image-generation") },
+            modifier = Modifier.fillMaxWidth(),
+            ) {
+            Icon(Icons.Default.PhotoCamera, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Generate an image")
+            }
+            Spacer(Modifier.height(8.dp))
+            Button(
+            onClick = { navController.navigate("ai-settings") },
+            modifier = Modifier.fillMaxWidth(),
+            ) {
+            Icon(Icons.Default.Settings, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("AI settings")
+            }
+            }
+
+            SettingsSection("Privacy & display") {
             SwitchRow("Show balances", "Hide amounts for privacy when off", settings.showBalance) { settingsRepo.setShowBalance(it) }
             SwitchRow("Compact mode", "Denser rows in lists", settings.compactMode) { settingsRepo.setCompact(it) }
         }

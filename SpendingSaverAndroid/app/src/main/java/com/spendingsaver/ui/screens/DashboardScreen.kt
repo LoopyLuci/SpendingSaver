@@ -243,6 +243,8 @@ private fun CategoryProgressRow(name: String, spent: Double, maxSpend: Float, cu
 private fun QuickActionRow(navController: NavHostController) {
     val actions = listOf(
         Triple("Add", Icons.Default.Add, "transactions"),
+        Triple("AI", Icons.Default.SmartToy, "ai"),
+        Triple("Tax", Icons.Default.Business, "tax"),
         Triple("Budgets", Icons.Default.Savings, "budgets"),
         Triple("Accounts", Icons.Default.AccountBalance, "accounts"),
     )

@@ -108,3 +108,6 @@ captures/
 *.mp4
 *.mkv
 *.wav
+
+# Android release signing (local only)
+keystore.properties

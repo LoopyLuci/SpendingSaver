@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="ai_capabilities">
+        <item>Text Generation</item>
+        <item>Image Description</item>
+        <item>Image Generation</item>
+        <item>Voice Input</item>
+        <item>Speech-to-Text</item>
+        <item>Object Detection</item>
+        <item>OCR</item>
+        <item>Classification</item>
+        <item>Zero-Shot VQA</item>
+        <item>Document Q&amp;A</item>
+    </string-array>
+</resources>

@@ -18,7 +18,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.spendingsaver.ai.AiRepository
 import com.spendingsaver.repository.SettingsRepository
+import com.spendingsaver.tax.TaxRepository
 import com.spendingsaver.ui.screens.*
 import com.spendingsaver.ui.theme.SpendingSaverTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,24 +31,26 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var settingsRepo: SettingsRepository
+    @Inject lateinit var aiRepo: AiRepository
+    @Inject lateinit var taxRepo: TaxRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AppRoot(settingsRepo)
+            AppRoot(settingsRepo, aiRepo, taxRepo)
         }
     }
 }
 
 @Composable
-fun AppRoot(settingsRepo: SettingsRepository) {
+fun AppRoot(settingsRepo: SettingsRepository, aiRepo: AiRepository, taxRepo: TaxRepository) {
     val settings by settingsRepo.settings.collectAsState()
     SpendingSaverTheme(
         themeMode = settings.themeMode,
         accentColor = settings.accentColor,
         textScale = settings.textScale,
     ) {
-        AppNavHost(settingsRepo)
+        AppNavHost(settingsRepo, aiRepo, taxRepo)
     }
 }
 
@@ -61,11 +65,17 @@ val NAV_ITEMS = listOf(
     NavItem("networth", "Net Worth", Icons.Default.TrendingUp),
     NavItem("import", "Import / Export", Icons.Default.FileUpload),
     NavItem("settings", "Settings", Icons.Default.Settings),
+    NavItem("ai", "AI", Icons.Default.SmartToy),
+    NavItem("tax", "Tax", Icons.Default.Business)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavHost(settingsRepo: SettingsRepository) {
+fun AppNavHost(
+    settingsRepo: SettingsRepository,
+    aiRepo: AiRepository,
+    taxRepo: TaxRepository
+) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -138,8 +148,49 @@ fun AppNavHost(settingsRepo: SettingsRepository) {
                     composable("networth") { NetWorthScreen(navController) }
                     composable("import") { ImportExportScreen(navController) }
                     composable("settings") { SettingsScreen(navController, settingsRepo) }
+                    // ---- AI routes ----
+                    composable("ai") { AiNavHost(aiRepo) }
+                    composable("ai-settings") { AISettingsScreen(aiRepo) }
+                    composable("ai-chat") { ChatScreen(aiRepo) }
+                    composable("ai-image-description") { ImageDescriptionScreen(aiRepo) }
+                    composable("ai-transcribe") { TranscribeScreen(aiRepo) }
+                    composable("ai-image-generation") { ImageGenerationScreen(aiRepo) }
+                    // ---- Tax routes ----
+                    composable("tax") { TaxNavHost(taxRepo) }
+                    composable("tax-countries") { TaxCountryBrowserScreen(taxRepo) }
+                    composable("tax-states/{countryId}") { backStackEntry ->
+                        val countryId = backStackEntry.arguments?.getString("countryId") ?: ""
+                        TaxStatesScreen(taxRepo, countryId)
+                    }
+                    composable("tax-search") { TaxSearchScreen(taxRepo) }
                 }
             }
         }
+    }
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AiNavHost(repository: AiRepository) {
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = "ai-settings") {
+        composable("ai-settings") { AISettingsScreen(repository) }
+        composable("ai-chat") { ChatScreen(repository) }
+        composable("ai-image-description") { ImageDescriptionScreen(repository) }
+        composable("ai-transcribe") { TranscribeScreen(repository) }
+        composable("ai-image-generation") { ImageGenerationScreen(repository) }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TaxNavHost(repository: TaxRepository) {
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = "tax-countries") {
+        composable("tax-countries") { TaxCountryBrowserScreen(repository) }
+        composable("tax-states/{countryId}") { backStackEntry ->
+            val countryId = backStackEntry.arguments?.getString("countryId") ?: ""
+            TaxStatesScreen(repository, countryId)
+        }
+        composable("tax-search") { TaxSearchScreen(repository) }
     }
 }

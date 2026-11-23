@@ -20,11 +20,8 @@ interface AccountDao {
     @Update
     suspend fun update(account: Account)
 
-    @Upsert
-    suspend fun upsert(account: Account)
-
-    @Delete
-    suspend fun delete(account: Account)
+    @Query("DELETE FROM accounts WHERE id = :id")
+    suspend fun delete(id: String)
 
     @Query("DELETE FROM accounts")
     suspend fun deleteAll()

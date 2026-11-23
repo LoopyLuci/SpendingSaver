@@ -51,10 +51,10 @@ class DataBackupRepository @Inject constructor(
             db.categoryDao().deleteAll()
             db.transactionDao().deleteAll()
             db.budgetDao().deleteAll()
-            doc.accounts.forEach { db.accountDao().upsert(it) }
-            doc.categories.forEach { db.categoryDao().upsert(it) }
-            doc.transactions.forEach { db.transactionDao().upsert(it) }
-            doc.budgets.forEach { db.budgetDao().upsert(it) }
+            doc.accounts.forEach { db.accountDao().insert(it) }
+            doc.categories.forEach { db.categoryDao().insert(it) }
+            doc.transactions.forEach { db.transactionDao().insert(it) }
+            doc.budgets.forEach { db.budgetDao().insert(it) }
         }
     }
 }

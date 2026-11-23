@@ -20,11 +20,8 @@ interface CategoryDao {
     @Update
     suspend fun update(category: Category)
 
-    @Upsert
-    suspend fun upsert(category: Category)
-
-    @Delete
-    suspend fun delete(category: Category)
+    @Query("DELETE FROM categories WHERE id = :id")
+    suspend fun delete(id: String)
 
     @Query("DELETE FROM categories")
     suspend fun deleteAll()

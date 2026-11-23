@@ -20,11 +20,8 @@ interface TransactionDao {
     @Update
     suspend fun update(transaction: Transaction)
 
-    @Upsert
-    suspend fun upsert(transaction: Transaction)
-
-    @Delete
-    suspend fun delete(transaction: Transaction)
+    @Query("DELETE FROM transactions WHERE id = :id")
+    suspend fun delete(id: String)
 
     @Query("SELECT * FROM transactions WHERE categoryId = :categoryId AND amount < 0 AND deleted = 0")
     suspend fun getExpensesByCategory(categoryId: String): List<Transaction>

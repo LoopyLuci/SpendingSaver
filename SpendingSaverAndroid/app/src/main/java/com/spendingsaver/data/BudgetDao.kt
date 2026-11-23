@@ -17,11 +17,8 @@ interface BudgetDao {
     @Update
     suspend fun update(budget: Budget)
 
-    @Upsert
-    suspend fun upsert(budget: Budget)
-
-    @Delete
-    suspend fun delete(budget: Budget)
+    @Query("DELETE FROM budgets WHERE id = :id")
+    suspend fun delete(id: String)
 
     @Query("DELETE FROM budgets")
     suspend fun deleteAll()
