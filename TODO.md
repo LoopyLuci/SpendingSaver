@@ -4,12 +4,11 @@ This list contains repository-level gaps observed in the checked-in projects.
 It is not a complete feature wishlist. Recheck each item against current code
 before starting work.
 
-- [ ] **Run the Android instrumented tests.** `app/src/androidTest/.../RoomSyncAndBackupTest.kt`
+- [x] **Android instrumented tests.** `app/src/androidTest/.../RoomSyncAndBackupTest.kt`
   (in-memory Room: `RoomSyncStore` last-write-wins and tombstones, backup restore,
-  invalid-file rejection, export/restore round trip) compiles but has **not been
-  run** (the build machine ran out of memory). Run with
-  `gradlew.bat :app:connectedDebugAndroidTest -PdebugAppIdSuffix=.debug` and a
-  device attached. The Compose UI still has no tests.
+  invalid-file rejection, export/restore round trip): 6 tests, passed on a Nokia 7.2
+  with `gradlew.bat :app:connectedDebugAndroidTest -PdebugAppIdSuffix=.debug`.
+  The Compose UI and DAO migrations still have no tests.
 - [x] **Add browser-app tests.** `spendingsaver-web` now has `npm test` (Vitest +
   fake-indexeddb) covering local persistence and CSV import/export. UI and
   `budget.ts` remain untested.

@@ -17,8 +17,9 @@ function Step($name, [scriptblock]$body) {
     if ($Only -ne 'all' -and $Only -ne $name) { return }
     Write-Host "`n=== $name ===" -ForegroundColor Cyan
     try {
+        $script:code = 0
         & $body
-        if ($LASTEXITCODE -ne 0) { throw "exit code $LASTEXITCODE" }
+        if ($script:code -ne 0) { throw "exit code $script:code" }
         $results[$name] = 'PASS'
     } catch {
         Write-Host $_ -ForegroundColor Red
@@ -35,23 +36,23 @@ function EnsureVenv {
 Step 'backend' {
     EnsureVenv
     Push-Location "$root\polyglot-app\backend"
-    try { & $py -m pytest -q } finally { Pop-Location }
+    try { & $py -m pytest -q; $script:code = $LASTEXITCODE } finally { Pop-Location }
 }
 Step 'mcp' {
     EnsureVenv
     Push-Location "$root\spendingsaver-mcp"
-    try { & $py -m pytest -q } finally { Pop-Location }
+    try { & $py -m pytest -q; $script:code = $LASTEXITCODE } finally { Pop-Location }
 }
 Step 'web' {
     Push-Location "$root\spendingsaver-web"
     try {
         if (-not (Test-Path node_modules)) { npm ci --silent }
-        npm test --silent
+        npm test --silent; $script:code = $LASTEXITCODE
     } finally { Pop-Location }
 }
 Step 'android' {
     Push-Location "$root\SpendingSaverAndroid"
-    try { .\gradlew.bat :app:testDebugUnitTest --console=plain } finally { Pop-Location }
+    try { & .\gradlew.bat :app:testDebugUnitTest --console=plain; $script:code = $LASTEXITCODE } finally { Pop-Location }
 }
 
 Write-Host "`n=== summary ===" -ForegroundColor Cyan
