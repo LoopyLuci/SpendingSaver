@@ -83,5 +83,10 @@ Backend: `SS_LINK_GATEWAY_PORT`, `SS_LINK_CONTROL_PORT`.
   `relayd` (`polyglot-app/link/tests/e2e.rs`); the gateway's allow-list and the loopback-only control
   plane (`backend/tests/test_link.py`); the Android link-aware API and URL handling (unit tests); the
   Android library cross-compiles.
-- Not verified yet: the phone-to-desktop path on a physical device, and a relay on the public
-  internet. Treat those as untested until you have run them.
+- Verified on a Nokia 7.2 (arm64, debug build): pairing with a real invite through `libss_link.so`, a
+  first sync (8 records received) and a later desktop-to-phone change arriving, with the desktop agent's
+  audit log showing the phone opening `spendingsaver-hub`. The path used was a direct TCP route over
+  `adb reverse`, because adb cannot forward UDP.
+- Not verified yet: the phone reaching a relay over a real network, a relay on the public internet, and a
+  phone-to-desktop push over the link (the same engine code, but not exercised there). Treat those as
+  untested until you have run them.
