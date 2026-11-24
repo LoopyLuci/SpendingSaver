@@ -9,8 +9,7 @@ Product requirements and unresolved decisions are recorded in the
 ## Project map
 
 - **Android:** standalone local-first app; see
-  [`SpendingSaverAndroid/README.md`](SpendingSaverAndroid/README.md) and its
-  [feature roadmap](SpendingSaverAndroid/.hermes/plans/2026-10-22_100200-spendingsaver-roadmap.md).
+  [`SpendingSaverAndroid/README.md`](SpendingSaverAndroid/README.md).
 - **Browser:** standalone React app using browser storage; see
   [`spendingsaver-web/README.md`](spendingsaver-web/README.md).
 - **Desktop/backend:** Tauri UI with Python and Go services; see

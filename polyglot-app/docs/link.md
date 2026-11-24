@@ -55,9 +55,8 @@ Hub-side rules that make this safe:
 
 ## Setup
 
-1. **Build the components** (needs Rust, and the Transferd checkout next to this repo:
-   `H:\Projects\Transferd`; switch the path dependencies in `polyglot-app/link/Cargo.toml` to a pinned
-   git dependency once Transferd's source is published):
+1. **Build the components** (needs Rust; Transferd is fetched from its public repository, pinned to a commit in
+   `polyglot-app/link/Cargo.toml`. The end-to-end test also needs a `relayd` binary: set `RELAYD_BIN`, or it is skipped):
 
    ```powershell
    cd polyglot-app/link; cargo build --release        # ss-link-agent, found automatically

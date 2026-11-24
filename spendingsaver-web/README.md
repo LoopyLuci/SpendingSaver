@@ -1,8 +1,7 @@
 # SpendingSaver Web
 
 This directory is a standalone browser application built with React,
-TypeScript, Vite, and Dexie (IndexedDB). It is separate from the Tauri desktop
-frontend in `polyglot-app/tauri-app`; installing or running one does not start
+TypeScript, Vite, and Dexie (IndexedDB). It is separate from the native desktop app in `polyglot-app/desktop`; installing or running one does not start
 the other.
 
 ## Requirements

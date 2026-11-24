@@ -1,124 +1,75 @@
-# SpendingSaver Desktop and Backend
+# SpendingSaver desktop
 
-This project contains the Tauri desktop shell and React UI, a Python FastAPI
-backend, and a Go HTTP service. It is distinct from the standalone browser app
-at the repository root and the local-only Android app.
+The desktop app is a **native Rust program** (egui, no web view, no Tauri, no background services). It opens
+instantly and keeps everything in one local SQLite file. This directory also holds an optional headless
+backend used by the MCP adapter and the browser app's API.
 
 ## Layout
 
-- `tauri-app/` — React + TypeScript frontend and Tauri 2 shell.
-- `backend/` — FastAPI service, SQLite persistence, and Alembic migrations.
-- `go-service/` — Go HTTP service.
-- `scripts/` — local startup, tests, accessibility/load checks, and packaging
-  helpers.
-- `docs/runbook.md` — operator commands, database migration instructions,
-  packaging, and troubleshooting.
+- `desktop/` — **the desktop app** (Rust, `eframe`/`egui`, `rusqlite`). Start here.
+- `backend/` — optional FastAPI service with SQLite persistence and Alembic migrations (used by
+  [`spendingsaver-mcp`](../spendingsaver-mcp/README.md); it has its own database).
+- `go-service/` — optional Go HTTP service that goes with the backend.
+- `link/` — Rust agent that carries sync over [Transferd](https://github.com/LoopyLuci/Transferd) so a phone
+  can sync from outside the home network (used by the backend and the Android app).
+- `scripts/` — startup, tests, accessibility and load checks.
+- `docs/` — [runbook](docs/runbook.md), [sync protocol](docs/sync.md), [link](docs/link.md),
+  [bank linking](docs/bank-linking.md).
 
-## Prerequisites
+## Run the desktop app
 
-Install the tools needed for the target you want to run:
-
-- Python 3.9 or newer and the backend dependencies.
-- Go (the module declares Go 1.22).
-- Node.js/npm for the frontend.
-- Rust and the platform prerequisites for native Tauri development/builds.
-- Backend dependency metadata is currently incomplete for a clean install; see
-  the root [`TODO.md`](../TODO.md) before setting up a new environment.
-
-## Run the services and frontend
-
-From the repository root, in one terminal, start the FastAPI service:
+You need a Rust toolchain ([rustup](https://rustup.rs)). From this directory:
 
 ```powershell
-Set-Location polyglot-app\backend
+Set-Location desktop
+cargo run --release
+```
+
+or build once with `cargo build --release` and run `desktop/target/release/spendingsaver` (`.exe` on Windows).
+The window opens in about a tenth of a second: the only start-up work is opening the database file.
+
+What it does: dashboard, transactions (search and filter, add, edit, delete), accounts, budgets, categories,
+the US federal **tax** estimator (same numbers as the Android app), JSON backup and CSV import/export, and
+optional phone sync. See [`desktop/README.md`](desktop/README.md).
+
+### Data
+
+The app reads and writes `%APPDATA%\SpendingSaver\spendingsaver-desktop.db` (`SPENDINGSAVER_DATA` overrides
+the folder). This is **not** the backend's database (`backend/data/spendingsaver.db`); the two do not share
+data. A backup file made by the desktop app opens in the Android app and the reverse.
+
+### Phone sync (optional)
+
+Sync is off until you turn it on in **Phone Sync**. The app then listens on your local network (port 8125 or the
+next free one) and shows a QR code; the Android app scans it. Details, security and merge rules:
+[`docs/sync.md`](docs/sync.md). Syncing from outside your network uses the Transferd link, which is currently
+provided by the backend (see [`docs/link.md`](docs/link.md)).
+
+## Optional backend and MCP
+
+Only needed if you use the MCP adapter or call the HTTP API yourself.
+
+```powershell
+Set-Location backend
+python -m pip install -e ".[dev]"
 python -m uvicorn app.api:app --host 127.0.0.1 --port 8125
 ```
 
-In a second terminal from the repository root, start the Go service:
+Do not expose the backend or the Go service (port 8126, all interfaces) to an untrusted network. The MCP
+adapter can change financial records; see its README.
+
+## Tests
 
 ```powershell
-Set-Location polyglot-app\go-service
-go run .
+Set-Location desktop; cargo test --release          # desktop app
+Set-Location ..ackend; python -m pytest -q         # backend
+Set-Location ..\go-service; go test -count=1 ./...   # go service
 ```
 
-The Python API command binds to loopback at port 8125. The Go service listens
-on all interfaces at port 8126; do not expose either service to an untrusted
-network. `scripts/start.py` starts both services together; see the
-[runbook](docs/runbook.md).
+From the repository root, `scripts/check.ps1` runs every suite.
 
-In another terminal from the repository root, run the frontend in browser mode:
+## Database migrations (backend only)
 
-```powershell
-Set-Location polyglot-app\tauri-app
-npm ci
-npm run dev
-```
-
-Vite prints the URL (configured for port 5173).
-
-## Build and tests
-
-Run commands from this directory unless a command shows another working
-directory:
-
-```powershell
-# Backend tests
-Set-Location backend
-python -m pytest tests/test_api.py -q
-
-# Go tests
-Set-Location ..\go-service
-go test -count=1 ./...
-
-# Frontend tests and production build
-Set-Location ..\tauri-app
-npm ci
-npm run test
-npm run build
-
-# Rust tests
-Set-Location src-tauri
-cargo test --lib --tests
-```
-
-The integration helper can run backend, Go, and frontend tests from
-`polyglot-app/`:
-
-```powershell
-python scripts/integration_tests.py
-```
-
-## Native package
-
-From `tauri-app/`, with Node, Rust, and the platform's Tauri prerequisites
-installed:
-
-```powershell
-npm ci
-npm run tauri build
-```
-
-Windows packaging configuration is in `tauri-app/src-tauri/tauri.conf.json`.
-See the runbook for signing and release caveats. Release builds may also need
-the backend and Go sidecar artifacts described by the Tauri bundle config;
-check those inputs before packaging.
-
-## Data and database
-
-The Python service stores its SQLite database under `backend/data/` by
-default. Schema migrations are in `backend/alembic/versions/`; use Alembic
-from the `backend/` directory. Back up the database before applying migrations
-to valuable data.
-
-## MCP integration
-
-The separate [`spendingsaver-mcp`](../spendingsaver-mcp/README.md) package
-connects to this backend's HTTP API. Its tools include write operations; keep
-the backend on a trusted network and review its authentication behavior before
-using it outside local development.
-
-## Documentation
-
-- [Operator runbook](docs/runbook.md)
-- [Changelog](CHANGELOG.md)
-- [Windows signing notes](scripts/windows-signing.md)
+Migrations are in `backend/alembic/versions/`; run `python -m alembic upgrade head` from `backend/`. Back up
+`backend/data/spendingsaver.db` first. The desktop app's own database creates and extends its tables itself and
+never drops data.

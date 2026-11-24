@@ -59,18 +59,12 @@ jobs:
       - name: Run Go tests
         run: go test -count=1 ./...
 
-  desktop-frontend:
+  desktop:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: polyglot-app/tauri-app
+        working-directory: polyglot-app/desktop
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-          cache-dependency-path: polyglot-app/tauri-app/package-lock.json
-      - run: npm ci
-      - run: npm run test
-      - run: npm run build
+      - run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libgl1-mesa-dev
+      - run: cargo test --release

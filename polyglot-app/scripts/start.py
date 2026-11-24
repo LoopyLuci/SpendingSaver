@@ -52,7 +52,6 @@ def main() -> int:
         print(f"Python: {f'http://127.0.0.1:{PYTHON_PORT}' if is_listening(PYTHON_PORT) else 'offline'}")
         print(f"Go: {f'http://127.0.0.1:{GO_PORT}' if is_listening(GO_PORT) else 'offline'}")
         print("Open http://localhost:5173 for the web frontend")
-        print("Frontend (separate terminal): cd tauri-app && npm run dev   (or npm run tauri dev)")
         try:
             while True:
                 time.sleep(1)

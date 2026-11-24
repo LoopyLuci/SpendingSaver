@@ -15,13 +15,11 @@ before starting work.
 - [x] **Add MCP adapter tests.** Done: `spendingsaver-mcp/tests` (mocked
   backend) cover tool-to-API mapping, argument handling, error reporting and
   auth; run with `python -m pytest` there. Not yet in CI.
-- [ ] **Desktop packaging is unverified.** `tauri dev` now runs Vite (config
-  fixed) and `scripts/start.py` works with the Go service. The Rust tests
-  (`cargo test` in `tauri-app/src-tauri`, 3 pass) run once `go-service/go-service.exe`
-  is built (`go build -o go-service.exe .`) and a placeholder
-  `backend/dist-offline/backend-service` exists; no build script produces the real
-  one. `tauri dev`/`tauri build` were not run, and the Windows signing config is
-  a placeholder.
+- [ ] **Desktop packaging is unverified.** The native desktop app builds with `cargo build --release` and starts in
+  about 0.1 s, but there is no installer, no code signing, and it has only been run on Windows.
+- [ ] **Desktop parity with the old Tauri app.** Not ported: SimpleFIN bank linking UI, Connect from anywhere
+  (Transferd link), recurring items, goals, debts, attachments, the AI assistant. Phone sync works on the local
+  network only.
 - [x] **Unify MCP HTTP client/auth behavior.** Done: `server.py` now calls the
   backend through `client.py`, which sends `SS_MCP_TOKEN` as a bearer token
   when set (also fixes GET arguments, previously sent as a JSON body instead

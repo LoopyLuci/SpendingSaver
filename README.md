@@ -3,7 +3,7 @@
 SpendingSaver is a collection of personal-finance applications and integrations
 in one repository. The applications are separate projects, not one shared
 runtime: in particular, the Android app stores data locally and works fully on
-its own. It can optionally pair with the desktop backend to sync (see
+its own. It can optionally pair with the desktop app to sync (see
 [`polyglot-app/docs/sync.md`](polyglot-app/docs/sync.md)); nothing syncs unless
 you set that up.
 
@@ -13,14 +13,12 @@ you set that up.
 | --- | --- | --- |
 | Android app | [`SpendingSaverAndroid/`](SpendingSaverAndroid/README.md) | Kotlin, Jetpack Compose, Room. Local-first; JSON backup/restore; optional opt-in sync with the desktop backend. |
 | Browser app | [`spendingsaver-web/`](spendingsaver-web/README.md) | React, TypeScript, Vite, Dexie/IndexedDB. Runs in the browser. |
-| Desktop app and backend | [`polyglot-app/`](polyglot-app/README.md) | Tauri desktop shell and React UI, Python FastAPI backend, and Go service. |
+| Desktop app | [`polyglot-app/desktop/`](polyglot-app/desktop/README.md) | Native Rust GUI (egui) with its own local SQLite database. Opens instantly; no web view, no background services. Optional phone sync. |
+| Backend (optional) | [`polyglot-app/`](polyglot-app/README.md) | Python FastAPI backend and Go service used by the MCP adapter and the API. |
 | MCP integration | [`spendingsaver-mcp/`](spendingsaver-mcp/README.md) | Model Context Protocol tools that call the desktop backend's HTTP API. |
 
-Screenshots are in [`SpendingSaverScreenshots/`](SpendingSaverScreenshots/).
 The product requirements and implementation status are in the
 [SpendingSaver specification](spec/SPEC.md).
-The Android feature roadmap is in
-[`SpendingSaverAndroid/.hermes/plans/2026-10-22_100200-spendingsaver-roadmap.md`](SpendingSaverAndroid/.hermes/plans/2026-10-22_100200-spendingsaver-roadmap.md).
 
 ## Quick start
 

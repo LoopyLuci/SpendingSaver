@@ -39,7 +39,7 @@ building on it.
 
 ## Implemented: SimpleFIN on the desktop (US)
 
-Code: `backend/app/simplefin.py`, UI `tauri-app/src/components/SimpleFinPanel.tsx` (Connect Accounts page),
+Code: `backend/app/simplefin.py` (HTTP API only: the former desktop UI was removed with the Tauri app and the native desktop app does not include bank linking yet),
 tests `backend/tests/test_simplefin.py`, migration `c3e8a1d92f54_external_refs`.
 
 - **Use:** subscribe at SimpleFIN Bridge and link your bank there; create a setup token; paste it in

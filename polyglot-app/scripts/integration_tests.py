@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TAURI = ROOT / "tauri-app"
+DESKTOP = ROOT / "desktop"
 BACKEND = ROOT / "backend"
 GO = ROOT / "go-service"
 
@@ -33,8 +33,8 @@ def main() -> int:
         print(r.stderr)
         failed = True
 
-    print("\n== frontend tests ==")
-    r = run("npm run test", cwd=TAURI)
+    print("\n== desktop tests ==")
+    r = run("cargo test --release", cwd=DESKTOP)
     print(r.stdout)
     if r.returncode != 0:
         print(r.stderr)

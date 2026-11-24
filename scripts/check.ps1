@@ -51,11 +51,8 @@ Step 'web' {
     } finally { Pop-Location }
 }
 Step 'desktop' {
-    Push-Location "$root/polyglot-app/tauri-app"
-    try {
-        if (-not (Test-Path node_modules)) { npm ci --silent }
-        npm test --silent; $script:code = $LASTEXITCODE
-    } finally { Pop-Location }
+    Push-Location "$root/polyglot-app/desktop"
+    try { cargo test --release; $script:code = $LASTEXITCODE } finally { Pop-Location }
 }
 Step 'android' {
     Push-Location "$root\SpendingSaverAndroid"
@@ -63,11 +60,7 @@ Step 'android' {
 }
 
 Step 'link' {
-    # Needs the sibling Transferd checkout (and its relayd for the e2e test); skipped if absent.
-    if (-not (Test-Path "$root\..\Transferd\crates\transferd-overlay")) {
-        Write-Host 'Transferd checkout not found next to this repo; skipping link tests.' -ForegroundColor Yellow
-        return
-    }
+    # Fetches Transferd from GitHub on first run; the relayd end-to-end test is skipped unless RELAYD_BIN is set.
     Push-Location "$root\polyglot-app\link"
     try { cargo test; $script:code = $LASTEXITCODE } finally { Pop-Location }
 }

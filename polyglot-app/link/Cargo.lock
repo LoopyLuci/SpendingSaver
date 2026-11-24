@@ -995,6 +995,7 @@ checksum = "d902046e6a28a1e4c3cab97258a0ce11e994903f01c2d97a9447a0b3df85f4f6"
 [[package]]
 name = "relayd"
 version = "0.1.0"
+source = "git+https://github.com/LoopyLuci/Transferd?rev=c4a9d372d15e47f9480b77d48fe869bc357460c2#c4a9d372d15e47f9480b77d48fe869bc357460c2"
 dependencies = [
  "bincode",
  "blake3",
@@ -1025,6 +1026,7 @@ dependencies = [
 [[package]]
 name = "ring-channel"
 version = "0.1.0"
+source = "git+https://github.com/LoopyLuci/Transferd?rev=c4a9d372d15e47f9480b77d48fe869bc357460c2#c4a9d372d15e47f9480b77d48fe869bc357460c2"
 dependencies = [
  "bytes",
  "libc",
@@ -1518,6 +1520,7 @@ dependencies = [
 [[package]]
 name = "transferd-core"
 version = "0.1.0"
+source = "git+https://github.com/LoopyLuci/Transferd?rev=c4a9d372d15e47f9480b77d48fe869bc357460c2#c4a9d372d15e47f9480b77d48fe869bc357460c2"
 dependencies = [
  "async-trait",
  "bincode",
@@ -1539,6 +1542,7 @@ dependencies = [
 [[package]]
 name = "transferd-crypto"
 version = "0.1.0"
+source = "git+https://github.com/LoopyLuci/Transferd?rev=c4a9d372d15e47f9480b77d48fe869bc357460c2#c4a9d372d15e47f9480b77d48fe869bc357460c2"
 dependencies = [
  "aes-gcm",
  "bincode",
@@ -1564,6 +1568,7 @@ dependencies = [
 [[package]]
 name = "transferd-dns"
 version = "0.1.0"
+source = "git+https://github.com/LoopyLuci/Transferd?rev=c4a9d372d15e47f9480b77d48fe869bc357460c2#c4a9d372d15e47f9480b77d48fe869bc357460c2"
 dependencies = [
  "rustls",
  "thiserror 2.0.21",
@@ -1576,6 +1581,7 @@ dependencies = [
 [[package]]
 name = "transferd-overlay"
 version = "0.1.0"
+source = "git+https://github.com/LoopyLuci/Transferd?rev=c4a9d372d15e47f9480b77d48fe869bc357460c2#c4a9d372d15e47f9480b77d48fe869bc357460c2"
 dependencies = [
  "aes-gcm",
  "async-trait",

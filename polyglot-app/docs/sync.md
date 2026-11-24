@@ -13,6 +13,16 @@ Stores involved:
 | Android | Room database `spendingsaver.db` | **Client.** Pushes and pulls on demand. |
 | Browser app, MCP adapter | their own / the backend API | Not part of sync. (The MCP adapter sees synced data because it reads the backend.) |
 
+## Which desktop program is the hub
+
+Either one can be. The **native desktop app** (`polyglot-app/desktop`) starts the hub only when you turn on
+**Phone Sync**, listens on your local network, and shows a QR code that the Android app scans. It keeps its change
+log in its own database. The Python **backend** implements the same protocol (this document describes both) and also
+supports syncing from outside the home network through the Transferd link. The details below name the backend's
+files, but the wire protocol, merge rules and pairing key are identical. Differences in the native app: it is
+same-network only for now, it has no loopback-only device routes (the Phone Sync page lists and removes phones
+directly), and it uses no separate login because it is reachable only while you have sync turned on.
+
 ## What syncs
 
 Accounts, categories, transactions and budgets, limited to the fields both apps

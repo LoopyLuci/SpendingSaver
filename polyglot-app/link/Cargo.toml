@@ -22,10 +22,9 @@ name = "ss-link-agent"
 path = "src/bin/agent.rs"
 
 [dependencies]
-# Path dependency on the sibling Transferd checkout (H:\Projects\Transferd next to this repo).
-# Switch these to a pinned `git` dependency once Transferd's source is published.
-transferd-overlay = { path = "../../../Transferd/crates/transferd-overlay" }
-transferd-crypto = { path = "../../../Transferd/crates/transferd-crypto" }
+# Transferd is public; pinned to a reviewed commit so builds are reproducible.
+transferd-overlay = { git = "https://github.com/LoopyLuci/Transferd", rev = "c4a9d372d15e47f9480b77d48fe869bc357460c2" }
+transferd-crypto = { git = "https://github.com/LoopyLuci/Transferd", rev = "c4a9d372d15e47f9480b77d48fe869bc357460c2" }
 tokio = { version = "1", features = ["rt-multi-thread", "net", "io-util", "macros", "sync", "time", "signal"] }
 serde_json = "1"
 rand = "0.8"

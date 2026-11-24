@@ -1,7 +1,7 @@
 # Cross-compiles the Transferd link (polyglot-app/link) for Android arm64 and copies the shared
 # library into the app's jniLibs, where Gradle packages it. Needs: rustup target
 # aarch64-linux-android, the Android NDK (ANDROID_NDK_HOME or the SDK's ndk folder), and the
-# sibling Transferd checkout (see polyglot-app/link/Cargo.toml).
+# network access to fetch Transferd (see polyglot-app/link/Cargo.toml).
 param([string]$Ndk = $env:ANDROID_NDK_HOME)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot

@@ -31,7 +31,14 @@ fun SyncSection(viewModel: SyncViewModel = hiltViewModel()) {
     val colorScheme = MaterialTheme.colorScheme
     val scanner = rememberLauncherForActivityResult(ScanContract()) { result ->
         // A scanned code carries the invite and the pairing key, so one scan pairs and syncs.
-        result.contents?.let { invite = it; viewModel.pairViaLink(it, key) }
+        result.contents?.let { text ->
+            // The native desktop app shows a same-Wi-Fi code: sslan:<address>:<port>:<key>.
+            if (text.startsWith("sslan:")) {
+                val body = text.removePrefix("sslan:")
+                val cut = body.lastIndexOf(':')
+                if (cut > 0) { url = body.substring(0, cut); key = body.substring(cut + 1); viewModel.pair(url, key) }
+            } else { invite = text; viewModel.pairViaLink(text, key) }
+        }
     }
 
     SettingsSection("Desktop sync (optional)") {
