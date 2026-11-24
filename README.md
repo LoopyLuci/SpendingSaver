@@ -7,6 +7,27 @@ its own. It can optionally pair with the desktop app to sync (see
 [`polyglot-app/docs/sync.md`](polyglot-app/docs/sync.md)); nothing syncs unless
 you set that up.
 
+## What it looks like
+
+Sample data, not real accounts. Every screen is in the project READMEs:
+[Android gallery](SpendingSaverAndroid/README.md#screenshots) and
+[desktop gallery](polyglot-app/desktop/README.md#screenshots).
+
+<p align="center">
+  <img src="docs/screenshots/desktop-dashboard.png" alt="Desktop dashboard: net worth, monthly income and spending, spending by category and a six-month chart" width="760">
+</p>
+<p align="center"><sub><b>Desktop</b> (native Rust, opens instantly): net worth, this month, spending by category and the last six months.</sub></p>
+
+<table>
+<tr>
+<td align="center" valign="top"><img src="docs/screenshots/android-dashboard.png" alt="Android dashboard" width="180"><br><b>Dashboard</b><br><sub>Net worth and quick actions</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/android-budgets.png" alt="Android budgets" width="180"><br><b>Budgets</b><br><sub>Limits with progress bars</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/android-tax.png" alt="Android tax estimate" width="180"><br><b>Tax</b><br><sub>US federal estimate, offline</sub></td>
+<td align="center" valign="top"><img src="docs/screenshots/android-assistant.png" alt="Android on-device assistant" width="180"><br><b>Assistant</b><br><sub>Answers on the phone, no network</sub></td>
+</tr>
+</table>
+<p align="center"><sub><b>Android</b> (Kotlin and Jetpack Compose): works fully on its own.</sub></p>
+
 ## Projects
 
 | Project | Location | Data and runtime |

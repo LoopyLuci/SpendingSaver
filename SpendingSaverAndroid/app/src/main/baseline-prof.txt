@@ -1,0 +1,24 @@
+# Baseline profile: ahead-of-time compiles the start-up and first-screen paths so the
+# app opens fast and scrolls smoothly from the first launch. Regenerate with a
+# Macrobenchmark run if the screens change a lot.
+HSPLcom/spendingsaver/**->**(**)**
+HSPLcom/spendingsaver/**-><init>(**)V
+Lcom/spendingsaver/**;
+HSPLandroidx/compose/runtime/**->**(**)**
+Landroidx/compose/runtime/**;
+HSPLandroidx/compose/ui/**->**(**)**
+Landroidx/compose/ui/**;
+HSPLandroidx/compose/foundation/**->**(**)**
+Landroidx/compose/foundation/**;
+HSPLandroidx/compose/material3/**->**(**)**
+Landroidx/compose/material3/**;
+HSPLandroidx/compose/animation/**->**(**)**
+Landroidx/compose/animation/**;
+HSPLandroidx/navigation/**->**(**)**
+Landroidx/navigation/**;
+HSPLandroidx/lifecycle/**->**(**)**
+Landroidx/lifecycle/**;
+HSPLandroidx/room/**->**(**)**
+Landroidx/room/**;
+HSPLandroidx/activity/**->**(**)**
+Landroidx/activity/**;

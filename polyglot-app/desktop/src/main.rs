@@ -3,10 +3,14 @@
 //! SQLite file and reading its rows, which takes milliseconds. There are no background services.
 
 mod app;
+mod assistant;
+mod bank;
 mod calc;
 mod db;
+mod extras;
 mod hub;
 mod model;
+mod more;
 mod sync_page;
 mod tax;
 mod ui;

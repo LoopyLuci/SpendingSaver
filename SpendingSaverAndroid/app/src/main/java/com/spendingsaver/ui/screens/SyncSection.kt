@@ -98,8 +98,7 @@ fun SyncSection(viewModel: SyncViewModel = hiltViewModel()) {
                 Text("Scan QR code to pair")
             }
             Text(
-                if (viewModel.linkAvailable) "On the desktop: Phone Sync → Connect from anywhere → New phone invite."
-                else "QR pairing needs the link component, which is missing from this build. Use manual pairing below.",
+                "On the desktop open Phone Sync and turn it on, then scan the code it shows (same Wi-Fi). Or pair manually below.",
                 style = MaterialTheme.typography.bodySmall,
                 color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),

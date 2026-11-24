@@ -18,19 +18,29 @@ enum Page {
     Accounts,
     Budgets,
     Categories,
+    Recurring,
+    Goals,
+    Debts,
+    Assistant,
     Tax,
+    Bank,
     Data,
     Sync,
     Settings,
 }
 
-const NAV: [(Page, &str, &str); 9] = [
+const NAV: [(Page, &str, &str); 14] = [
     (Page::Dashboard, "🏠", "Dashboard"),
-    (Page::Transactions, "🧾", "Transactions"),
+    (Page::Transactions, "📝", "Transactions"),
     (Page::Accounts, "🏦", "Accounts"),
     (Page::Budgets, "🐷", "Budgets"),
     (Page::Categories, "🏷", "Categories"),
+    (Page::Recurring, "🔁", "Recurring"),
+    (Page::Goals, "🎯", "Goals"),
+    (Page::Debts, "💳", "Debts"),
+    (Page::Assistant, "💬", "Assistant"),
     (Page::Tax, "📑", "Tax"),
+    (Page::Bank, "🔗", "Bank Link"),
     (Page::Data, "💾", "Import / Export"),
     (Page::Sync, "📱", "Phone Sync"),
     (Page::Settings, "⚙", "Settings"),
@@ -157,6 +167,7 @@ pub struct App {
     csv_account: Option<String>,
     restore_pending: Option<Backup>,
     sync: crate::sync_page::SyncPage,
+    more: crate::more::More,
 }
 
 fn err(msg: &str) -> Option<(String, bool, Instant)> {
@@ -192,7 +203,17 @@ impl App {
             csv_account: None,
             restore_pending: None,
             sync: crate::sync_page::SyncPage::default(),
+            more: crate::more::More::default(),
         };
+        // Recurring items that came due while the app was closed are posted before the first screen is drawn.
+        app.db.post_due_recurring(Local::now().date_naive());
+        // Optional: open on a given page (used to take the README screenshots), e.g. SPENDINGSAVER_PAGE=goals.
+        if let Ok(name) = std::env::var("SPENDINGSAVER_PAGE") {
+            let name = name.to_lowercase();
+            if let Some(n) = NAV.iter().find(|n| n.2.to_lowercase().replace([' ', '/'], "").starts_with(&name)) {
+                app.page = n.0;
+            }
+        }
         app.reload();
         app.sync.autostart(&app.db, &cc.egui_ctx);
         app.sync_theme(&cc.egui_ctx);
@@ -1187,11 +1208,34 @@ impl App {
             ui.label(format!("SpendingSaver desktop {}", env!("CARGO_PKG_VERSION")));
             ui.label("A native Rust app: no web view, no background services. Your data is one SQLite file on this computer:");
             ui.label(RichText::new(db::default_path().display().to_string()).monospace());
-            ui.label("Nothing leaves this computer unless you pair a phone or export a file.");
+            ui.label("Nothing leaves this computer unless you pair a phone, link a bank (optional) or export a file.");
         });
         if changed {
             self.db.set_setting("theme", self.theme.as_str());
             self.db.set_setting("accent", &self.accent_name);
+        }
+    }
+
+    fn more_page(&mut self, ui: &mut egui::Ui) {
+        let today = self.today();
+        let accent = self.accent();
+        let data_dir = crate::db::default_path().parent().map(|p| p.to_path_buf()).unwrap_or_default();
+        let ctx = crate::more::Ctx { db: &self.db, data: &self.data, currency: &self.currency, today, accent };
+        let out = match self.page {
+            Page::Recurring => self.more.recurring(ui, &ctx),
+            Page::Goals => self.more.goals(ui, &ctx),
+            Page::Debts => self.more.debts(ui, &ctx),
+            Page::Bank => self.more.bank(ui, &ctx, &data_dir),
+            _ => {
+                self.more.assistant(ui, &ctx);
+                crate::more::Out::default()
+            }
+        };
+        if out.changed {
+            self.reload();
+        }
+        if let Some((m, e)) = out.message {
+            self.say(m, e);
         }
     }
 
@@ -1202,6 +1246,7 @@ impl App {
             Page::Accounts => self.accounts(ui),
             Page::Budgets => self.budgets(ui),
             Page::Categories => self.categories(ui),
+            Page::Recurring | Page::Goals | Page::Debts | Page::Assistant | Page::Bank => self.more_page(ui),
             Page::Tax => self.tax_page(ui),
             Page::Data => self.data_page(ui),
             Page::Sync => {

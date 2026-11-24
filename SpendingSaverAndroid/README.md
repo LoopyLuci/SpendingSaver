@@ -6,6 +6,16 @@ are stored on the device and the app is fully usable on its own. It can
 optionally pair with the SpendingSaver desktop backend to sync those four
 datasets; nothing is sent until you pair and tap **Sync now**.
 
+## Screenshots
+
+Taken on a Nokia 7.2 with sample data.
+
+<table>
+<tr><td align="center" valign="top"><img src="../docs/screenshots/android-dashboard.png" alt="Android Dashboard" width="200"><br><b>Dashboard</b><br><sub>Net worth, this month's income and spending, spending by category and recent activity, with quick actions.</sub></td><td align="center" valign="top"><img src="../docs/screenshots/android-transactions.png" alt="Android Transactions" width="200"><br><b>Transactions</b><br><sub>This month's totals and the latest transactions, with a one-tap add button.</sub></td><td align="center" valign="top"><img src="../docs/screenshots/android-accounts.png" alt="Android Accounts" width="200"><br><b>Accounts</b><br><sub>Add accounts with a type dropdown (or type your own), currency and starting balance.</sub></td><td align="center" valign="top"><img src="../docs/screenshots/android-budgets.png" alt="Android Budgets" width="200"><br><b>Budgets</b><br><sub>Monthly, weekly or yearly limits per category with progress bars.</sub></td></tr>
+<tr><td align="center" valign="top"><img src="../docs/screenshots/android-categories.png" alt="Android Categories" width="200"><br><b>Categories</b><br><sub>Pick a suggested category name and colour, or type your own.</sub></td><td align="center" valign="top"><img src="../docs/screenshots/android-net-worth.png" alt="Android Net worth" width="200"><br><b>Net worth</b><br><sub>Assets, liabilities and each account at a glance.</sub></td><td align="center" valign="top"><img src="../docs/screenshots/android-tax.png" alt="Android Tax" width="200"><br><b>Tax</b><br><sub>US federal estimate for 2025 and 2026, worked out on the phone with no internet.</sub></td><td align="center" valign="top"><img src="../docs/screenshots/android-assistant.png" alt="Android Assistant" width="200"><br><b>Assistant</b><br><sub>Ask about balances, spending and budgets. It runs on the phone and never uses a network.</sub></td></tr>
+<tr><td align="center" valign="top"><img src="../docs/screenshots/android-import-export.png" alt="Android Import / Export" width="200"><br><b>Import / Export</b><br><sub>Import transactions from CSV and export them.</sub></td><td align="center" valign="top"><img src="../docs/screenshots/android-pair.png" alt="Android Pair with desktop" width="200"><br><b>Pair with desktop</b><br><sub>Optional sync: scan the desktop's QR code or type the address and key.</sub></td><td align="center" valign="top"><img src="../docs/screenshots/android-updates.png" alt="Android App updates" width="200"><br><b>App updates</b><br><sub>Installed vs available version, manual by default, with save and share of the APK.</sub></td><td align="center" valign="top"><img src="../docs/screenshots/android-settings.png" alt="Android Settings" width="200"><br><b>Settings</b><br><sub>Theme, accent colour, text size, currency, JSON backup and restore.</sub></td></tr>
+</table>
+
 ## Optional desktop sync
 
 **Settings → Desktop sync (optional)**: enter the desktop backend's address and
@@ -84,6 +94,16 @@ gradlew.bat :app:connectedDebugAndroidTest -PdebugAppIdSuffix=.debug
 Release signing reads `keystore.properties` in this directory (`storeFile`,
 `storePassword`, `keyAlias`, `keyPassword`). The file is git-ignored; never
 commit it. Without it, release builds are unsigned.
+
+To make a key: `keytool -genkeypair -keystore <path outside the repo>.jks -storetype PKCS12 -alias spendingsaver
+-keyalg RSA -keysize 4096 -validity 10950`, then point `storeFile` at it. **Back the key up somewhere safe and
+private.** Android only installs an update that is signed with the same key, and the in-app updater checks the same,
+so a lost key means users must uninstall to update. A phone with a debug build must uninstall it (this loses its
+local data, so export a backup first) before a release-signed build installs.
+
+`app/src/main/baseline-prof.txt` is a baseline profile (installed by `profileinstaller`): it lets Android pre-compile
+the start-up and first-screen code so the app opens quickly and scrolls smoothly from the first launch. It is a
+hand-written broad profile; regenerate it with a Macrobenchmark run if the screens change a lot.
 
 Release builds are minified and resource-shrunk (R8). `app/proguard-rules.pro`
 keeps the classes that Gson reads by field name (backup file, sync wire models,

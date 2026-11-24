@@ -17,9 +17,15 @@ before starting work.
   auth; run with `python -m pytest` there. Not yet in CI.
 - [ ] **Desktop packaging is unverified.** The native desktop app builds with `cargo build --release` and starts in
   about 0.1 s, but there is no installer, no code signing, and it has only been run on Windows.
-- [ ] **Desktop parity with the old Tauri app.** Not ported: SimpleFIN bank linking UI, Connect from anywhere
-  (Transferd link), recurring items, goals, debts, attachments, the AI assistant. Phone sync works on the local
-  network only.
+- [x] **Desktop parity with the old Tauri app.** Done natively: recurring items, goals, debts, the on-device
+  assistant and the optional SimpleFIN bank link. Still missing: Connect from anywhere (Transferd link: phone sync
+  works on the local network only) and attachments. Recurring items, goals and debts are desktop-only and are not in
+  the Android backup or phone sync. The SimpleFIN link has unit tests for parsing and import but has not been run
+  against a live bridge account.
+- [ ] **Android release APK is signed but untested on a phone.** A release key exists locally (outside the repo) and
+  the signed APK builds with a baseline profile. Installing it over a debug build needs an uninstall, so jank and
+  start-up have only been measured on the debug build (3.0 s cold start, 62% janky frames while navigating, which
+  is expected for a debug build).
 - [x] **Unify MCP HTTP client/auth behavior.** Done: `server.py` now calls the
   backend through `client.py`, which sends `SS_MCP_TOKEN` as a bearer token
   when set (also fixes GET arguments, previously sent as a JSON body instead

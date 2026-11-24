@@ -65,6 +65,7 @@ impl Db {
         let _ = conn.pragma_update(None, "synchronous", "NORMAL");
         let _ = conn.pragma_update(None, "foreign_keys", "OFF");
         conn.execute_batch(SCHEMA)?;
+        conn.execute_batch(crate::extras::SCHEMA)?;
         Ok(Db { conn })
     }
 
