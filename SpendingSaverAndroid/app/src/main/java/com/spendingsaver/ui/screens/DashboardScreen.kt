@@ -245,9 +245,9 @@ private fun QuickActionRow(navController: NavHostController) {
         Triple("Add", Icons.Default.Add, "transactions"),
         Triple("Budgets", Icons.Default.Savings, "budgets"),
         Triple("Accounts", Icons.Default.AccountBalance, "accounts"),
-        Triple("Net worth", Icons.Default.TrendingUp, "networth"),
+        Triple("Assistant", Icons.Default.SmartToy, "assistant"),
+        Triple("Pair", Icons.Default.QrCodeScanner, "pair"),
     ) + if (com.spendingsaver.BuildConfig.EXPERIMENTAL_FEATURES) listOf(
-        Triple("AI", Icons.Default.SmartToy, "ai"),
         Triple("Tax", Icons.Default.Business, "tax"),
     ) else emptyList()
     Row(Modifier.fillMaxWidth()) {

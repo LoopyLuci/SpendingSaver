@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SpendingSaver</string>
-    <string name="ai_service_url">http://127.0.0.1:8787</string>
 </resources>

@@ -176,78 +176,40 @@ fun SettingsScreen(
             }
             }
 
-            if (com.spendingsaver.BuildConfig.EXPERIMENTAL_FEATURES) {
-            SettingsSection("AI toolkit") {
-            SettingsLabel("AI chat")
-            Text(
-            "Ask anything; the local AI engine answers from the device.",
-            style = MaterialTheme.typography.bodySmall,
-            color = colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(8.dp))
-            PrimaryButton(
-            "Open AI chat",
-            onClick = { navController.navigate("ai-chat") },
-            modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(8.dp))
-            OutlinedButton(
-            onClick = { navController.navigate("ai-transcribe") },
-            modifier = Modifier.fillMaxWidth(),
-            ) {
-            Icon(Icons.Default.RecordVoiceOver, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Voice input")
-            }
-            Spacer(Modifier.height(8.dp))
-            OutlinedButton(
-            onClick = { navController.navigate("ai-image-description") },
-            modifier = Modifier.fillMaxWidth(),
-            ) {
-            Icon(Icons.Default.DeveloperBoard, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Describe an image")
-            }
-            Spacer(Modifier.height(8.dp))
-            OutlinedButton(
-            onClick = { navController.navigate("ai-image-generation") },
-            modifier = Modifier.fillMaxWidth(),
-            ) {
-            Icon(Icons.Default.PhotoCamera, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Generate an image")
-            }
-            Spacer(Modifier.height(8.dp))
-            Button(
-            onClick = { navController.navigate("ai-settings") },
-            modifier = Modifier.fillMaxWidth(),
-            ) {
-            Icon(Icons.Default.Settings, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("AI settings")
-            }
-            }
-            }
-
             SettingsSection("Privacy & display") {
             SwitchRow("Show balances", "Hide amounts for privacy when off", settings.showBalance) { settingsRepo.setShowBalance(it) }
             SwitchRow("Compact mode", "Denser rows in lists", settings.compactMode) { settingsRepo.setCompact(it) }
         }
 
         SettingsSection("Currency & dates") {
-            SettingsLabel("Default currency")
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("USD", "EUR", "GBP", "CAD", "AUD", "JPY", "INR", "BRL").forEach { c ->
-                    optionChip(c, settings.defaultCurrency == c) { settingsRepo.setCurrency(c) }
-                }
+            var currency by remember(settings.defaultCurrency) { mutableStateOf(settings.defaultCurrency) }
+            var format by remember(settings.dateFormat) { mutableStateOf(settings.dateFormat) }
+            val formatOk = remember(format) {
+                format.isNotBlank() && runCatching { java.text.SimpleDateFormat(format, java.util.Locale.US).format(java.util.Date()) }.isSuccess
             }
-            Spacer(Modifier.height(16.dp))
-            SettingsLabel("Date format")
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("yyyy-MM-dd", "MM/dd/yyyy", "dd/MM/yyyy").forEach { d ->
-                    optionChip(d, settings.dateFormat == d) { settingsRepo.setDateFormat(d) }
-                }
-            }
+            ComboField(
+                label = "Default currency (pick one or type its 3-letter code)",
+                value = currency,
+                onValueChange = {
+                    currency = it.uppercase().take(3)
+                    if (currency.length == 3) settingsRepo.setCurrency(currency)
+                },
+                suggestions = Choices.CURRENCIES,
+                isError = currency.length != 3,
+                supportingText = if (currency.length != 3) "Three letters, e.g. USD" else null,
+            )
+            Spacer(Modifier.height(12.dp))
+            ComboField(
+                label = "Date format (pick one or type a pattern)",
+                value = format,
+                onValueChange = {
+                    format = it
+                    if (it.isNotBlank() && runCatching { java.text.SimpleDateFormat(it, java.util.Locale.US).format(java.util.Date()) }.isSuccess) settingsRepo.setDateFormat(it)
+                },
+                suggestions = Choices.DATE_FORMATS,
+                isError = !formatOk,
+                supportingText = if (formatOk) "Example: " + java.text.SimpleDateFormat(format, java.util.Locale.US).format(java.util.Date()) else "Not a valid pattern (try yyyy-MM-dd)",
+            )
         }
 
         SettingsSection("Data & backups") {

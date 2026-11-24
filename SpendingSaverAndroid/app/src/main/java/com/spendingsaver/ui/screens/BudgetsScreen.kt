@@ -31,137 +31,87 @@ fun BudgetsScreen(navController: NavHostController, viewModel: MainViewModel = h
     var showForm by remember { mutableStateOf(false) }
     var selectedCategoryId by remember { mutableStateOf<String?>(null) }
     var amount by remember { mutableStateOf("") }
+    var categoryError by remember { mutableStateOf(false) }
     var amountError by remember { mutableStateOf(false) }
     var period by remember { mutableStateOf("monthly") }
-    var catExpanded by remember { mutableStateOf(false) }
 
     val colorScheme = MaterialTheme.colorScheme
-    val backgroundGradient = Brush.verticalGradient(
-        colors = listOf(colorScheme.surface, colorScheme.surfaceVariant.copy(alpha = 0.3f)),
-    )
+    val backgroundGradient = Brush.verticalGradient(colors = listOf(colorScheme.surface, colorScheme.surfaceVariant.copy(alpha = 0.3f)))
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(backgroundGradient)
-            .padding(16.dp),
+    LazyColumn(
+        Modifier.fillMaxSize().background(backgroundGradient).imePadding(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            SectionHeader("Budgets", modifier = Modifier.weight(1f))
-            TextButton(onClick = { showForm = !showForm }) {
-                Text(if (showForm) "Cancel" else "Create budget", fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
+        item {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                SectionHeader("Budgets", modifier = Modifier.weight(1f))
+                TextButton(onClick = { showForm = !showForm }) {
+                    Text(if (showForm) "Cancel" else "Create budget", fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
+                }
             }
         }
-
         if (showForm) {
-            Spacer(Modifier.height(12.dp))
-            AppCard(elevation = 2.dp) {
-                val amountState = remember { mutableStateOf("") }
-                var amountError by remember { mutableStateOf(false) }
-                var snackbarMsg by remember { mutableStateOf<String?>(null) }
-
-                Text("New budget", style = MaterialTheme.typography.titleSmall, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
-                Spacer(Modifier.height(8.dp))
-
-                ExposedDropdownMenuBox(
-                    expanded = catExpanded,
-                    onExpandedChange = { catExpanded = it },
-                ) {
-                    OutlinedTextField(
-                        value = categories.find { it.id == selectedCategoryId }?.name ?: "Select category",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Category") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = catExpanded) },
-                        modifier = Modifier.fillMaxWidth().menuAnchor(),
-                        isError = selectedCategoryId == null,
-                        supportingText = {
-                            if (selectedCategoryId == null) Text("Pick a category first")
-                            else null
-                        },
+            item {
+                AppCard(elevation = 2.dp) {
+                    Text("New budget", style = MaterialTheme.typography.titleSmall, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
+                    Spacer(Modifier.height(8.dp))
+                    SelectField(
+                        label = "Category",
+                        options = categories.map { Option(it.id, it.name) },
+                        selectedKey = selectedCategoryId,
+                        onSelect = { selectedCategoryId = it; categoryError = false },
+                        placeholder = "Select category",
+                        isError = categoryError,
+                        errorText = "Pick a category",
+                        emptyHint = "No categories yet — tap to create one",
+                        onEmptyClick = { navController.navigate("categories") },
                     )
-                    ExposedDropdownMenu(expanded = catExpanded, onDismissRequest = { catExpanded = false }) {
-                        categories.forEach { cat ->
-                            DropdownMenuItem(
-                                text = { Text(cat.name) },
-                                onClick = { selectedCategoryId = cat.id; catExpanded = false },
-                            )
-                        }
-                        if (categories.isEmpty()) {
-                            DropdownMenuItem(text = { Text("No categories yet") }, onClick = { catExpanded = false })
-                        }
-                    }
-                }
-
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = amountState.value,
-                    onValueChange = { amountState.value = it; amountError = false },
-                    label = { Text("Amount") },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
-                    isError = amountError,
-                    supportingText = {
-                        if (amountError) Text("Enter a positive number")
-                        else null
-                    },
-                )
-                Spacer(Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("weekly", "monthly", "yearly").forEach { p ->
-                        FilterChip(
-                            selected = period == p,
-                            onClick = { period = p },
-                            label = { Text(p.replaceFirstChar { it.uppercase() }) },
+                    Spacer(Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            value = amount,
+                            onValueChange = { amount = it; amountError = false },
+                            label = { Text("Limit") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
+                            isError = amountError,
+                            supportingText = { if (amountError) Text("Enter a positive number") },
+                        )
+                        SelectField(
+                            label = "Period",
+                            options = Choices.PERIODS.map { Option(it, it.replaceFirstChar { c -> c.uppercase() }) },
+                            selectedKey = period,
+                            onSelect = { period = it ?: "monthly" },
                             modifier = Modifier.weight(1f),
                         )
                     }
-                }
-                Spacer(Modifier.height(12.dp))
-                PrimaryButton(
-                    "Save budget",
-                    enabled = selectedCategoryId != null && amountState.value.isNotBlank(),
-                    onClick = {
-                        amountError = amountState.value.isNotBlank() && amountState.value.toDoubleOrNull() == null
-                        if (amountError) return@PrimaryButton
-                        val amt = amountState.value.toDoubleOrNull() ?: return@PrimaryButton
-                        if (amt <= 0) {
-                            amountError = true
-                            return@PrimaryButton
-                        }
-                        viewModel.addBudget(categoryId = selectedCategoryId!!, amount = amt, period = period, startDate = "")
-                        amountState.value = ""
-                        selectedCategoryId = null
-                        showForm = false
-                        snackbarMsg = "Budget created"
-                    },
-                )
-                if (snackbarMsg != null) {
-                    Spacer(Modifier.height(8.dp))
-                    Text(snackbarMsg!!, style = MaterialTheme.typography.bodySmall, color = colorScheme.primary, modifier = Modifier.padding(horizontal = 4.dp))
+                    Spacer(Modifier.height(12.dp))
+                    PrimaryButton(
+                        "Save budget",
+                        onClick = {
+                            val amt = parseAmount(amount)
+                            categoryError = selectedCategoryId == null
+                            amountError = amt == null || amt <= 0
+                            if (categoryError || amountError) return@PrimaryButton
+                            viewModel.addBudget(categoryId = selectedCategoryId!!, amount = amt!!, period = period, startDate = "")
+                            amount = ""; selectedCategoryId = null; showForm = false
+                        },
+                    )
                 }
             }
-            Spacer(Modifier.height(16.dp))
         }
-
         if (budgets.isEmpty()) {
-            EmptyState(
-                emoji = "🎯",
-                title = "No budgets yet",
-                message = "Create a budget to track your spending by category.",
-                action = {
-                    PrimaryButton(
-                        "Create budget",
-                        onClick = { showForm = true },
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                    )
-                },
-            )
+            item {
+                EmptyState(
+                    emoji = "🎯", title = "No budgets yet", message = "Create a budget to track your spending by category.",
+                    action = { PrimaryButton("Create budget", onClick = { showForm = true }, modifier = Modifier.padding(horizontal = 24.dp)) },
+                )
+            }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
-                items(budgets) { budget ->
-                    BudgetRow(budget, categories, transactions, settings, onDelete = { viewModel.deleteBudget(budget) })
-                }
+            items(budgets, key = { it.id }) { budget ->
+                BudgetRow(budget, categories, transactions, settings, onDelete = { viewModel.deleteBudget(budget) })
             }
         }
     }

@@ -18,7 +18,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.spendingsaver.ai.AiRepository
+import com.spendingsaver.ai.LocalAssistant
 import com.spendingsaver.repository.SettingsRepository
 import com.spendingsaver.tax.TaxRepository
 import com.spendingsaver.ui.screens.*
@@ -31,26 +31,26 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var settingsRepo: SettingsRepository
-    @Inject lateinit var aiRepo: AiRepository
+    @Inject lateinit var assistant: LocalAssistant
     @Inject lateinit var taxRepo: TaxRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AppRoot(settingsRepo, aiRepo, taxRepo)
+            AppRoot(settingsRepo, assistant, taxRepo)
         }
     }
 }
 
 @Composable
-fun AppRoot(settingsRepo: SettingsRepository, aiRepo: AiRepository, taxRepo: TaxRepository) {
+fun AppRoot(settingsRepo: SettingsRepository, assistant: LocalAssistant, taxRepo: TaxRepository) {
     val settings by settingsRepo.settings.collectAsState()
     SpendingSaverTheme(
         themeMode = settings.themeMode,
         accentColor = settings.accentColor,
         textScale = settings.textScale,
     ) {
-        AppNavHost(settingsRepo, aiRepo, taxRepo)
+        AppNavHost(settingsRepo, assistant, taxRepo)
     }
 }
 
@@ -64,10 +64,11 @@ val NAV_ITEMS = listOf(
     NavItem("categories", "Categories", Icons.Default.Category),
     NavItem("networth", "Net Worth", Icons.Default.TrendingUp),
     NavItem("import", "Import / Export", Icons.Default.FileUpload),
+    NavItem("assistant", "Assistant", Icons.Default.SmartToy),
+    NavItem("pair", "Pair with desktop", Icons.Default.QrCodeScanner),
     NavItem("settings", "Settings", Icons.Default.Settings),
 ) + if (BuildConfig.EXPERIMENTAL_FEATURES) listOf(
-    // Both need a companion service / data pack that does not ship with the app yet.
-    NavItem("ai", "AI", Icons.Default.SmartToy),
+    // Needs a tax data pack that does not ship with the app yet.
     NavItem("tax", "Tax", Icons.Default.Business),
 ) else emptyList()
 
@@ -75,7 +76,7 @@ val NAV_ITEMS = listOf(
 @Composable
 fun AppNavHost(
     settingsRepo: SettingsRepository,
-    aiRepo: AiRepository,
+    assistant: LocalAssistant,
     taxRepo: TaxRepository
 ) {
     val navController = rememberNavController()
@@ -150,13 +151,8 @@ fun AppNavHost(
                     composable("networth") { NetWorthScreen(navController) }
                     composable("import") { ImportExportScreen(navController) }
                     composable("settings") { SettingsScreen(navController, settingsRepo) }
-                    // ---- AI routes ----
-                    composable("ai") { AiNavHost(aiRepo) }
-                    composable("ai-settings") { AISettingsScreen(aiRepo) }
-                    composable("ai-chat") { ChatScreen(aiRepo) }
-                    composable("ai-image-description") { ImageDescriptionScreen(aiRepo) }
-                    composable("ai-transcribe") { TranscribeScreen(aiRepo) }
-                    composable("ai-image-generation") { ImageGenerationScreen(aiRepo) }
+                    composable("assistant") { AssistantScreen(assistant) }
+                    composable("pair") { PairScreen() }
                     // ---- Tax routes ----
                     composable("tax") { TaxNavHost(taxRepo) }
                     composable("tax-countries") { TaxCountryBrowserScreen(taxRepo) }
@@ -170,19 +166,6 @@ fun AppNavHost(
         }
     }
 }
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AiNavHost(repository: AiRepository) {
-    val navController = rememberNavController()
-    NavHost(navController, startDestination = "ai-settings") {
-        composable("ai-settings") { AISettingsScreen(repository) }
-        composable("ai-chat") { ChatScreen(repository) }
-        composable("ai-image-description") { ImageDescriptionScreen(repository) }
-        composable("ai-transcribe") { TranscribeScreen(repository) }
-        composable("ai-image-generation") { ImageGenerationScreen(repository) }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaxNavHost(repository: TaxRepository) {

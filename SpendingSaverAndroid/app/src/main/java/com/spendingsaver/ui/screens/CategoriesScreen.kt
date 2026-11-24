@@ -26,62 +26,70 @@ fun CategoriesScreen(navController: NavHostController, viewModel: MainViewModel 
     val categories by viewModel.categories.collectAsState()
 
     var name by remember { mutableStateOf("") }
-    var color by remember { mutableStateOf("") }
+    var nameError by remember { mutableStateOf<String?>(null) }
+    var colorName by remember { mutableStateOf("") }
 
     val colorScheme = MaterialTheme.colorScheme
-    val backgroundGradient = Brush.verticalGradient(
-        colors = listOf(colorScheme.surface, colorScheme.surfaceVariant.copy(alpha = 0.3f)),
-    )
+    val backgroundGradient = Brush.verticalGradient(colors = listOf(colorScheme.surface, colorScheme.surfaceVariant.copy(alpha = 0.3f)))
+    // Typing "Teal" or "#009688" both work; the dropdown lists the named colours.
+    fun resolveColor(text: String): String? {
+        val t = text.trim()
+        if (t.isEmpty()) return null
+        Choices.COLORS.firstOrNull { it.first.equals(t, ignoreCase = true) }?.let { return it.second }
+        val hex = if (t.startsWith("#")) t else "#$t"
+        return if (Regex("#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})").matches(hex)) hex else "invalid"
+    }
+    val colorInvalid = resolveColor(colorName) == "invalid"
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(backgroundGradient)
-            .padding(16.dp),
+    LazyColumn(
+        Modifier.fillMaxSize().background(backgroundGradient).imePadding(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        SectionHeader("Add category")
-        Spacer(Modifier.height(8.dp))
-        AppCard(elevation = 2.dp) {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Category name") },
-                modifier = Modifier.fillMaxWidth(),
-                leadingIcon = { Icon(Icons.Default.Category, null) },
-            )
-            Spacer(Modifier.height(8.dp))
-            OutlinedTextField(
-                value = color,
-                onValueChange = { color = it },
-                label = { Text("Color (optional, e.g. #FF5722)") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(12.dp))
-            PrimaryButton(
-                "Add category",
-                enabled = name.isNotBlank(),
-                onClick = {
-                    viewModel.addCategory(name.trim(), color.trim().ifBlank { null })
-                    name = ""
-                    color = ""
-                },
-            )
+        item { SectionHeader("Add category") }
+        item {
+            AppCard(elevation = 2.dp) {
+                ComboField(
+                    label = "Category name (pick an idea or type your own)",
+                    value = name,
+                    onValueChange = { name = it; nameError = null },
+                    suggestions = Choices.CATEGORY_IDEAS.filter { idea -> categories.none { it.name.equals(idea, ignoreCase = true) } },
+                    leadingIcon = { Icon(Icons.Default.Category, null) },
+                    isError = nameError != null,
+                    supportingText = nameError,
+                )
+                Spacer(Modifier.height(8.dp))
+                ComboField(
+                    label = "Colour (pick one or type #RRGGBB)",
+                    value = colorName,
+                    onValueChange = { colorName = it },
+                    suggestions = Choices.COLORS.map { it.first },
+                    isError = colorInvalid,
+                    supportingText = if (colorInvalid) "Use a name from the list or a hex code like #FF5722" else null,
+                )
+                Spacer(Modifier.height(12.dp))
+                PrimaryButton(
+                    "Add category",
+                    onClick = {
+                        val n = name.trim()
+                        nameError = when {
+                            n.isEmpty() -> "Give the category a name"
+                            categories.any { it.name.equals(n, ignoreCase = true) } -> "That category already exists"
+                            else -> null
+                        }
+                        if (nameError != null || colorInvalid) return@PrimaryButton
+                        viewModel.addCategory(n, resolveColor(colorName))
+                        name = ""; colorName = ""
+                    },
+                )
+            }
         }
-        Spacer(Modifier.height(16.dp))
-
-        SectionHeader("Categories")
-        Spacer(Modifier.height(4.dp))
+        item { SectionHeader("Categories") }
         if (categories.isEmpty()) {
-            EmptyState(
-                emoji = "🏷️",
-                title = "No categories yet",
-                message = "Use the form above to add your first category.",
-            )
+            item { EmptyState(emoji = "🏷️", title = "No categories yet", message = "Add one above, or pick from the ideas list.") }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
-                items(categories) { category ->
-                    CategoryRow(category.name, color = category.color, onDelete = { viewModel.deleteCategory(category) })
-                }
+            items(categories, key = { it.id }) { category ->
+                CategoryRow(category.name, color = category.color, onDelete = { viewModel.deleteCategory(category) })
             }
         }
     }

@@ -30,9 +30,9 @@ class MainViewModel @Inject constructor(
     val budgets = repo.budgets.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
     val settings = settingsRepo.settings.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), com.spendingsaver.data.AppSettings())
 
-    fun addAccount(name: String, type: String, balance: Double) {
+    fun addAccount(name: String, type: String, balance: Double, currency: String = "USD") {
         viewModelScope.launch {
-            repo.addAccount(Account(name = name, type = type, balance = balance))
+            repo.addAccount(Account(name = name.trim(), type = type.trim().lowercase(), balance = balance, currency = currency.trim().uppercase().ifBlank { "USD" }))
         }
     }
 

@@ -8,9 +8,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -25,125 +25,108 @@ fun AccountsScreen(navController: NavHostController, viewModel: MainViewModel = 
     val settings by viewModel.settings.collectAsState()
     val showBalance = settings.showBalance
     val defaultCurrency = settings.defaultCurrency
-
-    var name by remember { mutableStateOf("") }
-    var nameError by remember { mutableStateOf(false) }
-    var type by remember { mutableStateOf("checking") }
-    var balance by remember { mutableStateOf("") }
-    var balanceError by remember { mutableStateOf(false) }
-    var showForm by remember { mutableStateOf(true) }
-
-    val totalBalance = accounts.sumOf { it.balance }
     val colorScheme = MaterialTheme.colorScheme
 
+    var name by remember { mutableStateOf("") }
+    var type by remember { mutableStateOf("Checking") }
+    var balance by remember { mutableStateOf("") }
+    var currency by remember(defaultCurrency) { mutableStateOf(defaultCurrency) }
+    var nameError by remember { mutableStateOf(false) }
+    var balanceError by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf<String?>(null) }
+
+    val totalBalance = accounts.sumOf { it.balance }
     val backgroundGradient = Brush.verticalGradient(
-        colors = listOf(
-            colorScheme.surface,
-            colorScheme.surface.copy(alpha = 0.95f),
-            colorScheme.surfaceVariant.copy(alpha = 0.3f),
-        ),
+        colors = listOf(colorScheme.surface, colorScheme.surface.copy(alpha = 0.95f), colorScheme.surfaceVariant.copy(alpha = 0.3f)),
     )
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(backgroundGradient)
-            .padding(16.dp),
+    // One scrolling list for the whole screen, so the form and its button are always reachable
+    // (also with the keyboard open or a large text size).
+    LazyColumn(
+        Modifier.fillMaxSize().background(backgroundGradient).imePadding(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        // Hero card with total balance
-        HeroCard(
-            title = "Total Balance",
-            value = if (showBalance) Format.money(totalBalance, defaultCurrency) else "\u2022\u2022\u2022\u2022",
-            subtitle = "${accounts.size} ${if (accounts.size == 1) "account" else "accounts"}",
-            accent = colorScheme.primary,
-            onAccent = colorScheme.onPrimary,
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        Spacer(Modifier.height(20.dp))
-
-        // Add account form
-        if (showForm) {
+        item {
+            HeroCard(
+                title = "Total Balance",
+                value = if (showBalance) Format.money(totalBalance, defaultCurrency) else "••••",
+                subtitle = "${accounts.size} ${if (accounts.size == 1) "account" else "accounts"}",
+                accent = colorScheme.primary,
+                onAccent = colorScheme.onPrimary,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(12.dp))
             SectionHeader("Add account")
-            Spacer(Modifier.height(8.dp))
+        }
+        item {
             AppCard(elevation = 2.dp) {
-                val nameState = remember { mutableStateOf("") }
-                val balanceState = remember { mutableStateOf("") }
-                var nameError by remember { mutableStateOf(false) }
-                var balanceError by remember { mutableStateOf(false) }
-                var snackbarMsg by remember { mutableStateOf<String?>(null) }
-
                 OutlinedTextField(
-                    value = nameState.value,
-                    onValueChange = { nameState.value = it; nameError = false },
+                    value = name,
+                    onValueChange = { name = it; nameError = false; message = null },
                     label = { Text("Account name") },
+                    singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                     leadingIcon = { Icon(Icons.Default.AccountBalance, null) },
                     isError = nameError,
-                    supportingText = {
-                        if (nameError) Text("Required — give your account a name")
-                        else null
-                    },
+                    supportingText = { if (nameError) Text("Give your account a name") },
+                )
+                Spacer(Modifier.height(8.dp))
+                ComboField(
+                    label = "Type (pick one or type your own)",
+                    value = type,
+                    onValueChange = { type = it },
+                    suggestions = Choices.ACCOUNT_TYPES,
                 )
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
-                        value = type,
-                        onValueChange = { type = it },
-                        label = { Text("Type") },
+                        value = balance,
+                        onValueChange = { balance = it; balanceError = false; message = null },
+                        label = { Text("Starting balance") },
+                        singleLine = true,
                         modifier = Modifier.weight(1f),
-                    )
-                    OutlinedTextField(
-                        value = balanceState.value,
-                        onValueChange = { balanceState.value = it; balanceError = false },
-                        label = { Text("Initial balance") },
-                        modifier = Modifier.weight(1f),
-                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         isError = balanceError,
-                        supportingText = {
-                            if (balanceError) Text("Enter a valid number, or leave blank for 0")
-                            else null
-                        },
+                        supportingText = { Text(if (balanceError) "Enter a number" else "Blank = 0, negative for debt") },
+                    )
+                    ComboField(
+                        label = "Currency",
+                        value = currency,
+                        onValueChange = { currency = it.uppercase().take(3) },
+                        suggestions = Choices.CURRENCIES,
+                        modifier = Modifier.weight(0.7f),
                     )
                 }
                 Spacer(Modifier.height(12.dp))
+                // Always tappable: a missing field is explained instead of the button silently doing nothing.
                 PrimaryButton(
                     "Add account",
-                    enabled = nameState.value.isNotBlank(),
                     onClick = {
-                        nameError = nameState.value.isBlank()
-                        if (nameError) return@PrimaryButton
-                        val bal = balanceState.value.toDoubleOrNull()
-                        balanceError = balanceState.value.isNotBlank() && bal == null
-                        if (balanceError) return@PrimaryButton
-                        viewModel.addAccount(nameState.value, type, bal ?: 0.0)
-                        nameState.value = ""
-                        balanceState.value = ""
-                        snackbarMsg = "Account added"
+                        nameError = name.isBlank()
+                        val amount = if (balance.isBlank()) 0.0 else parseAmount(balance)
+                        balanceError = amount == null
+                        if (nameError || balanceError) return@PrimaryButton
+                        viewModel.addAccount(name, type.ifBlank { "Other" }, amount ?: 0.0, currency.ifBlank { defaultCurrency })
+                        message = "Added \"${name.trim()}\""
+                        name = ""; balance = ""; type = "Checking"
                     },
                 )
-                if (snackbarMsg != null) {
+                message?.let {
                     Spacer(Modifier.height(8.dp))
-                    Text(snackbarMsg!!, style = MaterialTheme.typography.bodySmall, color = colorScheme.primary, modifier = Modifier.padding(horizontal = 4.dp))
+                    Text(it, style = MaterialTheme.typography.bodySmall, color = colorScheme.primary)
                 }
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
+            SectionHeader("Accounts")
         }
-
-        // Accounts list
-        SectionHeader("Accounts")
-        Spacer(Modifier.height(4.dp))
         if (accounts.isEmpty()) {
-            EmptyState(
-                emoji = "🏦",
-                title = "No accounts yet",
-                message = "Use the form above to add your first account.",
-            )
+            item {
+                EmptyState(emoji = "🏦", title = "No accounts yet", message = "Fill in the form above and tap Add account.")
+            }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
-                items(accounts) { account ->
-                    AccountRow(account, showBalance, defaultCurrency, onDelete = { viewModel.deleteAccount(account) })
-                }
+            items(accounts, key = { it.id }) { account ->
+                AccountRow(account, showBalance, account.currency.ifBlank { defaultCurrency }, onDelete = { viewModel.deleteAccount(account) })
             }
         }
     }
@@ -159,12 +142,7 @@ fun AccountRow(account: Account, showBalance: Boolean, currency: String, onDelet
             trailingColor = if (account.balance < 0) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
             onDelete = onDelete,
             leadingIcon = {
-                Icon(
-                    Icons.Default.AccountBalance,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp),
-                )
+                Icon(Icons.Default.AccountBalance, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
             },
         )
     }

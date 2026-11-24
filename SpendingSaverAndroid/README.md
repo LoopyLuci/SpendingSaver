@@ -19,8 +19,16 @@ Stores: the app reads and writes only its own Room database; the sync token and
 cursors live in the app-private preferences file `spendingsaver_sync.xml`
 (excluded from Android backup). The hub is the desktop backend's SQLite
 database. Network use: the `INTERNET` permission and a cleartext-capable network
-security config exist for the hub and the user-configured AI service; the app
-itself only accepts `http://` hub addresses on local networks.
+security config exist for the optional desktop sync only; the app itself only
+accepts `http://` hub addresses on local networks.
+
+**Assistant (on-device).** The Assistant screen answers questions about your own
+accounts, transactions and budgets using code that runs on the phone
+(`ai/AssistantEngine.kt`). It has no model download, no HTTP client and no service
+address. The unit test `AssistantEngineTest.aiPackageContainsNoNetworkCode` fails if
+networking vocabulary ever appears in the `ai` package. It is a rule-based helper,
+not a language model; image generation, image description and voice input were
+removed because they cannot run without a model that is not bundled.
 
 ## Data backup and restore
 

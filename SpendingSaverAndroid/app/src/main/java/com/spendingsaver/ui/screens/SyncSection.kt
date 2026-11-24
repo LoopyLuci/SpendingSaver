@@ -1,6 +1,7 @@
 package com.spendingsaver.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -72,6 +73,32 @@ fun SyncSection(viewModel: SyncViewModel = hiltViewModel()) {
                 }
             }
         } else {
+            // The fastest way to pair is always on top: one scan pairs and syncs.
+            Button(
+                onClick = {
+                    scanner.launch(
+                        ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                            .setPrompt("Scan the QR code on your desktop")
+                            .setBeepEnabled(false)
+                            .setOrientationLocked(false),
+                    )
+                },
+                enabled = !state.busy && viewModel.linkAvailable,
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+            ) {
+                androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Default.QrCodeScanner, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Scan QR code to pair")
+            }
+            Text(
+                if (viewModel.linkAvailable) "On the desktop: Phone Sync → Connect from anywhere → New phone invite."
+                else "QR pairing needs the link component, which is missing from this build. Use manual pairing below.",
+                style = MaterialTheme.typography.bodySmall,
+                color = colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
+            )
+            Text("Or pair manually", style = MaterialTheme.typography.labelLarge, color = colorScheme.onSurfaceVariant)
+            Spacer(Modifier.height(4.dp))
             if (viewModel.linkAvailable) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(selected = !anywhere, onClick = { anywhere = false }, label = { Text("Same network") })
@@ -80,30 +107,10 @@ fun SyncSection(viewModel: SyncViewModel = hiltViewModel()) {
                 Spacer(Modifier.height(8.dp))
             }
             if (anywhere) {
-                Text(
-                    "On the desktop, open Phone Sync → Connect from anywhere → New phone invite, then scan the QR code. " +
-                        "Your data travels end-to-end encrypted between your devices, through a relay that only sees ciphertext.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(8.dp))
-                Button(
-                    onClick = {
-                        scanner.launch(
-                            ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-                                .setPrompt("Scan the QR code on your desktop")
-                                .setBeepEnabled(false)
-                                .setOrientationLocked(false),
-                        )
-                    },
-                    enabled = !state.busy,
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text("Scan QR code") }
-                Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = invite,
                     onValueChange = { invite = it.trim() },
-                    label = { Text("…or paste the code") },
+                    label = { Text("Paste the code") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )

@@ -69,7 +69,15 @@ fun HeroCard(
             Column(Modifier.fillMaxWidth()) {
                 Text(title.uppercase(), style = MaterialTheme.typography.labelMedium, color = onAccent.copy(alpha = 0.85f), letterSpacing = 1.2.sp)
                 Spacer(Modifier.height(8.dp))
-                Text(value, style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold, color = onAccent)
+                // Long figures shrink to fit on one line instead of being cut off.
+                Text(
+                    value,
+                    style = MaterialTheme.typography.displaySmall.copy(fontSize = fitSize(value, 36, 8)),
+                    fontWeight = FontWeight.Bold,
+                    color = onAccent,
+                    maxLines = 1,
+                    softWrap = false,
+                )
                 if (subtitle != null) {
                     Spacer(Modifier.height(6.dp))
                     Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = onAccent.copy(alpha = 0.9f))
@@ -94,9 +102,16 @@ fun StatTile(
                 Box(Modifier.size(32.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) { icon() }
                 Spacer(Modifier.width(10.dp))
             }
-            Column {
-                Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold, color = valueColor, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Column(Modifier.weight(1f, fill = false)) {
+                Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+                Text(
+                    value,
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = fitSize(value, 22, 8)),
+                    fontWeight = FontWeight.SemiBold,
+                    color = valueColor,
+                    maxLines = 1,
+                    softWrap = false,
+                )
             }
         }
     }
@@ -189,7 +204,7 @@ fun ListItem(
         }
         if (trailing != null) {
             Spacer(Modifier.width(8.dp))
-            Text(trailing, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = trailingColor)
+            Text(trailing, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = trailingColor, maxLines = 1, softWrap = false)
         }
         if (onDelete != null) {
             IconButton(onClick = { confirming = true }) {
@@ -230,4 +245,10 @@ fun CategoryChip(
             labelColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
         ),
     )
+}
+
+/** Font size that keeps a figure on one line: full [base] size up to [comfortable] characters, then shrinking. */
+internal fun fitSize(text: String, base: Int, comfortable: Int): androidx.compose.ui.unit.TextUnit {
+    val extra = (text.length - comfortable).coerceAtLeast(0)
+    return (base - extra * base / 22.0).coerceAtLeast(base * 0.5).sp
 }
