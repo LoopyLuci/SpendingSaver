@@ -6,23 +6,27 @@ const CREATE_NO_WINDOW: u32 = 0x08000000;
 const PYTHON_PORT: u16 = 8125;
 const GO_PORT: u16 = 8126;
 
-/// Find the actual python.exe path, not a bash wrapper.
-fn which_python() -> Option<String> {
-    let candidates = [
-        "python.exe",
-        "python3.exe",
-        r"C:\Python311\python.exe",
-        r"C:\Python310\python.exe",
-        r"C:\Python312\python.exe",
-        r"C:\Users\limpi\AppData\Local\Programs\Python\Python311\python.exe",
-        r"C:\Users\limpi\AppData\Local\Programs\Python\Python310\python.exe",
-        r"C:\Users\limpi\AppData\Local\Programs\Python\Python312\python.exe",
-    ];
+/// Find a python.exe that has the backend's packages installed.
+/// Order: SPENDINGSAVER_PYTHON, the project's virtual environments, then `python`/`py` on PATH.
+fn which_python(root: &std::path::Path) -> Option<String> {
+    let mut candidates: Vec<String> = Vec::new();
+    if let Ok(p) = std::env::var("SPENDINGSAVER_PYTHON") {
+        candidates.push(p);
+    }
+    for venv in [root.join("backend").join(".venv"), root.join(".venv"), root.join("..").join(".venv"), root.join("..").join(".venv-check")] {
+        let exe = venv.join("Scripts").join("python.exe");
+        if exe.exists() {
+            candidates.push(exe.to_string_lossy().to_string());
+        }
+    }
+    for c in ["python.exe", "python3.exe", "py.exe"] {
+        candidates.push(c.to_string());
+    }
     for c in candidates {
-        let output = std::process::Command::new(c)
+        let output = std::process::Command::new(&c)
             .creation_flags(CREATE_NO_WINDOW)
             .arg("-c")
-            .arg("import sys; print(sys.executable)")
+            .arg("import sys, sqlalchemy, fastapi, uvicorn; print(sys.executable)")
             .output();
         if let Ok(o) = output {
             if o.status.success() {
@@ -267,7 +271,7 @@ pub fn start_python(handle: &BackendHandle, app: &tauri::AppHandle) -> Result<St
     }
     let root = project_root();
     let python_dir = root.join("backend");
-    let python_exe = which_python().unwrap_or_else(|| "python".to_string());
+    let python_exe = which_python(&root).unwrap_or_else(|| "python".to_string());
     let mut cmd = std::process::Command::new(&python_exe);
     cmd.creation_flags(CREATE_NO_WINDOW)
         .stdin(std::process::Stdio::null())
@@ -371,7 +375,7 @@ pub fn start_mcp(handle: &BackendHandle, app: &tauri::AppHandle) -> Result<Strin
     if guard.is_some() {
         return Ok("already running".into());
     }
-    let python_exe = which_python().unwrap_or_else(|| "python".to_string());
+    let python_exe = which_python(&project_root()).unwrap_or_else(|| "python".to_string());
     let mcp_module = if std::path::Path::new("spendingsaver_mcp").exists() {
         "spendingsaver_mcp.server"
     } else {

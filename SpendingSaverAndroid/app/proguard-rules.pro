@@ -7,12 +7,11 @@
     @androidx.room.* <methods>;
 }
 
-# Classes serialised with Gson by field name: backup file, AI client, sync wire models.
+# Classes serialised with Gson by field name: backup file, updater release cache, sync wire models.
 # Renaming their fields would silently break backups, restores and sync.
 -keep class com.spendingsaver.data.** { *; }
 -keep class com.spendingsaver.sync.** { *; }
--keep class com.spendingsaver.ai.** { *; }
--keep class com.spendingsaver.tax.** { *; }
+-keep class com.spendingsaver.update.ReleaseInfo { *; }
 -keep class com.spendingsaver.repository.DataBackupRepository$* { *; }
 -keep class com.google.gson.reflect.TypeToken { *; }
 -keep class * extends com.google.gson.reflect.TypeToken

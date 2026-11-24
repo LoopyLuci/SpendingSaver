@@ -20,7 +20,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.spendingsaver.ai.LocalAssistant
 import com.spendingsaver.repository.SettingsRepository
-import com.spendingsaver.tax.TaxRepository
 import com.spendingsaver.ui.screens.*
 import com.spendingsaver.ui.theme.SpendingSaverTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,25 +31,29 @@ class MainActivity : ComponentActivity() {
 
     @Inject lateinit var settingsRepo: SettingsRepository
     @Inject lateinit var assistant: LocalAssistant
-    @Inject lateinit var taxRepo: TaxRepository
+    @Inject lateinit var updates: com.spendingsaver.update.UpdateManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AppRoot(settingsRepo, assistant, taxRepo)
+            AppRoot(settingsRepo, assistant, updates)
         }
     }
 }
 
 @Composable
-fun AppRoot(settingsRepo: SettingsRepository, assistant: LocalAssistant, taxRepo: TaxRepository) {
+fun AppRoot(settingsRepo: SettingsRepository, assistant: LocalAssistant, updates: com.spendingsaver.update.UpdateManager) {
     val settings by settingsRepo.settings.collectAsState()
     SpendingSaverTheme(
         themeMode = settings.themeMode,
         accentColor = settings.accentColor,
         textScale = settings.textScale,
     ) {
-        AppNavHost(settingsRepo, assistant, taxRepo)
+        AppNavHost(settingsRepo, assistant)
+        // Automatic modes only: look for an update once when the app opens. Manual mode does nothing here.
+        LaunchedEffect(Unit) { updates.autoRun() }
+        val prompt by updates.prompt.collectAsState()
+        prompt?.let { InstallDialog(updates, it.release, it.file) { updates.dismissPrompt() } }
     }
 }
 
@@ -64,20 +67,19 @@ val NAV_ITEMS = listOf(
     NavItem("categories", "Categories", Icons.Default.Category),
     NavItem("networth", "Net Worth", Icons.Default.TrendingUp),
     NavItem("import", "Import / Export", Icons.Default.FileUpload),
+    NavItem("tax", "Tax", Icons.Default.Business),
     NavItem("assistant", "Assistant", Icons.Default.SmartToy),
     NavItem("pair", "Pair with desktop", Icons.Default.QrCodeScanner),
+    NavItem("updates", "App updates", Icons.Default.SystemUpdate),
     NavItem("settings", "Settings", Icons.Default.Settings),
-) + if (BuildConfig.EXPERIMENTAL_FEATURES) listOf(
-    // Needs a tax data pack that does not ship with the app yet.
-    NavItem("tax", "Tax", Icons.Default.Business),
-) else emptyList()
+)
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavHost(
     settingsRepo: SettingsRepository,
     assistant: LocalAssistant,
-    taxRepo: TaxRepository
 ) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -153,29 +155,10 @@ fun AppNavHost(
                     composable("settings") { SettingsScreen(navController, settingsRepo) }
                     composable("assistant") { AssistantScreen(assistant) }
                     composable("pair") { PairScreen() }
-                    // ---- Tax routes ----
-                    composable("tax") { TaxNavHost(taxRepo) }
-                    composable("tax-countries") { TaxCountryBrowserScreen(taxRepo) }
-                    composable("tax-states/{countryId}") { backStackEntry ->
-                        val countryId = backStackEntry.arguments?.getString("countryId") ?: ""
-                        TaxStatesScreen(taxRepo, countryId)
-                    }
-                    composable("tax-search") { TaxSearchScreen(taxRepo) }
+                    composable("tax") { TaxScreen() }
+                    composable("updates") { UpdatesScreen() }
                 }
             }
         }
-    }
-}
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TaxNavHost(repository: TaxRepository) {
-    val navController = rememberNavController()
-    NavHost(navController, startDestination = "tax-countries") {
-        composable("tax-countries") { TaxCountryBrowserScreen(repository) }
-        composable("tax-states/{countryId}") { backStackEntry ->
-            val countryId = backStackEntry.arguments?.getString("countryId") ?: ""
-            TaxStatesScreen(repository, countryId)
-        }
-        composable("tax-search") { TaxSearchScreen(repository) }
     }
 }

@@ -3,5 +3,6 @@
     <include domain="sharedpref" path="."/>
     <!-- The sync device token must never leave the device through backups. -->
     <exclude domain="sharedpref" path="spendingsaver_sync.xml"/>
+    <exclude domain="sharedpref" path="spendingsaver_update.xml"/>
     <!-- Only shared prefs are included, so the Transferd link identity (files/link) is never backed up. -->
 </full-backup-content>

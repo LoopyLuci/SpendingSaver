@@ -246,10 +246,9 @@ private fun QuickActionRow(navController: NavHostController) {
         Triple("Budgets", Icons.Default.Savings, "budgets"),
         Triple("Accounts", Icons.Default.AccountBalance, "accounts"),
         Triple("Assistant", Icons.Default.SmartToy, "assistant"),
-        Triple("Pair", Icons.Default.QrCodeScanner, "pair"),
-    ) + if (com.spendingsaver.BuildConfig.EXPERIMENTAL_FEATURES) listOf(
         Triple("Tax", Icons.Default.Business, "tax"),
-    ) else emptyList()
+        Triple("Pair", Icons.Default.QrCodeScanner, "pair"),
+    )
     Row(Modifier.fillMaxWidth()) {
         actions.forEach { (label, icon, route) ->
             Column(

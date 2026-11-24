@@ -166,3 +166,15 @@ interfaces. Keep services on a trusted network and configure appropriate
 firewall/authentication controls before remote access. The MCP adapter can
 write financial data; see its
 [configuration and authentication notes](../../spendingsaver-mcp/README.md).
+
+## Running the native desktop app
+
+`npm run tauri -- build --debug --no-bundle` (from `polyglot-app/tauri-app`) produces
+`src-tauri/target/debug/spendingsaver.exe`. On start it launches the Python backend (127.0.0.1:8125) and the Go
+service (8126) itself, freeing those ports first. Unless a bundled backend exists, it runs
+`python -m uvicorn app.api:app` using the first Python that can import `sqlalchemy`, `fastapi` and `uvicorn`:
+`SPENDINGSAVER_PYTHON`, then a project virtual environment (`backend/.venv`, `.venv`, `../.venv`,
+`../.venv-check`), then `python`/`py` on PATH. Phone Sync → Connect from anywhere → Turn on → New phone invite
+shows the pairing QR; the link agent (`polyglot-app/link`, `cargo build --release`) must be rebuilt after
+Link changes or invites fail with "link.make_code is not available". The phone must be able to reach the PC
+(same Wi-Fi, or a relay).
