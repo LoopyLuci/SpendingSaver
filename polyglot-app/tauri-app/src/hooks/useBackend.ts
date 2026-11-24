@@ -633,8 +633,24 @@ export const getLinkStatus = (): Promise<LinkStatus> => hubJson('/api/link/statu
 export const enableLink = (relays: string[], name?: string): Promise<LinkStatus> =>
   hubJson('/api/link/enable', { method: 'POST', body: JSON.stringify({ relays, name }) })
 export const disableLink = (): Promise<LinkStatus> => hubJson('/api/link/disable', { method: 'POST' })
-export const createLinkInvite = (): Promise<{ invite: string; node_id: string }> =>
+export const createLinkInvite = (): Promise<{ code: string; invite: string; node_id: string }> =>
   hubJson('/api/link/invite', { method: 'POST', body: JSON.stringify({ ttl_s: 600 }) })
 
 export const revokeSyncDevice = (id: string) =>
   hubJson(`/api/sync/v1/devices/${encodeURIComponent(id)}`, { method: 'DELETE' })
+
+// ---- SimpleFIN (optional US bank link; see docs/bank-linking.md) ----
+export interface SimpleFinStatus {
+  connected: boolean
+  last_sync: string | null
+  last_result: { accounts: number; added: number; skipped: number } | null
+  last_error: string | null
+  min_interval_s: number
+}
+export const getSimpleFinStatus = (): Promise<SimpleFinStatus> => hubJson('/api/simplefin/status')
+export const connectSimpleFin = (setup_token: string): Promise<SimpleFinStatus> =>
+  hubJson('/api/simplefin/connect', { method: 'POST', body: JSON.stringify({ setup_token }) })
+export const syncSimpleFin = (): Promise<SimpleFinStatus & { result: SimpleFinStatus['last_result']; messages: string[] }> =>
+  hubJson('/api/simplefin/sync', { method: 'POST' })
+export const disconnectSimpleFin = (): Promise<SimpleFinStatus & { note: string }> =>
+  hubJson('/api/simplefin', { method: 'DELETE' })

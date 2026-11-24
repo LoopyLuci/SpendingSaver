@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import SimpleFinPanel from '../components/SimpleFinPanel'
 import { listConnectors, connectConnector, fetchConnector, listAccounts, previewCsvImport } from '../hooks/useBackend'
 
 interface Connector {
@@ -28,7 +29,7 @@ export default function ConnectAccounts() {
 
   useEffect(() => {
     listConnectors()
-      .then(setConnectors)
+      .then((list) => setConnectors(list.filter((c: Connector) => c.name !== 'open_banking'))) // scaffold only: no live sync
       .catch((e) => setError(e.message))
     listAccounts()
       .then(setAccounts)
@@ -111,6 +112,8 @@ export default function ConnectAccounts() {
 
       {error && <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm rounded-lg px-4 py-3">{error}</div>}
       {msg && <div className="bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-sm rounded-lg px-4 py-3">{msg}</div>}
+
+      <SimpleFinPanel onImported={() => listAccounts().then(setAccounts).catch(() => {})} />
 
       <section className="bg-white dark:bg-gray-800 rounded-lg shadow">
         <div className="border-b border-gray-100 dark:border-gray-700 px-6 py-4">

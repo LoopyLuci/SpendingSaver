@@ -81,6 +81,8 @@ app.include_router(hosting_router)
 # Optional Transferd link ("connect from anywhere"); off unless the user enables it.
 from app.link import router as link_router
 app.include_router(link_router)
+from app.simplefin import router as simplefin_router
+app.include_router(simplefin_router)
 
 class Account(BaseModel):
     id: Optional[str] = None
