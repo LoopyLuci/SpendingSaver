@@ -2,6 +2,20 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Changed
+- The desktop folder is now `spendingsaver-desktop` and the Python package is
+  `spendingsaver-backend`, so everything is named SpendingSaver (reinstall with
+  `pip install -e ".[dev]"` to get the new command name).
+
+## [1.1.1] - 2026-11-24
+### Added
+- Android device flavors: `universal` (Android 8+, 64-bit, Transferd link) and `legacy`
+  (Android 5+, any CPU, LAN sync only). Releases attach both APKs.
+
+## [1.1.0] - 2026-11-23
+Native Rust desktop app, Windows installer, recurring items, goals, debts, offline
+assistant and read-only SimpleFIN bank link.
+
 ### Added
 - Opt-in sync hub for paired Android devices (`/api/sync/v1`): per-device tokens,
   change log, last-write-wins merge, device listing/revocation. See `docs/sync.md`.

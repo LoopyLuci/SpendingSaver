@@ -24,6 +24,12 @@ for repository history.
 
 ## Verification context
 
+Release 1.1.1 adds Android flavors (`universal`, `legacy`). The `legacy` release APK was
+installed and launched on a 32-bit Android 5.1 Fire tablet (Dashboard rendered); no other
+legacy screens, CSV import or sync were tried there. The `universal` release APK was
+installed on a Redmi Note 12 Pro 5G only far enough to confirm the install; it has not been
+exercised. The renamed `spendingsaver-desktop` folder passes `scripts/check.ps1`.
+
 Latest verification (Windows, JDK 17, Gradle 8.2 wrapper, Python 3.11 clean venv):
 
 - Android `:app:assembleDebug` and `:app:testDebugUnitTest` pass; 49 JVM unit

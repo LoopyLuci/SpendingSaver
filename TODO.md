@@ -57,3 +57,9 @@ before starting work.
 - [ ] **Review the Android product roadmap.** The existing roadmap contains a
   broad proposed feature set. Confirm priorities and update its baseline as
   Android capabilities change; do not treat planned features as implemented.
+
+- [ ] **Legacy flavor coverage.** Only a launch on an Android 5.1 tablet is verified. Try
+  CSV import/export (commons-logging lint check is suppressed), backup/restore, LAN sync
+  and the updater on a legacy device.
+- [ ] **Updater against a flavored release.** The asset picking is unit tested; it has not
+  yet run end to end against the published 1.1.1 release.

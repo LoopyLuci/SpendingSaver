@@ -1,6 +1,6 @@
 # Builds the two release files into dist/: the Windows installer and the signed Android APK, plus checksums.
 # Needs Rust, NSIS (makensis) and, for a signed APK, SpendingSaverAndroid/keystore.properties.
-param([string]$Version = '1.1.0')
+param([string]$Version = '1.1.1')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $dist = Join-Path $root 'dist'

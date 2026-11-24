@@ -17,11 +17,11 @@ You do not need an account, and you do not need to know anything about GitHub. Y
 
 | You have | Click this file | What it is |
 | --- | --- | --- |
-| A **Windows** PC (Windows 10 or 11) | `SpendingSaver-Setup-1.1.0.exe` | The installer for the computer app |
-| An **Android** phone or tablet (Android 8 or newer, almost every phone from 2017 on) | `SpendingSaver-1.1.0.apk` | The phone app (the main "Universal" version) |
-| An **older or 32-bit** Android device (Android 5 to 7, or a device the main file says it cannot install on, such as older Amazon Fire tablets) | `SpendingSaver-<version>-legacy.apk` (from the next release on) | The same app without the optional remote-sync extra; everything else works |
+| A **Windows** PC (Windows 10 or 11) | `SpendingSaver-Setup-1.1.1.exe` | The installer for the computer app |
+| An **Android** phone or tablet (Android 8 or newer, almost every phone from 2017 on) | `SpendingSaver-1.1.1-universal.apk` | The phone app (the main "Universal" version) |
+| An **older or 32-bit** Android device (Android 5 to 7, or a device the main file says it cannot install on, such as older Amazon Fire tablets) | `SpendingSaver-1.1.1-legacy.apk` | The same app without the optional remote-sync extra; everything else works |
 
-Ignore the other files (`Source code` and `SHA256SUMS.txt`); they are for developers. If the version number in the file name is newer than 1.1.0, that is fine, pick the same kind of file.
+Ignore the other files (`Source code` and `SHA256SUMS.txt`); they are for developers. If the version number in the file name is newer than 1.1.1, that is fine, pick the same kind of file.
 
 **Step 3. Open the file you downloaded** and follow the steps for your device below. Your device will probably show a few warnings first. That is normal and explained below.
 
@@ -30,7 +30,7 @@ Ignore the other files (`Source code` and `SHA256SUMS.txt`); they are for develo
 <details>
 <summary><b>Windows: step by step (click to open)</b></summary>
 
-1. **Download.** Click `SpendingSaver-Setup-1.1.0.exe`. Your browser saves it to your **Downloads** folder.
+1. **Download.** Click `SpendingSaver-Setup-1.1.1.exe`. Your browser saves it to your **Downloads** folder.
    - Edge or Chrome may say *"SpendingSaver-Setup… isn't commonly downloaded"* or *"couldn't be verified"*. This is the "unknown publisher" notice. Click the **three dots (…)** next to the download, choose **Keep**, then **Keep anyway** (in Edge you may need to click **Show more** first).
 2. **Open it.** Double-click the file in your Downloads folder.
 3. **If a blue window says "Windows protected your PC"** (this is called SmartScreen): click the small words **More info**, then click the **Run anyway** button that appears. Windows shows this for every new app from a small maker. It is not a virus alert.
@@ -51,9 +51,9 @@ Ignore the other files (`Source code` and `SHA256SUMS.txt`); they are for develo
 <details>
 <summary><b>Android: step by step (click to open)</b></summary>
 
-1. **On your phone**, open the download page link above in your browser (Chrome, Samsung Internet, Firefox, and so on). Scroll to **Assets** and tap `SpendingSaver-1.1.0.apk`.
+1. **On your phone**, open the download page link above in your browser (Chrome, Samsung Internet, Firefox, and so on). Scroll to **Assets** and tap `SpendingSaver-1.1.1-universal.apk` (or `-legacy.apk` for an older device).
    - Your browser may say *"This type of file can harm your device"* or *"File may be harmful"*. Android shows this for every app that is installed from a file instead of from Google Play. Tap **OK** or **Download anyway**.
-2. **Open the file.** Tap **Open** when the download finishes, or open your **Downloads** app (or **Files**) and tap `SpendingSaver-1.1.0.apk`.
+2. **Open the file.** Tap **Open** when the download finishes, or open your **Downloads** app (or **Files**) and tap `SpendingSaver-1.1.1-universal.apk` (or `-legacy.apk` for an older device).
 3. **If your phone says it can't install from this source.** You will see something like *"For your security, your phone is not allowed to install unknown apps from this source"*. This is Android's normal protection. Tap **Settings**, switch on **Allow from this source**, then press the **back** arrow and tap **Install**. This permission applies only to the browser or file app you used. You can switch it off again afterwards.
 4. **Tap Install**, then **Open**.
 
@@ -76,7 +76,7 @@ Ignore the other files (`Source code` and `SHA256SUMS.txt`); they are for develo
 
 Every release includes a file called `SHA256SUMS.txt`: a fingerprint for each download. If the fingerprint of your downloaded file matches, the file is exactly the one that was published.
 
-- **Windows:** open **PowerShell** in your Downloads folder and run `Get-FileHash .\SpendingSaver-Setup-1.1.0.exe`. Compare the long code with the matching line in `SHA256SUMS.txt`.
+- **Windows:** open **PowerShell** in your Downloads folder and run `Get-FileHash .\SpendingSaver-Setup-1.1.1.exe`. Compare the long code with the matching line in `SHA256SUMS.txt`.
 - **Android:** the app's updater does this check by itself whenever it downloads an update.
 
 The Android app is signed with a key that stays the same from release to release, which is how Android knows an update really comes from the same maker. Its fingerprint is `90:EE:55:14:8B:48:96:E8:FB:1A:14:92:9D:B9:0C:D7:9A:B0:1D:12:3B:C2:22:E7:75:A8:14:DB:5C:CC:0D:E5`. The Windows installer is not signed with a purchased certificate, which is why Windows asks for your confirmation.
