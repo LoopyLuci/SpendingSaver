@@ -137,14 +137,7 @@ fun AccountsScreen(navController: NavHostController, viewModel: MainViewModel = 
             EmptyState(
                 emoji = "🏦",
                 title = "No accounts yet",
-                message = "Add your first account to start tracking your finances.",
-                action = {
-                    PrimaryButton(
-                        "Add account",
-                        onClick = { showForm = true },
-                        modifier = Modifier.padding(horizontal = 24.dp),
-                    )
-                },
+                message = "Use the form above to add your first account.",
             )
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp), contentPadding = PaddingValues(bottom = 16.dp)) {

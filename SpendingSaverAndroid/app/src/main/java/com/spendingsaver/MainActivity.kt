@@ -65,9 +65,11 @@ val NAV_ITEMS = listOf(
     NavItem("networth", "Net Worth", Icons.Default.TrendingUp),
     NavItem("import", "Import / Export", Icons.Default.FileUpload),
     NavItem("settings", "Settings", Icons.Default.Settings),
+) + if (BuildConfig.EXPERIMENTAL_FEATURES) listOf(
+    // Both need a companion service / data pack that does not ship with the app yet.
     NavItem("ai", "AI", Icons.Default.SmartToy),
-    NavItem("tax", "Tax", Icons.Default.Business)
-)
+    NavItem("tax", "Tax", Icons.Default.Business),
+) else emptyList()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

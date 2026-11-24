@@ -48,9 +48,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             buildConfigField("boolean", "DEBUG_OVERLAYS", "false")
+            buildConfigField("boolean", "EXPERIMENTAL_FEATURES", "false")
             if (hasReleaseSigning) signingConfig = signingConfigs.getByName("release")
         }
         debug {
@@ -58,6 +60,7 @@ android {
             // never has to replace (or uninstall) an app signed with a different key.
             (findProperty("debugAppIdSuffix") as String?)?.let { applicationIdSuffix = it }
             buildConfigField("boolean", "DEBUG_OVERLAYS", "true")
+            buildConfigField("boolean", "EXPERIMENTAL_FEATURES", "true")
         }
     }
 
@@ -68,9 +71,14 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+    // Room writes its schema JSON here (committed) so migrations can be tested on a device.
+    sourceSets["androidTest"].assets.srcDir("$projectDir/schemas")
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.4"
@@ -107,6 +115,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
 
     // Instrumented tests (need a device/emulator): ./gradlew :app:connectedDebugAndroidTest
+    androidTestImplementation("androidx.room:room-testing:2.5.2")
     androidTestImplementation("androidx.test:runner:1.5.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")

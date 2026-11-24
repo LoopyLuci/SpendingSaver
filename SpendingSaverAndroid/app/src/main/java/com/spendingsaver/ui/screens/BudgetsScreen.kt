@@ -170,7 +170,7 @@ fun BudgetsScreen(navController: NavHostController, viewModel: MainViewModel = h
 @Composable
 private fun BudgetRow(budget: com.spendingsaver.data.Budget, categories: List<com.spendingsaver.data.Category>, transactions: List<com.spendingsaver.data.Transaction>, settings: com.spendingsaver.data.AppSettings, onDelete: () -> Unit) {
     val category = categories.find { it.id == budget.categoryId }
-    val spent = transactions.filter { it.categoryId == budget.categoryId && it.amount < 0 }.sumOf { Math.abs(it.amount) }
+    val spent = com.spendingsaver.util.BudgetPeriod.spent(transactions, budget.categoryId, budget.period)
     // A zero budget would give NaN/Infinity and break the progress bar.
     val fraction = if (budget.amount > 0) (spent / budget.amount).toFloat().coerceIn(0f, 1f) else 0f
     val isOver = spent > budget.amount

@@ -77,7 +77,22 @@ Release signing reads `keystore.properties` in this directory (`storeFile`,
 `storePassword`, `keyAlias`, `keyPassword`). The file is git-ignored; never
 commit it. Without it, release builds are unsigned.
 
+Release builds are minified and resource-shrunk (R8). `app/proguard-rules.pro`
+keeps the classes that Gson reads by field name (backup file, sync wire models,
+AI client); keep those rules in step with any new serialised class. The AI and
+Tax screens need a companion service / data pack that does not ship yet, so
+they are hidden unless `BuildConfig.EXPERIMENTAL_FEATURES` is true (debug builds
+only).
+
+Budgets count expenses in the current calendar window of their period (weekly
+Mon–Sun, monthly, yearly); see `util/BudgetPeriod.kt`.
+
 ## Local database
+
+Room exports its schema to `app/schemas/` (commit it). When bumping the version,
+keep the old JSON, add the `Migration`, and extend
+`androidTest/.../MigrationTest.kt` to run it. Only the v3 schema JSON exists, so
+the `1 → 2` and `2 → 3` migrations are not covered by an automated test.
 
 Room database schema version 3 removes the former sync outbox and sync metadata.
 The `1 → 2` migration converts legacy numeric identifiers to strings, and the

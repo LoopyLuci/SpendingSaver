@@ -176,6 +176,7 @@ fun SettingsScreen(
             }
             }
 
+            if (com.spendingsaver.BuildConfig.EXPERIMENTAL_FEATURES) {
             SettingsSection("AI toolkit") {
             SettingsLabel("AI chat")
             Text(
@@ -224,6 +225,7 @@ fun SettingsScreen(
             Icon(Icons.Default.Settings, contentDescription = null)
             Spacer(Modifier.width(8.dp))
             Text("AI settings")
+            }
             }
             }
 
