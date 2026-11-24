@@ -16,7 +16,7 @@ vi.mock('../hooks/useBackend', async () => {
     ],
     revokeSyncDevice: (id: string) => revoke(id),
     getLinkStatus: async () => ({ available: true, enabled: true, running: true, relays: ['r.example:5901'], name: 'pc', node_id: 'abc123', error: null, peers: [] }),
-    createLinkInvite: async () => ({ invite: 'INVITE-TEXT', node_id: 'abc123' }),
+    createLinkInvite: async () => ({ code: 'ss1:TEST', invite: 'INVITE-TEXT', node_id: 'abc123' }),
     enableLink: async () => ({}),
     disableLink: async () => ({}),
   }
@@ -45,6 +45,6 @@ describe('SyncHub page', () => {
     render(<SyncHub />)
     expect((await screen.findByTestId('link-node')).textContent).toBe('abc123')
     fireEvent.click(screen.getByText('New phone invite'))
-    expect(((await screen.findByTestId('link-invite')) as HTMLTextAreaElement).value).toBe('INVITE-TEXT')
+    expect(((await screen.findByTestId('link-qr')) as HTMLImageElement).src).toContain('data:image/png')
   })
 })

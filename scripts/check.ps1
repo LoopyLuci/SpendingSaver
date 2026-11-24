@@ -69,7 +69,7 @@ Step 'link' {
         return
     }
     Push-Location "$root\polyglot-app\link"
-    try { cargo test --release; $script:code = $LASTEXITCODE } finally { Pop-Location }
+    try { cargo test; $script:code = $LASTEXITCODE } finally { Pop-Location }
 }
 
 Write-Host "`n=== summary ===" -ForegroundColor Cyan

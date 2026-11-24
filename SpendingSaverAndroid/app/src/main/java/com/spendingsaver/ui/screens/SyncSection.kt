@@ -9,6 +9,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.spendingsaver.ui.viewmodel.SyncViewModel
+import androidx.activity.compose.rememberLauncherForActivityResult
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import java.text.DateFormat
 import java.util.Date
 
@@ -25,6 +28,10 @@ fun SyncSection(viewModel: SyncViewModel = hiltViewModel()) {
     var invite by remember { mutableStateOf("") }
     var anywhere by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
+    val scanner = rememberLauncherForActivityResult(ScanContract()) { result ->
+        // A scanned code carries the invite and the pairing key, so one scan pairs and syncs.
+        result.contents?.let { invite = it; viewModel.pairViaLink(it, key) }
+    }
 
     SettingsSection("Desktop sync (optional)") {
         Text(
@@ -74,18 +81,30 @@ fun SyncSection(viewModel: SyncViewModel = hiltViewModel()) {
             }
             if (anywhere) {
                 Text(
-                    "On the desktop, open Phone Sync → Connect from anywhere → New phone invite, then paste it here. " +
+                    "On the desktop, open Phone Sync → Connect from anywhere → New phone invite, then scan the QR code. " +
                         "Your data travels end-to-end encrypted between your devices, through a relay that only sees ciphertext.",
                     style = MaterialTheme.typography.bodySmall,
                     color = colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        scanner.launch(
+                            ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                                .setPrompt("Scan the QR code on your desktop")
+                                .setBeepEnabled(false)
+                                .setOrientationLocked(false),
+                        )
+                    },
+                    enabled = !state.busy,
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text("Scan QR code") }
+                Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = invite,
-                    onValueChange = { invite = it },
-                    label = { Text("Phone invite") },
-                    minLines = 2,
-                    maxLines = 4,
+                    onValueChange = { invite = it.trim() },
+                    label = { Text("…or paste the code") },
+                    singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             } else {
@@ -99,8 +118,9 @@ fun SyncSection(viewModel: SyncViewModel = hiltViewModel()) {
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
-            Spacer(Modifier.height(8.dp))
-            OutlinedTextField(
+            val needsKey = !anywhere || (invite.isNotBlank() && !invite.startsWith("ss1:"))
+            if (needsKey) Spacer(Modifier.height(8.dp))
+            if (needsKey) OutlinedTextField(
                 value = key,
                 onValueChange = { key = it.uppercase() },
                 label = { Text("Pairing key") },
@@ -111,7 +131,7 @@ fun SyncSection(viewModel: SyncViewModel = hiltViewModel()) {
             Spacer(Modifier.height(8.dp))
             Button(
                 onClick = { if (anywhere) viewModel.pairViaLink(invite, key) else viewModel.pair(url, key) },
-                enabled = !state.busy && key.isNotBlank() && (if (anywhere) invite.isNotBlank() else url.isNotBlank()),
+                enabled = !state.busy && (if (anywhere) invite.isNotBlank() && (!needsKey || key.isNotBlank()) else url.isNotBlank() && key.isNotBlank()),
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(if (state.busy) "Pairing…" else "Pair and sync") }
         }

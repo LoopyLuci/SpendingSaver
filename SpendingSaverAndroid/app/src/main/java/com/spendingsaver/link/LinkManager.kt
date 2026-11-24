@@ -51,6 +51,21 @@ class LinkManager @Inject constructor(
 
     private suspend fun ensureStarted() = lock.withLock { if (!started) startLocked(relays()) }
 
+    /** What a scanned or pasted pairing code contains: the desktop invite, and the sync key if the code carries it. */
+    class Pairing(val invite: String, val key: String?)
+
+    /**
+     * Reads a pairing code from the desktop (`ss1:`, invite and key together) or a bare Transferd
+     * invite (`tdov2:`, key typed separately). The code is checked by the native library.
+     */
+    suspend fun decode(text: String): Pairing {
+        val t = text.trim()
+        if (!t.startsWith("ss1:")) return Pairing(t, null)
+        ensureStarted()
+        val r = call("link.decode_code", JsonObject().apply { addProperty("code", t) }.toString())
+        return Pairing(r.get("invite").asString, r.get("key").asString)
+    }
+
     /**
      * Verifies a desktop invite, pairs with that desktop, and makes sure this node is registered
      * on the relays the desktop uses. Returns the desktop's link id.

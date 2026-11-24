@@ -264,4 +264,12 @@ async def link_invite(request: Request, payload: dict | None = None):
         res = await supervisor.call("overlay.invite_create", {"ttl_s": max(60, min(ttl, 3600))})
     except Exception as e:  # noqa: BLE001
         raise HTTPException(status_code=502, detail=str(e))
-    return {"invite": res["invite"], "node_id": supervisor.node_id}
+    # One scannable code: the invite and the pairing key together, so the phone needs a single scan.
+    # It is shown only to this machine's own UI and expires with the invite.
+    from .hosting import get_or_create_pairing_key
+
+    try:
+        packed = await supervisor.call("link.make_code", {"invite": res["invite"], "key": get_or_create_pairing_key()})
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail=str(e))
+    return {"code": packed["code"], "invite": res["invite"], "node_id": supervisor.node_id}

@@ -71,8 +71,11 @@ class SyncRepository @Inject constructor(
     }
 
     /** Pairs over the Transferd link: the desktop's invite finds the desktop, the pairing key authorises sync. */
-    suspend fun pairViaLink(invite: String, key: String) = run("Connecting…") {
-        val nodeId = link.acceptInvite(invite)
+    suspend fun pairViaLink(code: String, typedKey: String) = run("Connecting…") {
+        val p = link.decode(code)
+        val key = p.key ?: typedKey
+        if (key.isBlank()) throw SyncException("Enter the pairing key shown on the desktop", SyncException.Kind.PROTOCOL)
+        val nodeId = link.acceptInvite(p.invite)
         engine.pair(LINK_SCHEME + nodeId, key, "Android ${Build.MODEL}")
         _ui.value = snapshot("Paired. Syncing…", busy = true)
         describe(engine.sync())

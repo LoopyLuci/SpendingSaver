@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import QRCode from 'qrcode'
 import {
   getHubInfo, rotateHubKey, listSyncDevices, revokeSyncDevice,
   getLinkStatus, enableLink, disableLink, createLinkInvite,
@@ -19,6 +20,7 @@ export default function SyncHub() {
   const [link, setLink] = useState<LinkStatus | null>(null)
   const [relays, setRelays] = useState('')
   const [invite, setInvite] = useState<string | null>(null)
+  const [qr, setQr] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   const load = useCallback(async () => {
@@ -45,7 +47,7 @@ export default function SyncHub() {
   useEffect(() => { load(); loadLink() }, [load, loadLink])
 
   const runLink = async (fn: () => Promise<LinkStatus>, done: string) => {
-    setBusy(true); setError(null); setInvite(null)
+    setBusy(true); setError(null); setInvite(null); setQr(null)
     try {
       setLink(await fn())
       setMessage(done)
@@ -60,7 +62,9 @@ export default function SyncHub() {
   const makeInvite = async () => {
     setError(null)
     try {
-      setInvite((await createLinkInvite()).invite)
+      const { code } = await createLinkInvite()
+      setQr(await QRCode.toDataURL(code, { errorCorrectionLevel: 'L', margin: 1, width: 448 }))
+      setInvite(code)
     } catch (e: any) {
       setError(e.message || String(e))
     }
@@ -153,11 +157,14 @@ export default function SyncHub() {
                   className="px-3 py-1.5 rounded-lg border border-gray-600">Turn off</button>
               </div>
               {invite && (
-                <div className="space-y-1">
-                  <p className="text-gray-400">Paste this into the phone (Settings → Connect from anywhere). It expires in 10 minutes and works once.</p>
-                  <textarea readOnly data-testid="link-invite" value={invite} rows={4}
-                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-xs text-gray-200" />
-                  <button className="text-xs underline text-gray-400" onClick={() => navigator.clipboard?.writeText(invite)}>Copy</button>
+                <div className="space-y-2">
+                  <p className="text-gray-400">
+                    On the phone open Settings → Desktop sync → From anywhere → Scan QR. The code includes the pairing
+                    key, expires in 10 minutes and works once. Keep this screen private while it is showing.
+                  </p>
+                  {qr && <img data-testid="link-qr" src={qr} alt="Pairing QR code" className="w-56 h-56 rounded bg-white p-2" />}
+                  <button className="text-xs underline text-gray-400" data-testid="link-copy"
+                    onClick={() => navigator.clipboard?.writeText(invite)}>Copy code instead</button>
                 </div>
               )}
               {link.peers.length > 0 && (

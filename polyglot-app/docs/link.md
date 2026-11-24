@@ -34,7 +34,10 @@ LAN sync keeps working exactly as before.
 1. **Transferd pairing.** Only a device that accepted a one-time, expiring, signed invite from this
    desktop may open the service. Identity is Ed25519 + ML-DSA-87; key exchange is X25519 + ML-KEM-768.
 2. **Sync pairing.** Over the link the phone *still* needs the pairing key and receives the normal
-   per-device bearer token. Holding a link invite is not enough to read or write data.
+   per-device bearer token. A bare Transferd invite is not enough to read or write data. The QR /
+   pairing code the desktop shows does carry both (so one scan pairs), which makes the code itself a
+   credential: it is shown only in the desktop's own window, its invite expires in 10 minutes and
+   works once, and without a live invite a leaked key cannot reach the hub over the link at all.
 
 Hub-side rules that make this safe:
 
@@ -69,9 +72,16 @@ Hub-side rules that make this safe:
    No relay: only a direct path works (same LAN, or set `SS_LINK_LISTEN` / `SS_LINK_DIRECT` to an
    address the phone can reach).
 3. **Desktop:** Phone Sync → *Connect from anywhere* → enter the relay address → **Turn on** →
-   **New phone invite**.
-4. **Phone:** Settings → Desktop sync → **From anywhere**, paste the invite, enter the pairing key,
-   **Pair and sync**. Automatic hourly sync (if enabled) uses the link too.
+   **New phone invite**. A QR code appears (a "Copy code" fallback sits beneath it).
+4. **Phone:** Settings → Desktop sync → **From anywhere** → **Scan QR code**. Scanning pairs and syncs
+   in one step; nothing is typed. If the camera is unavailable, paste the copied code instead. Automatic
+   hourly sync (if enabled) uses the link too.
+
+The pairing code (`ss1:…`, about 270 characters) is the signed Transferd invite and the sync pairing
+key packed in binary (`polyglot-app/link/src/code.rs`), less than half the size of the raw invite so the
+QR stays sparse and quick to scan. Nothing is re-signed: the phone rebuilds the original invite and
+Transferd verifies its signature as usual. The scanner is ZXing (offline, no Google services); the camera
+permission is requested only when you tap *Scan QR code*.
 
 Environment (desktop agent): `SS_LINK_RELAYS`, `SS_LINK_LISTEN`, `SS_LINK_DIRECT`, `SS_LINK_NAME`,
 `SS_LINK_HUB` (default `127.0.0.1:8126`), `SS_LINK_CONTROL` (default `127.0.0.1:8127`).
@@ -87,6 +97,9 @@ Backend: `SS_LINK_GATEWAY_PORT`, `SS_LINK_CONTROL_PORT`.
   first sync (8 records received) and a later desktop-to-phone change arriving, with the desktop agent's
   audit log showing the phone opening `spendingsaver-hub`. The path used was a direct TCP route over
   `adb reverse`, because adb cannot forward UDP.
+- Verified on the same phone: a real `ss1:` code pasted into the app paired and synced in one step with no
+  key typed (10 records received). The QR scanner opens in portrait with a live camera preview; decoding a
+  QR shown on a screen was not exercised end to end (it uses the ZXing library unchanged).
 - Not verified yet: the phone reaching a relay over a real network, a relay on the public internet, and a
   phone-to-desktop push over the link (the same engine code, but not exercised there). Treat those as
   untested until you have run them.

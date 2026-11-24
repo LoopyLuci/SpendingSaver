@@ -108,6 +108,8 @@ dependencies {
     implementation("com.opencsv:opencsv:5.7.1")
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    // Offline QR scanning for pairing (no Google Play services needed).
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

@@ -4,6 +4,9 @@
 
     <!-- Needed only for the optional desktop sync hub and the user-configured AI service. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Used only while scanning a pairing QR code (the scanner asks first); the camera is optional hardware. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
         android:name=".SpendingSaverApp"
@@ -25,6 +28,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- The scanner library locks to landscape; follow the phone's orientation instead. -->
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="fullSensor"
+            tools:replace="android:screenOrientation" />
     </application>
 
 </manifest>

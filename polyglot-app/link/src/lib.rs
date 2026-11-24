@@ -12,6 +12,7 @@ use serde_json::{json, Value};
 use transferd_overlay::node::{OverlayConfig, OverlayNode};
 use transferd_overlay::NodeIdentity;
 
+pub mod code;
 #[cfg(target_os = "android")]
 mod android;
 
@@ -109,6 +110,16 @@ impl Link {
                 "hub_published": self.cfg.hub.is_some(),
                 "peers": self.node.peer_list(),
             })),
+            "link.make_code" => {
+                let invite = args.get("invite").and_then(Value::as_str).ok_or("link.make_code needs invite")?;
+                let key = args.get("key").and_then(Value::as_str).ok_or("link.make_code needs key")?;
+                Ok(json!({"code": code::pack(invite, key)?}))
+            }
+            "link.decode_code" => {
+                let c = args.get("code").and_then(Value::as_str).ok_or("link.decode_code needs code")?;
+                let (invite, key) = code::unpack(c)?;
+                Ok(json!({"invite": invite, "key": key}))
+            }
             "link.accept_invite" => {
                 // Verifies the invite (signature, expiry, key fingerprint) and pairs. The reply
                 // carries the relays the inviter registers on: a node only registers on the relays
