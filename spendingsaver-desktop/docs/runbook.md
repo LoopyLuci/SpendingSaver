@@ -1,6 +1,6 @@
 # SpendingSaver operator runbook
 
-This runbook applies to `polyglot-app/` (the native Rust desktop app and the optional Python + Go backend), not
+This runbook applies to `spendingsaver-desktop/` (the native Rust desktop app and the optional Python + Go backend), not
 the separate browser-only or Android projects. Commands begin at the repository root unless the section states
 another working directory.
 
@@ -12,7 +12,7 @@ Go service, Go.
 ## Run the desktop app
 
 ```powershell
-Set-Location polyglot-app\desktop
+Set-Location spendingsaver-desktop\desktop
 cargo run --release
 ```
 
@@ -26,7 +26,7 @@ Only needed for the MCP adapter or direct API use. Install the backend once (a v
 recommended):
 
 ```powershell
-Set-Location polyglot-app\backend
+Set-Location spendingsaver-desktop\backend
 python -m pip install -e ".[dev]"
 python -m uvicorn app.api:app --host 127.0.0.1 --port 8125
 ```
@@ -34,14 +34,14 @@ python -m uvicorn app.api:app --host 127.0.0.1 --port 8125
 In a separate terminal, the Go service:
 
 ```powershell
-Set-Location polyglot-app\go-service
+Set-Location spendingsaver-desktop\go-service
 go run .
 ```
 
 The Python API binds to `127.0.0.1:8125`. The Go service listens on all interfaces at port 8126; do not expose it
 to an untrusted network. Health checks: `http://127.0.0.1:8125/health`, `http://127.0.0.1:8126/health`.
 
-`python polyglot-app\scripts\start.py` starts both (using the Python that runs the script, so activate the
+`python spendingsaver-desktop\scripts\start.py` starts both (using the Python that runs the script, so activate the
 environment with the backend installed first). The desktop app's phone sync also listens on port 8125 or the next
 free port, so it can run at the same time as the backend.
 
@@ -49,7 +49,7 @@ free port, so it can run at the same time as the backend.
 
 ```powershell
 # Python backend
-Set-Location polyglot-app\backend
+Set-Location spendingsaver-desktop\backend
 python -m pytest tests/test_api.py -q
 
 # Go service
@@ -62,7 +62,7 @@ cargo test --release
 ```
 
 `powershell -ExecutionPolicy Bypass -File scripts/check.ps1` (repository root) runs every project's tests.
-`python polyglot-app\scripts\integration_tests.py` runs the Python, Go and desktop tests.
+`python spendingsaver-desktop\scripts\integration_tests.py` runs the Python, Go and desktop tests.
 
 CI (`.github/workflows/ci.yml`) runs the Android build/tests, backend tests and migration round trip, Go tests and
 the desktop tests. It does not run packaging.
@@ -74,7 +74,7 @@ the desktop tests. It does not run packaging.
 - Back up the database before migrations that affect valuable data.
 
 ```powershell
-Set-Location polyglot-app\backend
+Set-Location spendingsaver-desktop\backend
 python -m alembic upgrade head
 python -m alembic current
 ```
@@ -94,7 +94,7 @@ throwaway database through `SS_DB_PATH` and `SS_DATA_DIR` (see `backend/tests/co
 
 ## Package
 
-`cargo build --release` in `polyglot-app/desktop` produces one self-contained executable
+`cargo build --release` in `spendingsaver-desktop/desktop` produces one self-contained executable
 (`target/release/spendingsaver`). There is no installer or code-signing setup; on Windows run `signtool sign` on
 that file with your own certificate if you distribute it.
 

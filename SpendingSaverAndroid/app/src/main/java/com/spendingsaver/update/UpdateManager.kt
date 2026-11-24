@@ -103,7 +103,7 @@ class UpdateManager @Inject constructor(
                     resp.code == 401 || resp.code == 403 -> UpdateState.Failed("GitHub refused the request (${resp.code}). Check the access token, or try again later.")
                     !resp.isSuccessful -> UpdateState.Failed("The update server answered ${resp.code}.")
                     else -> {
-                        val rel = UpdateLogic.parseRelease(resp.body?.string().orEmpty())
+                        val rel = UpdateLogic.parseRelease(resp.body?.string().orEmpty(), com.spendingsaver.BuildConfig.DEVICE_FLAVOR)
                         when {
                             rel == null -> UpdateState.Failed("The latest release has no APK attached.")
                             UpdateLogic.isNewer(rel.version, currentVersion) -> existingDownload(rel) ?: UpdateState.Available(rel)

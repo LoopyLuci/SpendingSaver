@@ -2,7 +2,7 @@
 
 Thanks for helping. The projects in this repository are independent (Android, browser, native desktop, backend,
 MCP); work in the one that owns the behaviour. Android and desktop must each stay fully usable on their own; the
-only link is the optional sync protocol in [`polyglot-app/docs/sync.md`](polyglot-app/docs/sync.md).
+only link is the optional sync protocol in [`spendingsaver-desktop/docs/sync.md`](spendingsaver-desktop/docs/sync.md).
 
 1. Read the project's README and look at its tests first.
 2. Keep changes small and update the docs for any change to behaviour, setup or data.

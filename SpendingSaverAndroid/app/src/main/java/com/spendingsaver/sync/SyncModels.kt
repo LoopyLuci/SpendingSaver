@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 /**
  * Wire format of the optional desktop sync hub (protocol v1). See
- * `polyglot-app/backend/app/modules/sync_v1.py` for the server side.
+ * `spendingsaver-desktop/backend/app/modules/sync_v1.py` for the server side.
  *
  * Timestamps are ISO-8601 UTC strings on the wire and epoch milliseconds in the
  * local database; [SyncMapper] converts between them.

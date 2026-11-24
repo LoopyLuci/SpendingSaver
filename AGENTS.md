@@ -8,9 +8,9 @@
 - Android is local-first and must stay fully usable without the desktop
   backend, and vice versa. Its JSON backup is user-initiated and is not sync.
   The only cross-app path is the opt-in sync protocol in
-  `polyglot-app/docs/sync.md`; keep it optional and never make a feature depend
+  `spendingsaver-desktop/docs/sync.md`; keep it optional and never make a feature depend
   on it.
-- The MCP adapter calls the `polyglot-app/backend` HTTP API. MCP tools can
+- The MCP adapter calls the `spendingsaver-desktop/backend` HTTP API. MCP tools can
   change financial records; treat tool inputs and backend access accordingly.
 
 ## Before changing code
@@ -30,7 +30,7 @@
 
 - Run the narrowest relevant checks documented by the project. The root
   README links to each project guide; desktop commands are also collected in
-  `polyglot-app/docs/runbook.md`.
+  `spendingsaver-desktop/docs/runbook.md`.
 - Report checks that were not run and distinguish warnings from failures.
 - Do not claim a test suite exists when a project has no tests.
 

@@ -49,20 +49,20 @@ Latest verification (Windows, JDK 17, Gradle 8.2 wrapper, Python 3.11 clean venv
 - Android JSON restore replaces active accounts, categories, transactions,
   and budgets; absent rows become tombstones and restored rows are re-stamped.
   It does not include deleted rows or app settings. It is not sync.
-- Sync is opt-in and documented in `polyglot-app/docs/sync.md`: backend
+- Sync is opt-in and documented in `spendingsaver-desktop/docs/sync.md`: backend
   `app/modules/sync_v1.py`, Android `com.spendingsaver.sync`. Last write wins per
   row by device clocks. Both apps must stay usable without it.
 - The sync device token is in Android's app-private `spendingsaver_sync.xml`
   (excluded from Android backup). Local debug builds can use
   `-PdebugAppIdSuffix=.debug` to install beside an app signed with another key.
 - Release signing uses the git-ignored `SpendingSaverAndroid/keystore.properties`.
-- Backend runtime data (`polyglot-app/backend/data/`) is git-ignored; see the
+- Backend runtime data (`spendingsaver-desktop/backend/data/`) is git-ignored; see the
   history note in `TODO.md`.
 - The MCP adapter can invoke write operations. Its active server and helper
   client currently have different HTTP/auth handling; review `TODO.md` before
   deploying it against a non-local backend.
 - Desktop setup and release packaging depend on tools documented in
-  `polyglot-app/docs/runbook.md`; backend, Go, and frontend services are not a
+  `spendingsaver-desktop/docs/runbook.md`; backend, Go, and frontend services are not a
   single automatically managed installation in every workflow.
 
 ## Suggested next step

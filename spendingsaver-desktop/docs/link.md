@@ -21,7 +21,7 @@ LAN sync keeps working exactly as before.
                           direct path, or blind relay (sees ciphertext only)
 ```
 
-- `polyglot-app/link` (Rust, crate `spendingsaver-link`) wraps Transferd's overlay node. It builds
+- `spendingsaver-desktop/link` (Rust, crate `spendingsaver-link`) wraps Transferd's overlay node. It builds
   as the desktop sidecar `ss-link-agent` and as `libss_link.so` for Android (JNI).
 - The desktop publishes **one** overlay service, `spendingsaver-hub`, to *paired* Transferd devices.
   It points at the **sync gateway** (`backend/app/link_gateway.py`), not at the backend itself.
@@ -56,10 +56,10 @@ Hub-side rules that make this safe:
 ## Setup
 
 1. **Build the components** (needs Rust; Transferd is fetched from its public repository, pinned to a commit in
-   `polyglot-app/link/Cargo.toml`. The end-to-end test also needs a `relayd` binary: set `RELAYD_BIN`, or it is skipped):
+   `spendingsaver-desktop/link/Cargo.toml`. The end-to-end test also needs a `relayd` binary: set `RELAYD_BIN`, or it is skipped):
 
    ```powershell
-   cd polyglot-app/link; cargo build --release        # ss-link-agent, found automatically
+   cd spendingsaver-desktop/link; cargo build --release        # ss-link-agent, found automatically
    powershell -ExecutionPolicy Bypass -File scripts/build-link-android.ps1   # needs the Android NDK
    ```
 
@@ -77,7 +77,7 @@ Hub-side rules that make this safe:
    hourly sync (if enabled) uses the link too.
 
 The pairing code (`ss1:…`, about 270 characters) is the signed Transferd invite and the sync pairing
-key packed in binary (`polyglot-app/link/src/code.rs`), less than half the size of the raw invite so the
+key packed in binary (`spendingsaver-desktop/link/src/code.rs`), less than half the size of the raw invite so the
 QR stays sparse and quick to scan. Nothing is re-signed: the phone rebuilds the original invite and
 Transferd verifies its signature as usual. The scanner is ZXing (offline, no Google services); the camera
 permission is requested only when you tap *Scan QR code*.
@@ -89,7 +89,7 @@ Backend: `SS_LINK_GATEWAY_PORT`, `SS_LINK_CONTROL_PORT`.
 ## What is and is not verified
 
 - Verified: two Link nodes with no listener pair with a real invite and carry HTTP through a real
-  `relayd` (`polyglot-app/link/tests/e2e.rs`); the gateway's allow-list and the loopback-only control
+  `relayd` (`spendingsaver-desktop/link/tests/e2e.rs`); the gateway's allow-list and the loopback-only control
   plane (`backend/tests/test_link.py`); the Android link-aware API and URL handling (unit tests); the
   Android library cross-compiles.
 - Verified on a Nokia 7.2 (arm64, debug build): pairing with a real invite through `libss_link.so`, a

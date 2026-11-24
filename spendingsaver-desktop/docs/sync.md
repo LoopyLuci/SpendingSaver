@@ -15,7 +15,7 @@ Stores involved:
 
 ## Which desktop program is the hub
 
-Either one can be. The **native desktop app** (`polyglot-app/desktop`) starts the hub only when you turn on
+Either one can be. The **native desktop app** (`spendingsaver-desktop/desktop`) starts the hub only when you turn on
 **Phone Sync**, listens on your local network, and shows a QR code that the Android app scans. It keeps its change
 log in its own database. The Python **backend** implements the same protocol (this document describes both) and also
 supports syncing from outside the home network through the Transferd link. The details below name the backend's
@@ -48,7 +48,7 @@ app settings, the Android AI and tax data) stays where it was created.
 
 1. Start the backend. To let a phone reach it over your network, bind it to a
    LAN address (for example `uvicorn app.api:app --host 0.0.0.0 --port 8125` from
-   `polyglot-app/backend`) and allow the port through your firewall. The default
+   `spendingsaver-desktop/backend`) and allow the port through your firewall. The default
    helper script binds `127.0.0.1` only, which is not reachable from a phone.
 2. On the desktop machine itself, read the pairing key:
    `GET http://127.0.0.1:8125/api/host/info` → `key`. The key is returned only to
@@ -127,7 +127,7 @@ Back up `backend/data/spendingsaver.db` first. The backend creates the two new
 tables, `sync_log` and `sync_devices`, and adds a nullable `categories.parent_id` column (Alembic
 revision `b7d2f4a91c33`, also applied idempotently at startup), and seeds the log from your
 existing rows once. The equivalent Alembic revision `a1c3e5f70b21` is idempotent;
-run it from `polyglot-app/backend` with `alembic upgrade head`. It only adds
+run it from `spendingsaver-desktop/backend` with `alembic upgrade head`. It only adds
 tables and log rows. Downgrading drops the two tables (devices must pair again);
 financial tables are never touched.
 

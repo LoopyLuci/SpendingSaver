@@ -1,4 +1,4 @@
-//! Optional phone-sync hub (protocol v1, see `polyglot-app/docs/sync.md`). Off unless the user turns it on.
+//! Optional phone-sync hub (protocol v1, see `spendingsaver-desktop/docs/sync.md`). Off unless the user turns it on.
 //! It runs on its own thread with its own SQLite connection, so it never blocks the window.
 use rusqlite::{params, Connection, OptionalExtension};
 use serde_json::{json, Map, Value};

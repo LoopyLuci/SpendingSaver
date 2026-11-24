@@ -23,7 +23,7 @@ its pairing key, then **Pair and sync**. Afterwards **Sync now** pushes your
 changes and pulls the desktop's. Last write wins per row; deletes sync;
 **Unpair** forgets the hub and never deletes data on the phone. Setup, security
 (token storage, `http://` limited to local addresses), merge rules and
-troubleshooting: [`polyglot-app/docs/sync.md`](../polyglot-app/docs/sync.md).
+troubleshooting: [`spendingsaver-desktop/docs/sync.md`](../spendingsaver-desktop/docs/sync.md).
 
 Stores: the app reads and writes only its own Room database; the sync token and
 cursors live in the app-private preferences file `spendingsaver_sync.xml`
@@ -62,26 +62,38 @@ Requirements: JDK 17 and Android SDK platform 34.
 From this directory, build a debug APK with the Gradle wrapper:
 
 ```bat
-gradlew.bat :app:assembleDebug
+gradlew.bat assembleDebug
 ```
 
 The project uses Gradle 8.2 and Android Gradle Plugin 8.1.0. Do not replace the
 wrapper with a newer Gradle version without checking Android Gradle Plugin
 compatibility.
 
-The built APK is at `app/build/outputs/apk/debug/app-debug.apk`.
+The built APK is at `app/build/outputs/apk/universalDebug/app-universal-debug.apk`.
+
+### Device flavors
+
+| Flavor | Android | CPU | Native Transferd link |
+|---|---|---|---|
+| `universal` (main) | 8.0+ (API 26) | 64-bit ARM (the link library is arm64) | yes |
+| `legacy` | 5.0+ (API 21), uses core-library desugaring | any, including 32-bit | no (LAN sync only) |
+
+Both share one application id and signing key. `scripts/build-release.ps1` builds both and names them
+`SpendingSaver-<version>-universal.apk` and `-legacy.apk`; the in-app updater downloads the file that
+matches the installed flavor. Build one with `gradlew :app:assembleLegacyRelease`. The `legacy` flavor
+has been run on an Android 5.1 (API 22) 32-bit Fire tablet; no other legacy device has been tried.
 
 To install next to an existing build signed with a different key (without
 uninstalling it or losing its data), add an application-id suffix:
 
 ```bat
-gradlew.bat :app:assembleDebug -PdebugAppIdSuffix=.debug
+gradlew.bat assembleDebug -PdebugAppIdSuffix=.debug
 ```
 
 Unit tests (JUnit 5/MockK, JVM only):
 
 ```bat
-gradlew.bat :app:testDebugUnitTest
+gradlew.bat :app:testUniversalDebugUnitTest :app:testLegacyDebugUnitTest
 ```
 
 Instrumented Room tests (JUnit 4, need a device or emulator; the suffix keeps

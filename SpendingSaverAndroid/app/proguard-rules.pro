@@ -32,3 +32,7 @@
 
 # JNI: the native library binds to these exact names.
 -keep class com.spendingsaver.link.NativeLink { *; }
+
+# Core library desugaring (legacy flavor, Android 5-7): keep the backported java.* classes.
+-keep class j$.** { *; }
+-dontwarn j$.**

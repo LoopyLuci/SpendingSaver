@@ -75,4 +75,19 @@ internal class UpdateLogicTest {
     @Test fun badDigestIsIgnored() {
         assertNull(UpdateLogic.parseRelease(release().replace(sha, "zz"))!!.sha256)
     }
+
+    private fun asset(name: String) = """{"name":"$name","size":1,"browser_download_url":"https://github.com/o/r/releases/download/v1.2.0/$name","digest":"sha256:$sha"}"""
+
+    @Test fun picksTheApkForThisFlavor() {
+        val both = "[" + listOf("SpendingSaver-1.2.0-universal.apk", "SpendingSaver-1.2.0-legacy.apk").joinToString(",") { asset(it) } + "]"
+        assertEquals("SpendingSaver-1.2.0-legacy.apk", UpdateLogic.parseRelease(release(assets = both), "legacy")!!.apkName)
+        assertEquals("SpendingSaver-1.2.0-universal.apk", UpdateLogic.parseRelease(release(assets = both), "universal")!!.apkName)
+    }
+
+    @Test fun neverOffersAnotherFlavorsApk() {
+        val onlyLegacy = "[" + asset("SpendingSaver-1.2.0-legacy.apk") + "]"
+        assertNull(UpdateLogic.parseRelease(release(assets = onlyLegacy), "universal"))
+        // Older releases have a single unlabelled APK, which every flavor may use.
+        assertEquals("SpendingSaver-1.2.0.apk", UpdateLogic.parseRelease(release(), "legacy")!!.apkName)
+    }
 }

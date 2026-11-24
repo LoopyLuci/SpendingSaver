@@ -16,7 +16,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.1.0] - 2026-08-16
 ### Added
-- Polyglot desktop app shell: Tauri/TypeScript UI + Python FastAPI + Go HTTP service
+- Desktop app shell: Tauri/TypeScript UI + Python FastAPI + Go HTTP service
 - Accounts, Categories, Transactions, Budgets, Recurring, Import/Export, Settings, Diagnostics pages
 - Rust sidecar process management for Python/Go backends with status events
 - CSV export, JSON backup export, CSV import with backend validation
@@ -26,5 +26,5 @@ All notable changes to this project will be documented in this file.
 - Alembic migrations, retry resilience, release verification script
 
 ### Changed
-- Product name: PolyglotApp -> SpendingSaver
+- Product name unified as SpendingSaver
 - Tauri updater endpoint and Windows signing metadata configured

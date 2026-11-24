@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: polyglot-app/backend
+        working-directory: spendingsaver-desktop/backend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -50,12 +50,12 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: polyglot-app/go-service
+        working-directory: spendingsaver-desktop/go-service
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: polyglot-app/go-service/go.mod
+          go-version-file: spendingsaver-desktop/go-service/go.mod
       - name: Run Go tests
         run: go test -count=1 ./...
 
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: polyglot-app/desktop
+        working-directory: spendingsaver-desktop/desktop
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get update && sudo apt-get install -y libxkbcommon-dev libwayland-dev libgl1-mesa-dev

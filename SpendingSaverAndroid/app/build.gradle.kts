@@ -46,6 +46,29 @@ android {
         }
     }
 
+    // Device flavors. "universal" is the main build (Android 8+, 64-bit, with the optional Transferd
+    // link). "legacy" runs on Android 5+ and on 32-bit devices; it has no native library, so it offers
+    // LAN sync only. Both share one application id and signing key, and the in-app updater downloads
+    // the release asset whose name ends with the flavor (SpendingSaver-<version>-<flavor>.apk).
+    lint {
+        // Android 5-6 (legacy flavor) ship their own copy of commons-logging, which opencsv's
+        // dependencies also include. The platform copy wins and has the same API, so it is harmless.
+        disable += "DuplicatePlatformClasses"
+    }
+
+    flavorDimensions += "device"
+    productFlavors {
+        create("universal") {
+            dimension = "device"
+            buildConfigField("String", "DEVICE_FLAVOR", "\"universal\"")
+        }
+        create("legacy") {
+            dimension = "device"
+            minSdk = 21
+            buildConfigField("String", "DEVICE_FLAVOR", "\"legacy\"")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -65,6 +88,7 @@ android {
     }
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -86,6 +110,8 @@ android {
 }
 
 dependencies {
+    // java.time etc. on Android 5-7 (legacy flavor); harmless on newer versions.
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     implementation("androidx.core:core-ktx:1.10.1")
     // Installs the baseline profile (src/main/baseline-prof.txt) on first launch.
     implementation("androidx.profileinstaller:profileinstaller:1.3.1")

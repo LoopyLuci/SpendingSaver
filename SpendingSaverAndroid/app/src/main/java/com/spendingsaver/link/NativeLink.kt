@@ -1,7 +1,7 @@
 package com.spendingsaver.link
 
 /**
- * JNI bridge to `libss_link.so` (polyglot-app/link, the Transferd overlay). Every call takes and
+ * JNI bridge to `libss_link.so` (spendingsaver-desktop/link, the Transferd overlay). Every call takes and
  * returns strings so no native types cross the boundary; replies are `{"ok":..,"result"|"error":..}`.
  *
  * The library is built by `scripts/build-link-android.ps1` and only exists for arm64 builds. When

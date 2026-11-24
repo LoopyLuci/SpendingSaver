@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Launch the polyglot desktop app stack."""
+"""Launch the SpendingSaver desktop stack."""
 import subprocess
 import sys
 import time
 import requests
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent  # polyglot-app/
+ROOT = Path(__file__).resolve().parent.parent  # spendingsaver-desktop/
 PYTHON_PORT = 8125
 GO_PORT = 8126
 

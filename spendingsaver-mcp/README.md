@@ -2,7 +2,7 @@
 
 This package exposes SpendingSaver finance operations as MCP tools. The MCP
 server communicates over stdio and calls the HTTP API of the separate
-`polyglot-app/backend` service. It is not a database and does not connect to
+`spendingsaver-desktop/backend` service. It is not a database and does not connect to
 the Android or standalone browser app.
 
 The tool set includes read and write operations for accounts, transactions,
@@ -55,7 +55,7 @@ Safety notes:
   setting `SS_MCP_TOKEN` does not by itself protect your data. Only point
   `SS_API_URL` at a backend you trust, on a trusted machine or network.
 - The MCP adapter does not use the backend's opt-in sync hub
-  (`polyglot-app/docs/sync.md`).
+  (`spendingsaver-desktop/docs/sync.md`).
 - `src/spendingsaver_mcp/tools/` contains older, unused per-tool modules; the
   active tool list and routing live in `server.py`.
 

@@ -11,7 +11,7 @@ version or commit. You should get a first reply within a week.
 ## Scope and design notes
 
 - The Android app and the native desktop app are local-first: data stays on the device unless you export it or turn
-  on sync. Sync is opt-in and described in [`polyglot-app/docs/sync.md`](polyglot-app/docs/sync.md).
+  on sync. Sync is opt-in and described in [`spendingsaver-desktop/docs/sync.md`](spendingsaver-desktop/docs/sync.md).
 - The sync hub only accepts requests that carry a per-device token obtained with the pairing key. Pairing attempts are
   rate limited. Use it on networks you trust; plain HTTP is for local networks only.
 - The MCP adapter can change financial records. Run it only against a backend you trust.

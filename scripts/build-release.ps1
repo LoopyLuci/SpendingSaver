@@ -6,22 +6,25 @@ $root = Split-Path -Parent $PSScriptRoot
 $dist = Join-Path $root 'dist'
 New-Item -ItemType Directory -Force $dist | Out-Null
 
-Push-Location (Join-Path $root 'polyglot-app\desktop')
+Push-Location (Join-Path $root 'spendingsaver-desktop\desktop')
 cargo build --release
 if ($LASTEXITCODE -ne 0) { throw 'cargo build failed' }
 Pop-Location
-$exe = Join-Path $root 'polyglot-app\desktop\target\release\spendingsaver.exe'
+$exe = Join-Path $root 'spendingsaver-desktop\desktop\target\release\spendingsaver.exe'
 $nsis = 'C:\Program Files (x86)\NSIS\makensis.exe'
-& $nsis /V2 "/DVERSION=$Version" "/DEXE=$exe" "/DOUT=$dist\SpendingSaver-Setup-$Version.exe" (Join-Path $root 'polyglot-app\desktop\installer\spendingsaver.nsi')
+& $nsis /V2 "/DVERSION=$Version" "/DEXE=$exe" "/DOUT=$dist\SpendingSaver-Setup-$Version.exe" (Join-Path $root 'spendingsaver-desktop\desktop\installer\spendingsaver.nsi')
 if ($LASTEXITCODE -ne 0) { throw 'makensis failed' }
 
-$apk = Join-Path $root 'SpendingSaverAndroid\app\build\outputs\apk\release\app-release.apk'
-Remove-Item $apk -ErrorAction SilentlyContinue   # never ship a stale file
 Push-Location (Join-Path $root 'SpendingSaverAndroid')
-.\gradlew.bat --no-daemon :app:assembleRelease --console=plain
-if ($LASTEXITCODE -ne 0) { throw 'gradle failed' }
+foreach ($flavor in 'universal', 'legacy') {
+  $cap = (Get-Culture).TextInfo.ToTitleCase($flavor)
+  $apk = Join-Path $root "SpendingSaverAndroid\app\build\outputs\apk\$flavor\release\app-$flavor-release.apk"
+  Remove-Item $apk -ErrorAction SilentlyContinue   # never ship a stale file
+  .\gradlew.bat --no-daemon ":app:assemble${cap}Release" --console=plain
+  if ($LASTEXITCODE -ne 0) { throw "gradle failed ($flavor)" }
+  Copy-Item -ErrorAction Stop $apk "$dist\SpendingSaver-$Version-$flavor.apk" -Force
+}
 Pop-Location
-Copy-Item -ErrorAction Stop $apk "$dist\SpendingSaver-$Version.apk" -Force
 
 Get-ChildItem $dist -File | Where-Object { $_.Name -ne 'SHA256SUMS.txt' } | ForEach-Object {
   "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name

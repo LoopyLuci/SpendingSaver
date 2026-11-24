@@ -9,14 +9,14 @@ description = "A budgeting app for web, desktop and Android: accounts, transacti
 base_url = "http://127.0.0.1:27215"
 health = "/health"
 start = ["{python}", "-m", "uvicorn", "app.api:app", "--host", "127.0.0.1", "--port", "27215"]
-cwd = "polyglot-app/backend"
+cwd = "spendingsaver-desktop/backend"
 ready_timeout_s = 90
 
 [[op]]
-id = "polyglot_backend.run"
+id = "spendingsaver_backend.run"
 kind = "cmd"
-summary = "Run `polyglot-backend` with the given arguments"
-argv = ["{venv_bin}/polyglot-backend{exe}"]
+summary = "Run `spendingsaver-backend` with the given arguments"
+argv = ["{venv_bin}/spendingsaver-backend{exe}"]
 timeout_s = 900
 extra_args = true
 
@@ -24,7 +24,7 @@ extra_args = true
 id = "script.standalone_server"
 kind = "cmd"
 summary = "Standalone entry point for the SpendingSaver backend."
-argv = ["{python}", "polyglot-app/backend/standalone_server.py"]
+argv = ["{python}", "spendingsaver-desktop/backend/standalone_server.py"]
 timeout_s = 900
 extra_args = true
 

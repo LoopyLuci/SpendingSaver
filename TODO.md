@@ -50,7 +50,7 @@ before starting work.
   per-field merge, no TLS in the backend, device token is not hardware-backed on
   Android, and the backend treats data as a single owner's.
 - [ ] **Git history contains private data.** The initial commit tracked
-  `polyglot-app/backend/data/` (a live SQLite database, WAL files, a backup and
+  `spendingsaver-desktop/backend/data/` (a live SQLite database, WAL files, a backup and
   a pairing key). They are untracked now and the pairing key was rotated, but
   they remain in history. Decide whether to rewrite history and treat anything
   in that database as exposed if the repository was ever shared.

@@ -49,7 +49,7 @@ The repository contains four separately built projects:
    database.
 2. **Browser** (`spendingsaver-web/`): React/TypeScript UI with Dexie storage
    in browser IndexedDB.
-3. **Desktop/backend** (`polyglot-app/`): Tauri/React UI, Python FastAPI and
+3. **Desktop/backend** (`spendingsaver-desktop/`): Tauri/React UI, Python FastAPI and
    SQLite backend, plus a Go HTTP service.
 4. **MCP adapter** (`spendingsaver-mcp/`): stdio MCP tools that call the
    desktop/backend HTTP API.
@@ -57,7 +57,7 @@ The repository contains four separately built projects:
 These are not clients of a common account service. The Android and browser
 projects do not sync with each other. An Android device that the user has
 explicitly paired with a desktop backend can sync accounts, categories,
-transactions and budgets with it (`polyglot-app/docs/sync.md`); both stay fully
+transactions and budgets with it (`spendingsaver-desktop/docs/sync.md`); both stay fully
 usable unpaired.
 Android JSON backup/restore and browser CSV transaction import/export are
 manual, distinct workflows; their files are not currently a shared portable
@@ -267,7 +267,7 @@ requires follow-up before cross-currency totals are relied upon.
 | --- | --- | --- |
 | Android | Room database on device | User-selected JSON export/restore for active accounts, categories, transactions, and budgets |
 | Browser | Dexie in IndexedDB for the browser profile and origin | CSV import into a selected account; CSV export of transactions |
-| Desktop/backend | SQLite database under `polyglot-app/backend/data/` | Backend CSV and backup/portable-backup endpoints |
+| Desktop/backend | SQLite database under `spendingsaver-desktop/backend/data/` | Backend CSV and backup/portable-backup endpoints |
 | MCP | No independent finance database | Reads/writes through the configured backend API |
 
 ### 8.3 Import and backup safety
@@ -362,7 +362,7 @@ Project-specific details:
 
 - [Browser project guide](../spendingsaver-web/README.md)
 - [Android project guide](../SpendingSaverAndroid/README.md)
-- [Desktop/backend guide](../polyglot-app/README.md)
+- [Desktop/backend guide](../spendingsaver-desktop/README.md)
 - [MCP guide](../spendingsaver-mcp/README.md)
 
 ## 13. Acceptance criteria

@@ -1,5 +1,5 @@
 [project]
-name = "polyglot-backend"
+name = "spendingsaver-backend"
 version = "0.1.0"
 requires-python = ">=3.9"
 dependencies = [
@@ -33,4 +33,4 @@ build-backend = "hatchling.build"
 packages = ["app"]
 
 [project.scripts]
-polyglot-backend = "app.cli:main"
+spendingsaver-backend = "app.cli:main"

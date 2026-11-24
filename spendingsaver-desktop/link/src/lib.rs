@@ -1,6 +1,6 @@
 //! SpendingSaver Link: a thin, opt-in wrapper over the Transferd overlay node.
 //!
-//! The sync protocol (`polyglot-app/docs/sync.md`) is unchanged. Link only changes *how bytes
+//! The sync protocol (`spendingsaver-desktop/docs/sync.md`) is unchanged. Link only changes *how bytes
 //! travel*: instead of a LAN address, the phone talks to a local endpoint that Transferd carries
 //! to the desktop over a relay or a direct path, end-to-end encrypted.
 

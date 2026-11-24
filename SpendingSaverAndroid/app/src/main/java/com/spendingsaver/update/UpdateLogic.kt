@@ -62,15 +62,21 @@ object UpdateLogic {
     }
 
     /** Reads the GitHub "latest release" JSON. Returns null when it has no APK asset or no usable version. */
-    fun parseRelease(json: String): ReleaseInfo? {
+    fun parseRelease(json: String, flavor: String = "universal"): ReleaseInfo? {
         val root = runCatching { JsonParser.parseString(json).asJsonObject }.getOrNull() ?: return null
         if (root.bool("draft") || root.bool("prerelease")) return null
         val tag = root.str("tag_name") ?: return null
         if (parseVersion(tag) == null) return null
         val assets = root.getAsJsonArray("assets") ?: return null
-        val apk = assets.map { it.asJsonObject }
+        val apks = assets.map { it.asJsonObject }
             .filter { (it.str("name") ?: "").endsWith(".apk", ignoreCase = true) }
-            .minByOrNull { if ((it.str("name") ?: "").contains("debug", true)) 1 else 0 } ?: return null
+        // Prefer this build's own flavor (SpendingSaver-1.2.0-legacy.apk), then an unlabelled APK
+        // (older releases), and never another flavor's file or a debug build.
+        fun nameOf(o: com.google.gson.JsonObject) = (o.str("name") ?: "").lowercase()
+        val others = listOf("universal", "legacy").filter { it != flavor.lowercase() }
+        val apk = apks.firstOrNull { nameOf(it).endsWith("-${flavor.lowercase()}.apk") }
+            ?: apks.filter { n -> others.none { nameOf(n).endsWith("-$it.apk") } && !nameOf(n).contains("debug") }.firstOrNull()
+            ?: return null
         val url = apk.str("browser_download_url") ?: return null
         if (!isAllowedUrl(url)) return null
         val digest = apk.str("digest")?.removePrefix("sha256:")?.lowercase()?.takeIf { Regex("^[0-9a-f]{64}$").matches(it) }

@@ -3,7 +3,7 @@
 Off by default. When the user turns it on, the backend
 
 1. serves the sync-only gateway (``app/link_gateway.py``) on 127.0.0.1:8126, and
-2. runs ``ss-link-agent`` (``polyglot-app/link``), which publishes that gateway to *paired*
+2. runs ``ss-link-agent`` (``spendingsaver-desktop/link``), which publishes that gateway to *paired*
    Transferd devices over a relay or direct path, end to end encrypted, with no open port.
 
 The sync protocol itself is unchanged: the phone still needs the pairing key and gets a
@@ -106,7 +106,7 @@ class LinkSupervisor:
         self.last_error = None
         agent = find_agent()
         if not agent:
-            self.last_error = "ss-link-agent is not installed (build polyglot-app/link)"
+            self.last_error = "ss-link-agent is not installed (build spendingsaver-desktop/link)"
             raise RuntimeError(self.last_error)
         settings = load_settings()
         try:

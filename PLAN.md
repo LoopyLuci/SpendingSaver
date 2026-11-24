@@ -13,8 +13,8 @@ Product requirements and unresolved decisions are recorded in the
 - **Browser:** standalone React app using browser storage; see
   [`spendingsaver-web/README.md`](spendingsaver-web/README.md).
 - **Desktop/backend:** Tauri UI with Python and Go services; see
-  [`polyglot-app/README.md`](polyglot-app/README.md) and its
-  [runbook](polyglot-app/docs/runbook.md).
+  [`spendingsaver-desktop/README.md`](spendingsaver-desktop/README.md) and its
+  [runbook](spendingsaver-desktop/docs/runbook.md).
 - **MCP:** adapter to the desktop backend API; see
   [`spendingsaver-mcp/README.md`](spendingsaver-mcp/README.md).
 
@@ -33,7 +33,7 @@ Product requirements and unresolved decisions are recorded in the
    [`TODO.md`](TODO.md).
 4. **Keep sync optional.** Android and the desktop backend must each remain fully
    usable alone; their opt-in sync is specified in
-   [`polyglot-app/docs/sync.md`](polyglot-app/docs/sync.md). Extending sync to the
+   [`spendingsaver-desktop/docs/sync.md`](spendingsaver-desktop/docs/sync.md). Extending sync to the
    browser app or MCP adapter, adding shared accounts, or a common release
    process still needs an explicit product decision.
 

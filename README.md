@@ -4,7 +4,7 @@ SpendingSaver is a collection of personal-finance applications and integrations
 in one repository. The applications are separate projects, not one shared
 runtime: in particular, the Android app stores data locally and works fully on
 its own. It can optionally pair with the desktop app to sync (see
-[`polyglot-app/docs/sync.md`](polyglot-app/docs/sync.md)); nothing syncs unless
+[`spendingsaver-desktop/docs/sync.md`](spendingsaver-desktop/docs/sync.md)); nothing syncs unless
 you set that up.
 
 ## Install SpendingSaver
@@ -18,7 +18,8 @@ You do not need an account, and you do not need to know anything about GitHub. Y
 | You have | Click this file | What it is |
 | --- | --- | --- |
 | A **Windows** PC (Windows 10 or 11) | `SpendingSaver-Setup-1.1.0.exe` | The installer for the computer app |
-| An **Android** phone or tablet (Android 8 or newer) | `SpendingSaver-1.1.0.apk` | The phone app |
+| An **Android** phone or tablet (Android 8 or newer, almost every phone from 2017 on) | `SpendingSaver-1.1.0.apk` | The phone app (the main "Universal" version) |
+| An **older or 32-bit** Android device (Android 5 to 7, or a device the main file says it cannot install on, such as older Amazon Fire tablets) | `SpendingSaver-<version>-legacy.apk` (from the next release on) | The same app without the optional remote-sync extra; everything else works |
 
 Ignore the other files (`Source code` and `SHA256SUMS.txt`); they are for developers. If the version number in the file name is newer than 1.1.0, that is fine, pick the same kind of file.
 
@@ -88,7 +89,7 @@ Using both? Install both, then follow **Phone Sync** in the desktop app to pair 
 
 Sample data, not real accounts. Every screen is in the project READMEs:
 [Android gallery](SpendingSaverAndroid/README.md#screenshots) and
-[desktop gallery](polyglot-app/desktop/README.md#screenshots).
+[desktop gallery](spendingsaver-desktop/desktop/README.md#screenshots).
 
 <p align="center">
   <img src="docs/screenshots/desktop-dashboard.png" alt="Desktop dashboard: net worth, monthly income and spending, spending by category and a six-month chart" width="760">
@@ -111,8 +112,8 @@ Sample data, not real accounts. Every screen is in the project READMEs:
 | --- | --- | --- |
 | Android app | [`SpendingSaverAndroid/`](SpendingSaverAndroid/README.md) | Kotlin, Jetpack Compose, Room. Local-first; JSON backup/restore; optional opt-in sync with the desktop backend. |
 | Browser app | [`spendingsaver-web/`](spendingsaver-web/README.md) | React, TypeScript, Vite, Dexie/IndexedDB. Runs in the browser. |
-| Desktop app | [`polyglot-app/desktop/`](polyglot-app/desktop/README.md) | Native Rust GUI (egui) with its own local SQLite database. Opens instantly; no web view, no background services. Optional phone sync. |
-| Backend (optional) | [`polyglot-app/`](polyglot-app/README.md) | Python FastAPI backend and Go service used by the MCP adapter and the API. |
+| Desktop app | [`spendingsaver-desktop/desktop/`](spendingsaver-desktop/desktop/README.md) | Native Rust GUI (egui) with its own local SQLite database. Opens instantly; no web view, no background services. Optional phone sync. |
+| Backend (optional) | [`spendingsaver-desktop/`](spendingsaver-desktop/README.md) | Python FastAPI backend and Go service used by the MCP adapter and the API. |
 | MCP integration | [`spendingsaver-mcp/`](spendingsaver-mcp/README.md) | Model Context Protocol tools that call the desktop backend's HTTP API. |
 
 The product requirements and implementation status are in the
@@ -133,12 +134,12 @@ npm run dev
 ```powershell
 # Android debug build (JDK 17 and Android SDK platform 34 required)
 Set-Location SpendingSaverAndroid
-.\gradlew.bat :app:assembleDebug
+.\gradlew.bat assembleDebug
 ```
 
 For desktop development, backend/API operations, tests, and packaging, see the
-[`polyglot-app` README](polyglot-app/README.md) and
-[operator runbook](polyglot-app/docs/runbook.md).
+[`spendingsaver-desktop` README](spendingsaver-desktop/README.md) and
+[operator runbook](spendingsaver-desktop/docs/runbook.md).
 
 ## Repository guidance
 

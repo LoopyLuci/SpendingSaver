@@ -19,9 +19,9 @@ require = [{ tool = "python", min = "3.10", url = "https://www.python.org/downlo
 [build]
 steps = [
   ["python", "-m", "venv", ".venv"],
-  ["{venv_python}", "-m", "pip", "install", "-q", "-e", "polyglot-app/backend"],
-  ["go", "-C", "polyglot-app/go-service", "build", "./..."],
-  ["cargo", "build", "--release", "--manifest-path", "polyglot-app/desktop/Cargo.toml"],
+  ["{venv_python}", "-m", "pip", "install", "-q", "-e", "spendingsaver-desktop/backend"],
+  ["go", "-C", "spendingsaver-desktop/go-service", "build", "./..."],
+  ["cargo", "build", "--release", "--manifest-path", "spendingsaver-desktop/desktop/Cargo.toml"],
   ["{venv_python}", "-m", "pip", "install", "-q", "-e", "spendingsaver-mcp"],
   ["npm", "ci", "--prefix", "spendingsaver-web"],
   ["npm", "run", "build", "--prefix", "spendingsaver-web"],

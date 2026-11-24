@@ -29,13 +29,13 @@ function Step($name, [scriptblock]$body) {
 
 function EnsureVenv {
     if (-not (Test-Path $py)) { python -m venv $venv }
-    & $py -m pip install -q --disable-pip-version-check -e "$root/polyglot-app/backend[dev]" -e "$root/spendingsaver-mcp[test]"
+    & $py -m pip install -q --disable-pip-version-check -e "$root/spendingsaver-desktop/backend[dev]" -e "$root/spendingsaver-mcp[test]"
     if ($LASTEXITCODE -ne 0) { throw "pip install failed ($LASTEXITCODE)" }
 }
 
 Step 'backend' {
     EnsureVenv
-    Push-Location "$root\polyglot-app\backend"
+    Push-Location "$root\spendingsaver-desktop\backend"
     try { & $py -m pytest -q; $script:code = $LASTEXITCODE } finally { Pop-Location }
 }
 Step 'mcp' {
@@ -51,17 +51,17 @@ Step 'web' {
     } finally { Pop-Location }
 }
 Step 'desktop' {
-    Push-Location "$root/polyglot-app/desktop"
+    Push-Location "$root/spendingsaver-desktop/desktop"
     try { cargo test --release; $script:code = $LASTEXITCODE } finally { Pop-Location }
 }
 Step 'android' {
     Push-Location "$root\SpendingSaverAndroid"
-    try { & .\gradlew.bat :app:testDebugUnitTest --console=plain; $script:code = $LASTEXITCODE } finally { Pop-Location }
+    try { & .\gradlew.bat :app:testUniversalDebugUnitTest :app:testLegacyDebugUnitTest --console=plain; $script:code = $LASTEXITCODE } finally { Pop-Location }
 }
 
 Step 'link' {
     # Fetches Transferd from GitHub on first run; the relayd end-to-end test is skipped unless RELAYD_BIN is set.
-    Push-Location "$root\polyglot-app\link"
+    Push-Location "$root\spendingsaver-desktop\link"
     try { cargo test; $script:code = $LASTEXITCODE } finally { Pop-Location }
 }
 
