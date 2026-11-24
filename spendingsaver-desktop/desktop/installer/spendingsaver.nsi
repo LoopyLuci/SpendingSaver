@@ -41,6 +41,9 @@ VIAddVersionKey "LegalCopyright" "MIT License"
 Section "Install"
   SetOutPath "$INSTDIR"
   File "${EXE}"
+!ifdef AGENT
+  File "${AGENT}"
+!endif
   WriteUninstaller "$INSTDIR\Uninstall.exe"
   CreateDirectory "$SMPROGRAMS\SpendingSaver"
   CreateShortCut "$SMPROGRAMS\SpendingSaver\SpendingSaver.lnk" "$INSTDIR\spendingsaver.exe"
@@ -59,6 +62,7 @@ SectionEnd
 
 Section "Uninstall"
   Delete "$INSTDIR\spendingsaver.exe"
+  Delete "$INSTDIR\ss-link-agent.exe"
   Delete "$INSTDIR\Uninstall.exe"
   RMDir "$INSTDIR"
   Delete "$SMPROGRAMS\SpendingSaver\SpendingSaver.lnk"

@@ -4,11 +4,13 @@
 
 mod app;
 mod assistant;
+mod attachments;
 mod bank;
 mod calc;
 mod db;
 mod extras;
 mod hub;
+mod link;
 mod model;
 mod more;
 mod sync_page;

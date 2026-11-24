@@ -6,7 +6,7 @@ only "open the database file and read it".
 
 ```powershell
 cargo run --release        # or: cargo build --release, then run target/release/spendingsaver
-cargo test --release       # 33 tests: storage, tax, calculations, sync hub, recurring, assistant, bank import
+cargo test --release       # 41 tests: storage, tax, calculations, sync hub, recurring, assistant, bank import, link, attachments
 ```
 
 ## Screenshots
@@ -35,7 +35,8 @@ Sample data. Light theme; dark and system themes are in Settings.
 | Tax | US federal estimate for 2025 and 2026 (same engine and numbers as the Android app); a planning aid, not tax advice |
 | Import / Export | JSON backup (the same file the Android app makes), CSV export, CSV import |
 | Bank Link | Optional read-only SimpleFIN Bridge link (US). The credential is a file in the data folder, never in the database, backup or sync |
-| Phone Sync | Optional. Turn it on to pair a phone by QR code over your Wi-Fi |
+| Phone Sync | Optional. Turn it on to pair a phone by QR code over your Wi-Fi. "Connect from anywhere" (also optional) carries the same sync over an end-to-end encrypted Transferd link through a relay you run, so no router port is opened; it needs `ss-link-agent.exe`, which the installer places next to the app. If the app is closed or crashes the agent stops with it |
+| Attachments | While editing a transaction, attach receipts or documents (PDF, images, Office/text files up to 25 MB). Copied to an `attachments` folder beside the database; never executables or scripts. Desktop-only: not in the Android backup or phone sync |
 | Settings | Light / dark / system theme, accent colour, default currency |
 
 ## Data
@@ -44,10 +45,10 @@ Sample data. Light theme; dark and system themes are in Settings.
 in WAL mode. Deleting something marks it deleted (a tombstone) so sync can carry the deletion. The data model matches
 the Android JSON backup, so Export here → Restore there (and back) works with no server.
 
-The app does not talk to the network unless you turn on Phone Sync (local network only) or connect the optional bank link (HTTPS to simplefin.org only).
+The app does not talk to the network unless you turn on Phone Sync (local network only), "Connect from anywhere" (outbound, encrypted, to the relay you configure) or the optional bank link (HTTPS to simplefin.org only).
 
 ## Layout
 
 `src/main.rs` window start-up · `app.rs` pages and state · `db.rs` SQLite · `model.rs` records ·
-`calc.rs` totals and budgets · `extras.rs` recurring, goals, debts · `assistant.rs` on-device answers · `bank.rs` SimpleFIN link · `more.rs` their pages · `tax.rs` tax engine · `hub.rs` sync protocol v1 server ·
+`calc.rs` totals and budgets · `extras.rs` recurring, goals, debts · `assistant.rs` on-device answers · `bank.rs` SimpleFIN link · `more.rs` their pages · `tax.rs` tax engine · `hub.rs` sync protocol v1 server · `link.rs` the optional Transferd agent supervisor · `attachments.rs` receipt files ·
 `sync_page.rs` pairing screen and QR · `ui.rs` theme and widgets.

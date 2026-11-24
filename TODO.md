@@ -18,8 +18,9 @@ before starting work.
 - [ ] **Desktop packaging is unverified.** The native desktop app builds with `cargo build --release` and starts in
   about 0.1 s, but there is no installer, no code signing, and it has only been run on Windows.
 - [x] **Desktop parity with the old Tauri app.** Done natively: recurring items, goals, debts, the on-device
-  assistant and the optional SimpleFIN bank link. Still missing: Connect from anywhere (Transferd link: phone sync
-  works on the local network only) and attachments. Recurring items, goals and debts are desktop-only and are not in
+  assistant and the optional SimpleFIN bank link. Connect from anywhere (Transferd link) and transaction attachments (receipts) are now
+  in the native app too, but only unit tested plus a real agent start and a phone code: the link has not carried a
+  desktop sync from a phone on another network, and attachments have not been tried through the file picker. Recurring items, goals and debts are desktop-only and are not in
   the Android backup or phone sync. The SimpleFIN link has unit tests for parsing and import but has not been run
   against a live bridge account.
 - [ ] **Android release APK is signed but untested on a phone.** A release key exists locally (outside the repo) and

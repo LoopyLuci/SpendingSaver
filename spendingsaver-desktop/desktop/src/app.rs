@@ -168,6 +168,7 @@ pub struct App {
     restore_pending: Option<Backup>,
     sync: crate::sync_page::SyncPage,
     more: crate::more::More,
+    attach: crate::attachments::Panel,
 }
 
 fn err(msg: &str) -> Option<(String, bool, Instant)> {
@@ -204,6 +205,7 @@ impl App {
             restore_pending: None,
             sync: crate::sync_page::SyncPage::default(),
             more: crate::more::More::default(),
+            attach: crate::attachments::Panel::default(),
         };
         // Recurring items that came due while the app was closed are posted before the first screen is drawn.
         app.db.post_due_recurring(Local::now().date_naive());
@@ -239,6 +241,7 @@ impl App {
             descriptions: descs,
         };
         self.tx_key.2 = usize::MAX; // force the transaction list to refilter
+        self.attach.refresh_marks(&self.db);
     }
 
     fn today(&self) -> NaiveDate {
@@ -472,6 +475,9 @@ impl App {
                     cancel = true;
                 }
             });
+            if let Some(t) = self.tx_form.editing.clone() {
+                self.attach.show(ui, &self.db, &t.id);
+            }
         });
         if cancel {
             self.tx_form = TxForm::blank();
@@ -540,7 +546,11 @@ impl App {
                         ui.label(&t.date);
                     });
                     row.col(|ui| {
-                        ui.label(&t.description);
+                        if self.attach.marks.contains(&t.id) {
+                            ui.label(format!("{}  (file attached)", t.description));
+                        } else {
+                            ui.label(&t.description);
+                        }
                     });
                     row.col(|ui| {
                         ui.label(RichText::new(self.data.category_name(&t.category_id)).weak());
@@ -552,21 +562,23 @@ impl App {
                         ui.label(RichText::new(money(t.amount, &cur)).color(ui::money_color(t.amount)).strong());
                     });
                     row.col(|ui| {
-                        if ui.small_button("Edit").clicked() {
-                            edit = Some(TxForm {
-                                editing: Some(t.clone()),
-                                description: t.description.clone(),
-                                amount: format!("{:.2}", t.amount.abs()),
-                                expense: t.amount < 0.0,
-                                date: parse_date(&t.date),
-                                account: Some(t.account_id.clone()),
-                                category: t.category_id.clone(),
-                                notes: t.notes.clone().unwrap_or_default(),
-                            });
-                        }
-                        if ui.small_button("Delete").clicked() {
-                            ask = Some(Confirm { text: format!("Delete “{}”?", t.description), act: Act::DeleteTx(t.id.clone()) });
-                        }
+                        ui.horizontal(|ui| {
+                            if ui.small_button("Edit").clicked() {
+                                edit = Some(TxForm {
+                                    editing: Some(t.clone()),
+                                    description: t.description.clone(),
+                                    amount: format!("{:.2}", t.amount.abs()),
+                                    expense: t.amount < 0.0,
+                                    date: parse_date(&t.date),
+                                    account: Some(t.account_id.clone()),
+                                    category: t.category_id.clone(),
+                                    notes: t.notes.clone().unwrap_or_default(),
+                                });
+                            }
+                            if ui.small_button("Delete").clicked() {
+                                ask = Some(Confirm { text: format!("Delete “{}”?", t.description), act: Act::DeleteTx(t.id.clone()) });
+                            }
+                        });
                     });
                 });
             });
@@ -1287,7 +1299,7 @@ fn resolve_color(input: &str) -> Result<Option<String>, ()> {
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.sync_theme(ctx);
-        if self.sync.take_changed() {
+        if self.sync.take_changed(&self.db) {
             self.reload();
             self.say("Synced with your phone.", false);
         }

@@ -34,7 +34,7 @@ store:
 - transaction: account, amount, description, category, date, notes, created time
 - budget: category, amount, period, start date
 
-Everything else (recurring items, goals, debts, attachments, budget carry-over,
+Everything else (recurring items, goals, debts, attachments (receipt files), budget carry-over,
 app settings, the Android AI and tax data) stays where it was created.
 
 ## Pairing screen and automatic sync

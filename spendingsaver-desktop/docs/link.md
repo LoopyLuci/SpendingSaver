@@ -7,6 +7,12 @@ transfer protocol. The phone and the PC each make only *outbound* connections (t
 directly when a path exists), so there is no open port, port-forward or VPN, and it works behind
 NAT/CGNAT, on mobile data, and across networks.
 
+> **Which desktop?** The native desktop app (`spendingsaver-desktop/desktop`) supervises `ss-link-agent`
+> itself (`desktop/src/link.rs`) and points it straight at its own sync hub, which serves only
+> `/api/sync/v1/*` and `/health` and 404s everything else, so no separate gateway is needed. Turn it on in
+> **Phone Sync → Connect from anywhere**. The older Python backend does the same through
+> `backend/app/link.py` and its gateway. The agent exits when the app that started it exits or crashes.
+
 It is **opt-in on both sides** and changes nothing when off. Both apps stay fully usable alone, and
 LAN sync keeps working exactly as before.
 

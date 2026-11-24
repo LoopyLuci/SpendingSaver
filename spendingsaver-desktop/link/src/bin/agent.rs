@@ -11,6 +11,7 @@
 //!   SS_LINK_HUB      sync-only gateway to publish (default 127.0.0.1:8126)
 //!   SS_LINK_CONTROL  control address (default 127.0.0.1:8127); loopback only
 //!   SS_LINK_TOKEN    if set, every control request must carry it as "token"
+//!   SS_LINK_EXIT_ON_STDIN_EOF  if "1", exit when stdin closes (the parent app died, so never linger)
 
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -92,6 +93,16 @@ async fn main() -> Result<(), String> {
         hub: Some(addr_env("SS_LINK_HUB", "127.0.0.1:8126")?),
     };
     let token = std::env::var("SS_LINK_TOKEN").ok().filter(|t| !t.is_empty());
+
+    if std::env::var("SS_LINK_EXIT_ON_STDIN_EOF").as_deref() == Ok("1") {
+        // The desktop app keeps our stdin open for as long as it lives; when it exits or crashes the
+        // pipe closes and this agent stops instead of lingering with its identity and sockets.
+        std::thread::spawn(|| {
+            let mut sink = Vec::new();
+            let _ = std::io::Read::read_to_end(&mut std::io::stdin(), &mut sink);
+            std::process::exit(0);
+        });
+    }
 
     let link = Arc::new(Link::start(cfg).await?);
     let listener = TcpListener::bind(control).await.map_err(|e| format!("control {control}: {e}"))?;

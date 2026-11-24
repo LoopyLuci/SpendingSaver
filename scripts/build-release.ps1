@@ -11,8 +11,14 @@ cargo build --release
 if ($LASTEXITCODE -ne 0) { throw 'cargo build failed' }
 Pop-Location
 $exe = Join-Path $root 'spendingsaver-desktop\desktop\target\release\spendingsaver.exe'
+# The optional "Connect from anywhere" agent (Transferd). Built from the link crate; fetching Transferd needs network.
+Push-Location (Join-Path $root 'spendingsaver-desktop\link')
+cargo build --release --bin ss-link-agent
+if ($LASTEXITCODE -ne 0) { throw 'link agent build failed' }
+Pop-Location
+$agent = Join-Path $root 'spendingsaver-desktop\link\target\release\ss-link-agent.exe'
 $nsis = 'C:\Program Files (x86)\NSIS\makensis.exe'
-& $nsis /V2 "/DVERSION=$Version" "/DEXE=$exe" "/DOUT=$dist\SpendingSaver-Setup-$Version.exe" (Join-Path $root 'spendingsaver-desktop\desktop\installer\spendingsaver.nsi')
+& $nsis /V2 "/DVERSION=$Version" "/DEXE=$exe" "/DAGENT=$agent" "/DOUT=$dist\SpendingSaver-Setup-$Version.exe" (Join-Path $root 'spendingsaver-desktop\desktop\installer\spendingsaver.nsi')
 if ($LASTEXITCODE -ne 0) { throw 'makensis failed' }
 
 Push-Location (Join-Path $root 'SpendingSaverAndroid')
