@@ -609,8 +609,12 @@ export interface HubInfo { name: string; lan_ip: string; port: number; key: stri
 export interface SyncDevice { id: string; name: string; created_at?: string; last_seen?: string | null; revoked?: boolean }
 
 async function hubJson(path: string, init?: RequestInit) {
-  const res = await fetch(`${API_BASE}${path}`, init)
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const headers = init?.body ? { 'Content-Type': 'application/json', ...(init.headers || {}) } : init?.headers
+  const res = await fetch(`${API_BASE}${path}`, { ...init, headers })
+  if (!res.ok) {
+    const detail = await res.json().then((j: any) => j?.detail).catch(() => null)
+    throw new Error(typeof detail === 'string' ? detail : `HTTP ${res.status}`)
+  }
   return res.json()
 }
 
@@ -620,5 +624,17 @@ export const listSyncDevices = async (): Promise<SyncDevice[]> => {
   const data = await hubJson('/api/sync/v1/devices')
   return Array.isArray(data) ? data : (data.devices ?? [])
 }
+
+export interface LinkStatus {
+  available: boolean; enabled: boolean; running: boolean; relays: string[]; name: string
+  node_id: string | null; error: string | null; peers: { node_id: string; name: string }[]
+}
+export const getLinkStatus = (): Promise<LinkStatus> => hubJson('/api/link/status')
+export const enableLink = (relays: string[], name?: string): Promise<LinkStatus> =>
+  hubJson('/api/link/enable', { method: 'POST', body: JSON.stringify({ relays, name }) })
+export const disableLink = (): Promise<LinkStatus> => hubJson('/api/link/disable', { method: 'POST' })
+export const createLinkInvite = (): Promise<{ invite: string; node_id: string }> =>
+  hubJson('/api/link/invite', { method: 'POST', body: JSON.stringify({ ttl_s: 600 }) })
+
 export const revokeSyncDevice = (id: string) =>
   hubJson(`/api/sync/v1/devices/${encodeURIComponent(id)}`, { method: 'DELETE' })

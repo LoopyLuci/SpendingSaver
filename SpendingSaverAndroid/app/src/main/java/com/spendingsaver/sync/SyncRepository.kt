@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import com.google.gson.Gson
 import com.spendingsaver.data.AppDatabase
+import com.spendingsaver.link.LinkManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,7 @@ class SyncRepository @Inject constructor(
     db: AppDatabase,
     client: OkHttpClient,
     gson: Gson,
+    private val link: LinkManager,
 ) {
     data class UiState(
         val paired: Boolean = false,
@@ -34,7 +36,7 @@ class SyncRepository @Inject constructor(
 
     private val prefs = context.getSharedPreferences(SharedPrefsSyncStateStore.FILE, Context.MODE_PRIVATE)
     private val stateStore = SharedPrefsSyncStateStore(context)
-    private val engine = SyncEngine(RoomSyncStore(db), HttpSyncApi(client, gson), stateStore)
+    private val engine = SyncEngine(RoomSyncStore(db), LinkAwareSyncApi(HttpSyncApi(client, gson), link), stateStore)
     private val lock = Mutex()
 
     private val _ui = MutableStateFlow(snapshot())
@@ -42,7 +44,7 @@ class SyncRepository @Inject constructor(
 
     private fun snapshot(message: String? = null, isError: Boolean = false, busy: Boolean = false): UiState {
         val s = stateStore.load()
-        return UiState(s.isPaired, s.hubUrl, busy, message, isError, s.lastSyncAtMs, s.isPaired && autoSyncEnabled())
+        return UiState(s.isPaired, if (s.hubUrl.startsWith(LINK_SCHEME)) "your desktop (from anywhere)" else s.hubUrl, busy, message, isError, s.lastSyncAtMs, s.isPaired && autoSyncEnabled())
     }
 
     // Kept beside the sync state but outside SyncState: it is a UI preference, not protocol state.
@@ -67,6 +69,16 @@ class SyncRepository @Inject constructor(
         _ui.value = snapshot("Paired. Syncing…", busy = true)
         describe(engine.sync())
     }
+
+    /** Pairs over the Transferd link: the desktop's invite finds the desktop, the pairing key authorises sync. */
+    suspend fun pairViaLink(invite: String, key: String) = run("Connecting…") {
+        val nodeId = link.acceptInvite(invite)
+        engine.pair(LINK_SCHEME + nodeId, key, "Android ${Build.MODEL}")
+        _ui.value = snapshot("Paired. Syncing…", busy = true)
+        describe(engine.sync())
+    }
+
+    val linkAvailable: Boolean get() = link.isAvailable
 
     suspend fun syncNow() = run(null) { describe(engine.sync()) }
 

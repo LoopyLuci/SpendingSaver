@@ -3,9 +3,9 @@
   Runs the project's local test suites (GitHub Actions is not available for this repo).
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File scripts/check.ps1                # everything
-  powershell -ExecutionPolicy Bypass -File scripts/check.ps1 -Only backend  # backend | mcp | web | desktop | android
+  powershell -ExecutionPolicy Bypass -File scripts/check.ps1 -Only backend  # backend | mcp | web | desktop | android | link
 #>
-param([ValidateSet('all', 'backend', 'mcp', 'web', 'desktop', 'android')][string]$Only = 'all')
+param([ValidateSet('all', 'backend', 'mcp', 'web', 'desktop', 'android', 'link')][string]$Only = 'all')
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
@@ -60,6 +60,16 @@ Step 'desktop' {
 Step 'android' {
     Push-Location "$root\SpendingSaverAndroid"
     try { & .\gradlew.bat :app:testDebugUnitTest --console=plain; $script:code = $LASTEXITCODE } finally { Pop-Location }
+}
+
+Step 'link' {
+    # Needs the sibling Transferd checkout (and its relayd for the e2e test); skipped if absent.
+    if (-not (Test-Path "$root\..\Transferd\crates\transferd-overlay")) {
+        Write-Host 'Transferd checkout not found next to this repo; skipping link tests.' -ForegroundColor Yellow
+        return
+    }
+    Push-Location "$root\polyglot-app\link"
+    try { cargo test --release; $script:code = $LASTEXITCODE } finally { Pop-Location }
 }
 
 Write-Host "`n=== summary ===" -ForegroundColor Cyan

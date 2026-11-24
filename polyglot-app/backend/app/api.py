@@ -49,7 +49,10 @@ async def lifespan(app: FastAPI):
             db.commit()
     finally:
         db.close()
+    from app.link import start_if_enabled, shutdown as link_shutdown
+    await start_if_enabled()
     yield
+    await link_shutdown()
     # Graceful shutdown: flush WAL so unsynced writes persist cleanly.
     try:
         from app.database import engine
@@ -74,6 +77,10 @@ app.include_router(connectors_router)
 # Self-hosted private server: LAN pairing + connection keys.
 from app.hosting import router as hosting_router, ensure_host_table
 app.include_router(hosting_router)
+
+# Optional Transferd link ("connect from anywhere"); off unless the user enables it.
+from app.link import router as link_router
+app.include_router(link_router)
 
 class Account(BaseModel):
     id: Optional[str] = None

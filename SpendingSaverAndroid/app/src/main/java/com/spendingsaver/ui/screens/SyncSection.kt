@@ -16,11 +16,14 @@ import java.util.Date
  * Optional pairing with the SpendingSaver desktop hub. The app works fully
  * without it; nothing is sent anywhere until the user pairs and taps Sync.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SyncSection(viewModel: SyncViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
     var url by remember { mutableStateOf("") }
     var key by remember { mutableStateOf("") }
+    var invite by remember { mutableStateOf("") }
+    var anywhere by remember { mutableStateOf(false) }
     val colorScheme = MaterialTheme.colorScheme
 
     SettingsSection("Desktop sync (optional)") {
@@ -62,28 +65,53 @@ fun SyncSection(viewModel: SyncViewModel = hiltViewModel()) {
                 }
             }
         } else {
-            OutlinedTextField(
-                value = url,
-                onValueChange = { url = it },
-                label = { Text("Hub address") },
-                placeholder = { Text("192.168.1.20:8125") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
-                modifier = Modifier.fillMaxWidth(),
-            )
+            if (viewModel.linkAvailable) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(selected = !anywhere, onClick = { anywhere = false }, label = { Text("Same network") })
+                    FilterChip(selected = anywhere, onClick = { anywhere = true }, label = { Text("From anywhere") })
+                }
+                Spacer(Modifier.height(8.dp))
+            }
+            if (anywhere) {
+                Text(
+                    "On the desktop, open Phone Sync → Connect from anywhere → New phone invite, then paste it here. " +
+                        "Your data travels end-to-end encrypted between your devices, through a relay that only sees ciphertext.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = invite,
+                    onValueChange = { invite = it },
+                    label = { Text("Phone invite") },
+                    minLines = 2,
+                    maxLines = 4,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else {
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = { url = it },
+                    label = { Text("Hub address") },
+                    placeholder = { Text("192.168.1.20:8125") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
                 value = key,
                 onValueChange = { key = it.uppercase() },
                 label = { Text("Pairing key") },
-                supportingText = { Text("Shown on the desktop in the hub's host info (local access only)") },
+                supportingText = { Text("Shown on the desktop in Phone Sync (local access only)") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(8.dp))
             Button(
-                onClick = { viewModel.pair(url, key) },
-                enabled = !state.busy && url.isNotBlank() && key.isNotBlank(),
+                onClick = { if (anywhere) viewModel.pairViaLink(invite, key) else viewModel.pair(url, key) },
+                enabled = !state.busy && key.isNotBlank() && (if (anywhere) invite.isNotBlank() else url.isNotBlank()),
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(if (state.busy) "Pairing…" else "Pair and sync") }
         }

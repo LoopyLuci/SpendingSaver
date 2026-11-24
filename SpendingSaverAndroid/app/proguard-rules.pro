@@ -30,3 +30,6 @@
 -dontwarn javax.script.**
 -dontwarn java.beans.**
 -dontwarn org.apache.commons.beanutils.**
+
+# JNI: the native library binds to these exact names.
+-keep class com.spendingsaver.link.NativeLink { *; }

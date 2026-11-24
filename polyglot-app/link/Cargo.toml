@@ -1,0 +1,44 @@
+# SpendingSaver Link: the optional Transferd transport for sync.
+#
+# Transferd (the secure transfer protocol, a sibling repository) gives two paired devices an
+# end-to-end encrypted, post-quantum stream between them over a relay or a direct path, with no
+# open port or VPN. This crate wraps its overlay node so that:
+#   * the desktop hub publishes ONE local service (the sync-only gateway) to paired devices, and
+#   * the Android app reaches it through a stable local endpoint, wherever either device is.
+# Built as a `ss-link-agent` executable (desktop sidecar) and a cdylib (Android JNI).
+[package]
+name = "spendingsaver-link"
+version = "0.1.0"
+edition = "2021"
+description = "Optional Transferd transport for SpendingSaver sync"
+publish = false
+
+[lib]
+name = "ss_link"
+crate-type = ["rlib", "cdylib"]
+
+[[bin]]
+name = "ss-link-agent"
+path = "src/bin/agent.rs"
+
+[dependencies]
+# Path dependency on the sibling Transferd checkout (H:\Projects\Transferd next to this repo).
+# Switch these to a pinned `git` dependency once Transferd's source is published.
+transferd-overlay = { path = "../../../Transferd/crates/transferd-overlay" }
+transferd-crypto = { path = "../../../Transferd/crates/transferd-crypto" }
+tokio = { version = "1", features = ["rt-multi-thread", "net", "io-util", "macros", "sync", "time", "signal"] }
+serde_json = "1"
+rand = "0.8"
+hex = "0.4"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
+
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "0.21"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

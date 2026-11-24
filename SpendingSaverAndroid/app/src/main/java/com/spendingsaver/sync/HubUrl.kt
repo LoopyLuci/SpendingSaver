@@ -17,6 +17,11 @@ object HubUrl {
     fun parse(input: String): Result {
         val trimmed = input.trim()
         if (trimmed.isEmpty()) return Result.Invalid("Enter the hub address, e.g. 192.168.1.20:8125")
+        if (trimmed.startsWith(LINK_SCHEME)) {
+            val id = trimmed.removePrefix(LINK_SCHEME)
+            return if (id.length in 16..128 && id.all { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' }) Result.Ok(LINK_SCHEME + id.lowercase())
+            else Result.Invalid("That link id is not valid")
+        }
         val withScheme = if ("://" in trimmed) trimmed else "http://$trimmed"
         val uri = try {
             URI(withScheme)

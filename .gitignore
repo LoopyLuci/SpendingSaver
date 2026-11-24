@@ -119,3 +119,7 @@ polyglot-app/backend/data/
 # local machine tooling and stray artifacts
 /ci/
 SpendingSaverAndroid/gradle/wrapper/test_jar.jar
+
+# Transferd link build output and the Android native library (built by scripts/build-link-android.ps1)
+polyglot-app/link/target/
+SpendingSaverAndroid/app/src/main/jniLibs/

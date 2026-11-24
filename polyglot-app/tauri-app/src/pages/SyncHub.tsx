@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   getHubInfo, rotateHubKey, listSyncDevices, revokeSyncDevice,
-  type HubInfo, type SyncDevice,
+  getLinkStatus, enableLink, disableLink, createLinkInvite,
+  type HubInfo, type SyncDevice, type LinkStatus,
 } from '../hooks/useBackend'
 
 /**
@@ -15,6 +16,10 @@ export default function SyncHub() {
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [showKey, setShowKey] = useState(false)
+  const [link, setLink] = useState<LinkStatus | null>(null)
+  const [relays, setRelays] = useState('')
+  const [invite, setInvite] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
 
   const load = useCallback(async () => {
     setError(null)
@@ -27,7 +32,39 @@ export default function SyncHub() {
     }
   }, [])
 
-  useEffect(() => { load() }, [load])
+  const loadLink = useCallback(async () => {
+    try {
+      const s = await getLinkStatus()
+      setLink(s)
+      setRelays(r => r || s.relays.join(', '))
+    } catch {
+      setLink(null) // older backend without Link: the section stays hidden
+    }
+  }, [])
+
+  useEffect(() => { load(); loadLink() }, [load, loadLink])
+
+  const runLink = async (fn: () => Promise<LinkStatus>, done: string) => {
+    setBusy(true); setError(null); setInvite(null)
+    try {
+      setLink(await fn())
+      setMessage(done)
+    } catch (e: any) {
+      setError(e.message || String(e))
+      await loadLink()
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const makeInvite = async () => {
+    setError(null)
+    try {
+      setInvite((await createLinkInvite()).invite)
+    } catch (e: any) {
+      setError(e.message || String(e))
+    }
+  }
 
   const rotate = async () => {
     if (!window.confirm('Generate a new pairing key? Phones that are already paired keep working; new pairings need the new key.')) return
@@ -93,6 +130,53 @@ export default function SyncHub() {
           Rotate pairing key
         </button>
       </section>
+
+      {link && (
+        <section className="space-y-2" data-testid="link-section">
+          <h4 className="font-semibold text-gray-200">Connect from anywhere (optional)</h4>
+          <p className="text-sm text-gray-400">
+            Lets a paired phone sync over the internet through the encrypted Transferd link, with no open port or
+            VPN. Your data stays between your devices; a relay only forwards ciphertext. Sync still needs the pairing
+            key above.
+          </p>
+          {!link.available ? (
+            <p className="text-sm text-amber-300">The link component is not installed on this PC (build polyglot-app/link).</p>
+          ) : link.running ? (
+            <div className="space-y-2 text-sm text-gray-200">
+              <p>On. This PC's link id: <code data-testid="link-node">{link.node_id}</code></p>
+              <p className="text-gray-400">
+                {link.relays.length ? `Relays: ${link.relays.join(', ')}` : 'No relay set: only devices that can reach this PC directly will connect.'}
+              </p>
+              <div className="flex gap-2">
+                <button onClick={makeInvite} className="px-3 py-1.5 rounded-lg border border-gray-600">New phone invite</button>
+                <button disabled={busy} onClick={() => runLink(disableLink, 'Connect from anywhere is off.')}
+                  className="px-3 py-1.5 rounded-lg border border-gray-600">Turn off</button>
+              </div>
+              {invite && (
+                <div className="space-y-1">
+                  <p className="text-gray-400">Paste this into the phone (Settings → Connect from anywhere). It expires in 10 minutes and works once.</p>
+                  <textarea readOnly data-testid="link-invite" value={invite} rows={4}
+                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-xs text-gray-200" />
+                  <button className="text-xs underline text-gray-400" onClick={() => navigator.clipboard?.writeText(invite)}>Copy</button>
+                </div>
+              )}
+              {link.peers.length > 0 && (
+                <p className="text-gray-400">Linked devices: {link.peers.map(p => p.name || p.node_id.slice(0, 8)).join(', ')}</p>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2 text-sm">
+              <label className="block text-gray-400">Relay address(es), comma separated (optional)
+                <input value={relays} onChange={e => setRelays(e.target.value)} placeholder="relay.example.com:5901"
+                  className="mt-1 w-full bg-gray-900 border border-gray-700 rounded p-2 text-gray-200" />
+              </label>
+              <button disabled={busy} onClick={() => runLink(() => enableLink(relays.split(',').map(r => r.trim()).filter(Boolean)), 'Connect from anywhere is on.')}
+                className="px-3 py-1.5 rounded-lg border border-gray-600 text-gray-200">Turn on</button>
+              {link.error && <p className="text-red-300">{link.error}</p>}
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="space-y-2">
         <h4 className="font-semibold text-gray-200">Paired phones</h4>

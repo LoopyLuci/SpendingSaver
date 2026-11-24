@@ -58,6 +58,11 @@ DELETE http://127.0.0.1:8125/api/sync/v1/devices/{device_id}
 Rotate the pairing key with `POST /api/host/rotate-key` (hub machine only).
 Wrong keys are rate-limited per client address.
 
+## Syncing across networks (optional)
+
+To sync when the phone and PC are not on the same network, use the Transferd link: see
+[link.md](link.md). It carries this same protocol end to end encrypted, with no open port.
+
 ## Network security
 
 - The token and your finance data cross the network, so use a network you trust.

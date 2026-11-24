@@ -15,6 +15,10 @@ vi.mock('../hooks/useBackend', async () => {
       { id: 'd2', name: 'Old phone', revoked: true },
     ],
     revokeSyncDevice: (id: string) => revoke(id),
+    getLinkStatus: async () => ({ available: true, enabled: true, running: true, relays: ['r.example:5901'], name: 'pc', node_id: 'abc123', error: null, peers: [] }),
+    createLinkInvite: async () => ({ invite: 'INVITE-TEXT', node_id: 'abc123' }),
+    enableLink: async () => ({}),
+    disableLink: async () => ({}),
   }
 })
 
@@ -35,5 +39,12 @@ describe('SyncHub page', () => {
     render(<SyncHub />)
     fireEvent.click(await screen.findByText('Revoke'))
     await waitFor(() => expect(revoke).toHaveBeenCalledWith('d1'))
+  })
+
+  it('shows the link and creates a phone invite', async () => {
+    render(<SyncHub />)
+    expect((await screen.findByTestId('link-node')).textContent).toBe('abc123')
+    fireEvent.click(screen.getByText('New phone invite'))
+    expect(((await screen.findByTestId('link-invite')) as HTMLTextAreaElement).value).toBe('INVITE-TEXT')
   })
 })
