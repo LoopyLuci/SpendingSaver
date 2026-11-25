@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file.
   `spendingsaver-backend`, so everything is named SpendingSaver (reinstall with
   `pip install -e ".[dev]"` to get the new command name).
 
+## [1.1.2] - 2026-11-25
+### Added
+- Browser app rebuilt as an installable, offline-capable PWA (`spendingsaver-web`).
+- Windows installer now includes the optional link agent ("Connect from anywhere").
+
 ## [1.1.1] - 2026-11-24
 ### Added
 - Android device flavors: `universal` (Android 8+, 64-bit, Transferd link) and `legacy`

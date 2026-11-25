@@ -1,6 +1,6 @@
 [package]
 name = "spendingsaver-desktop"
-version = "1.1.1"
+version = "1.1.2"
 edition = "2021"
 description = "SpendingSaver desktop: a native Rust app (egui) with its own local database. No webview, no sidecar processes."
 publish = false
