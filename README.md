@@ -111,7 +111,7 @@ Sample data, not real accounts. Every screen is in the project READMEs:
 | Project | Location | Data and runtime |
 | --- | --- | --- |
 | Android app | [`SpendingSaverAndroid/`](SpendingSaverAndroid/README.md) | Kotlin, Jetpack Compose, Room. Local-first; JSON backup/restore; optional opt-in sync with the desktop backend. |
-| Browser app | [`spendingsaver-web/`](spendingsaver-web/README.md) | React, TypeScript, Vite, Dexie/IndexedDB. Runs in the browser. |
+| Browser app | [`spendingsaver-web/`](spendingsaver-web/README.md) | Installable offline PWA (React, TypeScript, Vite, IndexedDB). Local-only data; reads and writes the Android/desktop JSON backup; no sync yet. |
 | Desktop app | [`spendingsaver-desktop/desktop/`](spendingsaver-desktop/desktop/README.md) | Native Rust GUI (egui) with its own local SQLite database. Opens instantly; no web view, no background services. Optional phone sync. |
 | Backend (optional) | [`spendingsaver-desktop/`](spendingsaver-desktop/README.md) | Python FastAPI backend and Go service used by the MCP adapter and the API. |
 | MCP integration | [`spendingsaver-mcp/`](spendingsaver-mcp/README.md) | Model Context Protocol tools that call the desktop backend's HTTP API. |

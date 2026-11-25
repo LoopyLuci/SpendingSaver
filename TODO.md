@@ -9,9 +9,10 @@ before starting work.
   invalid-file rejection, export/restore round trip): 6 tests, passed on a Nokia 7.2
   with `gradlew.bat :app:connectedDebugAndroidTest -PdebugAppIdSuffix=.debug`.
   The Compose UI and DAO migrations still have no tests.
-- [x] **Add browser-app tests.** `spendingsaver-web` now has `npm test` (Vitest +
-  fake-indexeddb) covering local persistence and CSV import/export. UI and
-  `budget.ts` remain untested.
+- [x] **Browser app rebuilt as an installable offline PWA.** `spendingsaver-web` has 85 Vitest tests
+  (money, budgets, recurring, CSV, backup round trip, assistant, tax parity, storage, build/precache
+  consistency); React UI is verified by hand in Edge only, with no component tests. Sync with the hub is not
+  implemented (records carry id/updatedAt/deleted for it).
 - [x] **Add MCP adapter tests.** Done: `spendingsaver-mcp/tests` (mocked
   backend) cover tool-to-API mapping, argument handling, error reporting and
   auth; run with `python -m pytest` there. Not yet in CI.
