@@ -5,6 +5,8 @@ import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -92,6 +94,8 @@ fun AppNavHost(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
+              // Scrollable: on a phone held sideways the list is taller than the screen.
+              Column(Modifier.verticalScroll(rememberScrollState())) {
                 Spacer(Modifier.height(16.dp))
                 Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                     Text("SpendingSaver", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
@@ -114,6 +118,7 @@ fun AppNavHost(
                         modifier = Modifier.padding(horizontal = 12.dp),
                     )
                 }
+              }
             }
         },
     ) {

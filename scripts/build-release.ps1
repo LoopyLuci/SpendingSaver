@@ -1,6 +1,6 @@
 # Builds the two release files into dist/: the Windows installer and the signed Android APK, plus checksums.
 # Needs Rust, NSIS (makensis) and, for a signed APK, SpendingSaverAndroid/keystore.properties.
-param([string]$Version = '1.1.3')
+param([string]$Version = '1.1.4')
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $dist = Join-Path $root 'dist'
@@ -30,6 +30,15 @@ foreach ($flavor in 'universal', 'legacy') {
   if ($LASTEXITCODE -ne 0) { throw "gradle failed ($flavor)" }
   Copy-Item -ErrorAction Stop $apk "$dist\SpendingSaver-$Version-$flavor.apk" -Force
 }
+Pop-Location
+
+# SpendingSaver Classic: the native app for Android 4.0.3 and up (no libraries, its own application id).
+Push-Location (Join-Path $root 'SpendingSaverClassic')
+$classic = Join-Path $root 'SpendingSaverClassic\app\build\outputs\apk\release\app-release.apk'
+Remove-Item $classic -ErrorAction SilentlyContinue
+.\gradlew.bat --no-daemon ':app:assembleRelease' "-PclassicVersion=$Version" --console=plain
+if ($LASTEXITCODE -ne 0) { throw 'gradle failed (classic)' }
+Copy-Item -ErrorAction Stop $classic "$dist\SpendingSaver-$Version-kindle-fire-kfot-android-4.0.3.apk" -Force
 Pop-Location
 
 Get-ChildItem $dist -File | Where-Object { $_.Name -ne 'SHA256SUMS.txt' } | ForEach-Object {

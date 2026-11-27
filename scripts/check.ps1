@@ -3,9 +3,9 @@
   Runs the project's local test suites (GitHub Actions is not available for this repo).
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File scripts/check.ps1                # everything
-  powershell -ExecutionPolicy Bypass -File scripts/check.ps1 -Only backend  # backend | mcp | web | desktop | android | link
+  powershell -ExecutionPolicy Bypass -File scripts/check.ps1 -Only backend  # backend | mcp | web | desktop | android | classic | link
 #>
-param([ValidateSet('all', 'backend', 'mcp', 'web', 'desktop', 'android', 'link')][string]$Only = 'all')
+param([ValidateSet('all', 'backend', 'mcp', 'web', 'desktop', 'android', 'classic', 'link')][string]$Only = 'all')
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
@@ -57,6 +57,11 @@ Step 'desktop' {
 Step 'android' {
     Push-Location "$root\SpendingSaverAndroid"
     try { & .\gradlew.bat :app:testUniversalDebugUnitTest :app:testLegacyDebugUnitTest --console=plain; $script:code = $LASTEXITCODE } finally { Pop-Location }
+}
+
+Step 'classic' {
+    Push-Location "$root\SpendingSaverClassic"
+    try { & .\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --console=plain; $script:code = $LASTEXITCODE } finally { Pop-Location }
 }
 
 Step 'link' {

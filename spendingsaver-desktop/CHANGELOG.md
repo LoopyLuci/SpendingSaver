@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file.
   `spendingsaver-backend`, so everything is named SpendingSaver (reinstall with
   `pip install -e ".[dev]"` to get the new command name).
 
+## [1.1.4] - 2026-11-27
+### Fixed
+- Android: the navigation menu now scrolls, so every screen (including App updates and Settings) is reachable when the phone is held sideways.
+### Added
+- SpendingSaver Classic (`SpendingSaverClassic/`): a small native app for Android 4.0.3 and up, such as the Kindle Fire 2nd generation. Accounts, transactions, categories, budgets and backups in the same backup format; no sync. Released as `SpendingSaver-<version>-kindle-fire-kfot-android-4.0.3.apk` (tested on the Kindle Fire KFOT, Android 4.0.3; it may work on similar devices).
+
 ## [1.1.3] - 2026-11-27
 ### Fixed
 - Android: the Description field (and other type-or-pick fields) stopped accepting typing while the suggestion list was showing, so a second transaction could not be described. Typing now works with suggestions open.
