@@ -64,4 +64,4 @@ before starting work.
   CSV import/export (commons-logging lint check is suppressed), backup/restore, LAN sync
   and the updater on a legacy device.
 - [ ] **Updater against a flavored release.** The asset picking is unit tested; it has not
-  yet run end to end against the published 1.1.2 release.
+  yet run end to end against the published 1.1.3 release.

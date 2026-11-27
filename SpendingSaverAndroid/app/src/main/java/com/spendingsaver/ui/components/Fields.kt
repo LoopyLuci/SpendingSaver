@@ -1,9 +1,13 @@
 package com.spendingsaver.ui.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -85,20 +89,31 @@ fun ComboField(
         else suggestions.filter { it.contains(typed, ignoreCase = true) }
         filtered.distinct().take(40)
     }
-    ExposedDropdownMenuBox(expanded = expanded && shown.isNotEmpty(), onExpandedChange = { expanded = it }, modifier = modifier) {
+    val open = expanded && shown.isNotEmpty()
+    // Not ExposedDropdownMenu: in material3 1.1 its popup takes window focus, so the keyboard stops
+    // typing into the field while suggestions are showing. A non-focusable DropdownMenu keeps typing live.
+    Box(modifier = modifier) {
         OutlinedTextField(
             value = value,
             onValueChange = { onValueChange(it); expanded = true },
             label = { Text(label) },
             singleLine = singleLine,
             leadingIcon = leadingIcon,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded && shown.isNotEmpty()) },
+            trailingIcon = {
+                IconButton(onClick = { expanded = !expanded }) {
+                    Icon(if (open) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown, contentDescription = if (open) "Hide suggestions" else "Show suggestions")
+                }
+            },
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            modifier = Modifier.fillMaxWidth().menuAnchor(),
+            modifier = Modifier.fillMaxWidth(),
             isError = isError,
             supportingText = { if (supportingText != null) Text(supportingText) },
         )
-        ExposedDropdownMenu(expanded = expanded && shown.isNotEmpty(), onDismissRequest = { expanded = false }) {
+        DropdownMenu(
+            expanded = open,
+            onDismissRequest = { expanded = false },
+            properties = PopupProperties(focusable = false),
+        ) {
             shown.forEach { s ->
                 DropdownMenuItem(text = { Text(s) }, onClick = { onValueChange(s); expanded = false })
             }

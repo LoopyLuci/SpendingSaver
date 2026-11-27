@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
   `spendingsaver-backend`, so everything is named SpendingSaver (reinstall with
   `pip install -e ".[dev]"` to get the new command name).
 
+## [1.1.3] - 2026-11-27
+### Fixed
+- Android: the Description field (and other type-or-pick fields) stopped accepting typing while the suggestion list was showing, so a second transaction could not be described. Typing now works with suggestions open.
+
 ## [1.1.2] - 2026-11-25
 ### Added
 - Browser app rebuilt as an installable, offline-capable PWA (`spendingsaver-web`).
